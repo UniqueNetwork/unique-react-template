@@ -1,24 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
+import { AccountsContextProvider } from './accounts/AccountsContext';
 import './App.css';
+import { AccountsPage } from './pages/Accounts';
+import { SdkProvider } from './sdk/SdkContext';
+import { SignByLocalSignerModalProvider } from './signModal/SignByLocalSignerModalContext';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <SdkProvider>
+        <SignByLocalSignerModalProvider>
+          <AccountsContextProvider>
+            <AccountsPage />
+          </AccountsContextProvider>
+        </SignByLocalSignerModalProvider>
+      </SdkProvider>
     </div>
   );
 }
