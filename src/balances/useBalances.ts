@@ -39,7 +39,6 @@ export const useBalances = () => {
 
     client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (_, { balance }) => {
       const { address, availableBalance } = balance;
-      console.log(address, availableBalance);
       
       setAccounts((accounts) => {
         const accountsCopy = new Map(accounts);

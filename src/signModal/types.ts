@@ -1,6 +1,6 @@
-import { KeyringPair } from "@polkadot/keyring/types"
+import { AskPassphraseCallback } from "../accounts/LocalAccountSigner"
 
 export interface SignByLocalSignerModalContextValue {
-  openModal(pair: KeyringPair): Promise<void>
+  openModal: AskPassphraseCallback
   closeModal(): void
 }

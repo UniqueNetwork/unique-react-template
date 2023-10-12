@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@polkadot/keyring": "^12.5.1",
-    "@polkadot/ui-keyring": "^3.6.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -14,11 +12,13 @@
     "@types/react-dom": "^18.2.8",
     "@unique-nft/sdk": "^0.2.22",
     "@unique-nft/solidity-interfaces": "^0.57.1",
+    "@unique-nft/sr25519": "^0.0.1",
     "@unique-nft/utils": "^0.3.14",
     "ethers": "^5.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "tweetnacl-ts": "^1.0.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },

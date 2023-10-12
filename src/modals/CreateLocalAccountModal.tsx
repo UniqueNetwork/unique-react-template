@@ -1,8 +1,8 @@
-import { ChangeEvent, useContext, useState } from "react"
-import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Modal } from "../components/Modal"
-import keyring from "@polkadot/ui-keyring";
+import { ChangeEvent, useContext, useState } from "react";
+import { Modal } from "../components/Modal";
 import { AccountsContext } from "../accounts/AccountsContext";
+import { Sr25519Account } from '@unique-nft/sr25519';
+import { addLocalAccount } from "../accounts/AccountsManager";
 
 type CreateLocalAccountModalProps = {
   isVisible: boolean
@@ -22,7 +22,8 @@ export const CreateLocalAccountModal = ({isVisible, onClose}: CreateLocalAccount
   }
 
   const onGenerateMnemonicClick = () => {
-    setMnemonicPhrase(mnemonicGenerate(12));
+    const mnemonic = Sr25519Account.generateMnemonic()
+    setMnemonicPhrase(mnemonic);
   }
 
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -36,8 +37,9 @@ export const CreateLocalAccountModal = ({isVisible, onClose}: CreateLocalAccount
   const onCreate = async () => {
     if (!mnemonicPhrase || !name || !password) return;
     setIsLoading(true);
+    const { address } = Sr25519Account.fromUri(mnemonicPhrase); 
 
-    keyring.addUri(mnemonicPhrase, password, { name });
+    addLocalAccount(address, name, mnemonicPhrase, password);
 
     await fetchAccounts();
 

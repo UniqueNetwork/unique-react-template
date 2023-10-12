@@ -1,6 +1,6 @@
 import { SignerResult } from "@unique-nft/utils/extension"
 import { ChangeEvent, useState } from "react"
-import { KeyringSigner } from "../accounts/KeyringSigner"
+import { LocalAccountSigner } from "../accounts/LocalAccountSigner"
 import { Account, SignerTypeEnum } from "../accounts/types"
 import { Modal } from "../components/Modal"
 import { Signer as EthersSigner } from "ethers"
@@ -28,7 +28,7 @@ export const SignMessageModal = ({isVisible, account, onClose}: SignMessageModal
 
     switch (account.signerType) {
       case SignerTypeEnum.Local: 
-        signature = await (account.signer as KeyringSigner).signMessage(message); 
+        signature = await (account.signer as LocalAccountSigner).signMessage(message); 
         break;
       case SignerTypeEnum.Polkadot: 
         const result = await account.signer.signMessage?.(message) as SignerResult; 
@@ -55,6 +55,9 @@ export const SignMessageModal = ({isVisible, account, onClose}: SignMessageModal
     <div className="form-item">
       <input type="text" placeholder="Result" value={result} />
     </div>
+    {isLoading && <div className="form-item">
+      <div>Transferring...</div>
+    </div>}
     <div className="form-item">
       <button onClick={onSign} disabled={isLoading} >Sign</button>
       <button onClick={onClose} >Cancel</button>

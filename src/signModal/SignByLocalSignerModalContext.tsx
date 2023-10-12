@@ -1,8 +1,8 @@
 import { ChangeEvent, createContext, PropsWithChildren, useCallback, useMemo, useRef, useState } from "react";
 import { SignByLocalSignerModalContextValue } from "./types";
 import { noop } from "../utils/common";
-import { KeyringPair } from "@polkadot/keyring/types";
 import { Modal } from "../components/Modal";
+import { AskPassphraseCallback } from "../accounts/LocalAccountSigner";
 
 export const SignByLocalSignerModalContext = createContext<SignByLocalSignerModalContextValue>({
   openModal: noop,
@@ -10,17 +10,17 @@ export const SignByLocalSignerModalContext = createContext<SignByLocalSignerModa
 })
 
 export const SignByLocalSignerModalProvider = ({ children }: PropsWithChildren) => {
-  const [pair, setPair] = useState<KeyringPair>();
   const [isVisible, setIsVisible] = useState(false);
   const [password, setPassword] = useState<string>();
   const [hasError, setHasError] = useState(false);
 
+  const openCallback = useRef<(passphrase: string) => boolean>();
   const onSignByLocalSigner = useRef<() => void>()
   const onClose = useRef<() => void>()
 
-  const openModal = useCallback(async (pair: KeyringPair) => {
-    setPair(pair);
+  const openModal = useCallback<AskPassphraseCallback>(async (cb) => {
     setIsVisible(true);
+    openCallback.current = cb;
     await new Promise<void>((resolve, reject) => {
       onSignByLocalSigner.current = resolve;
       onClose.current = reject;
@@ -28,14 +28,17 @@ export const SignByLocalSignerModalProvider = ({ children }: PropsWithChildren) 
   }, []);
 
   const onSign = useCallback(() => {
-    try {
-      pair?.unlock(password);
+    if(!password) {
+      setHasError(true);
+      return
+    }
+    if(openCallback.current?.(password)) {
       onSignByLocalSigner.current?.();
       setIsVisible(false);
-    } catch (_) {
-      setHasError(true);
+      return
     }
-  }, [pair, password])
+    setHasError(true);
+  }, [password])
 
   const closeModal = useCallback(() => {
     onClose.current?.();

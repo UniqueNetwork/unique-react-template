@@ -13,7 +13,7 @@ export interface Account {
   name: string;
   address: string;
   signerType: SignerTypeEnum; 
-  signer: (Signer | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> } ;
+  signer: (Signer | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> | Uint8Array } ;
   balance?: number;
 }
 
