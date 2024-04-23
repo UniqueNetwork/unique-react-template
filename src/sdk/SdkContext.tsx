@@ -12,7 +12,7 @@ export const SdkContext = createContext<SdkContextValueType>({
   chainProperties: undefined
 });
 
-const baseUrl = "https://rest.unique.network/quartz/v1/";
+const baseUrl = "https://rest.unique.network/opal/v1/";
 
 export const SdkProvider = ({ children }: PropsWithChildren) => {
   const [sdk, setSdk] = useState<Sdk>();

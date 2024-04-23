@@ -21,25 +21,25 @@ export const SignMessageModal = ({isVisible, account, onClose}: SignMessageModal
   }
 
   const onSign = async () => {
-    if(!message || !account) return;
-    setIsLoading(true);
+    // if(!message || !account) return;
+    // setIsLoading(true);
 
-    let signature: string;
+    // let signature: string;
 
-    switch (account.signerType) {
-      case SignerTypeEnum.Local: 
-        signature = await (account.signer as LocalAccountSigner).signMessage(message); 
-        break;
-      case SignerTypeEnum.Polkadot: 
-        const result = await account.signer.signMessage?.(message) as SignerResult; 
-        signature = result.signature;
-        break;
-      case SignerTypeEnum.Metamask: 
-        signature = await (account.signer as EthersSigner).signMessage(message); 
-    }
+    // switch (account?.signerType) {
+    //   case SignerTypeEnum.Local: 
+    //     signature = await (account.signer as LocalAccountSigner).signMessage(message); 
+    //     break;
+    //   case SignerTypeEnum.Polkadot: 
+    //     const result = await account.signer.signMessage?.(message) as SignerResult; 
+    //     signature = result.signature;
+    //     break;
+    //   case SignerTypeEnum.Metamask: 
+    //     signature = await (account.signer as EthersSigner).signMessage(message); 
+    // }
   
-    setResult(signature);
-    setIsLoading(false);
+    // setResult(signature);
+    // setIsLoading(false);
   }
 
   if(!account) return null;

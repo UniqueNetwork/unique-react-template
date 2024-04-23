@@ -3,6 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@polkadot/hw-ledger": "^12.6.2",
+    "@subwallet-connect/coinbase": "^1.0.3",
+    "@subwallet-connect/core": "^1.0.3",
+    "@subwallet-connect/ledger": "^1.0.3",
+    "@subwallet-connect/metamask": "^1.0.3",
+    "@subwallet-connect/polkadot-js": "^1.0.3",
+    "@subwallet-connect/polkadot-vault": "^1.0.3",
+    "@subwallet-connect/react": "^1.0.3",
+    "@subwallet-connect/subwallet": "^1.0.3",
+    "@subwallet-connect/subwallet-polkadot": "^1.0.3",
+    "@subwallet-connect/talisman": "^1.0.3",
+    "@subwallet-connect/walletconnect": "^1.0.3",
+    "@subwallet-connect/walletconnect-polkadot": "^1.0.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -45,5 +58,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
   }
 }

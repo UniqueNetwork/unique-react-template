@@ -2,8 +2,8 @@ import { createContext, PropsWithChildren, useCallback, useContext, useEffect, u
 import { SdkContext } from "../sdk/SdkContext";
 import { SignByLocalSignerModalContext } from "../signModal/SignByLocalSignerModalContext";
 import { noop } from "../utils/common";
-import { getLocalAccounts, getMetamaskAccount, getPolkadotAccounts } from "./AccountsManager";
 import { Account, AccountsContextValue } from "./types";
+import { useWallets } from "@subwallet-connect/react";
 
 export const AccountsContext = createContext<AccountsContextValue>({
   accounts: new Map(),
@@ -15,35 +15,54 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const [accounts, setAccounts] = useState<Map<string, Account>>(new Map());
   const { openModal } = useContext(SignByLocalSignerModalContext);
   const { sdk } = useContext(SdkContext);
+  const connectedWallets = useWallets();
 
   const fetchAccounts = useCallback(async () => {
     if (!sdk) return;
-    const localAccounts = getLocalAccounts(openModal)
-    const polkadotAccounts = await getPolkadotAccounts();
-    const metamaskAccounts = await getMetamaskAccount();
+    const wallet = connectedWallets[0];
+    if (connectedWallets.length === 0) {
+      setAccounts(new Map());
+      return;
+    }
 
-    //all accounts
-    const accounts = new Map([...localAccounts, ...polkadotAccounts, ...metamaskAccounts]);
+    if (!wallet || !Array.isArray(wallet.accounts)) return;
+
+    const accs: Map<string, Account> = new Map(
+      wallet.accounts.map(({ address }, index) => [
+        address,
+        {
+          name: `${++index}`,
+          address,
+          signerType: wallet.type,
+          // signer: undefined,
+          balance: 0,
+        },
+      ])
+    );
+
+    const testAddr = wallet?.accounts[0]?.address;
 
     //get balances
-    await Promise.all([...accounts.keys()]
-      .map((address) => sdk.balance.get({ address })))
-      .then((responses) => {
-      responses.forEach(({ address, availableBalance }) => {
-        const account =  accounts.get(address);
-        if (account) { 
-          account.balance = Number(availableBalance.amount);
+    await Promise.all(
+      [...wallet.accounts].map(({ address }) => sdk.balance.get({ address }))
+    ).then((responses) => {
+      //for eth case amount included
+      //@ts-ignore
+      responses.forEach(({ address, availableBalance, amount, ...res }) => {
+        const account = accs.get(address);
+        if (account) {
+          account.balance = Number(availableBalance.amount || amount);
         }
-      })
-    })
-
-    setAccounts(accounts);
-  }, [openModal, sdk]);
+        //create balance subscription
+      });
+    });
+    setAccounts(accs);
+  }, [openModal, sdk, connectedWallets]);
 
   useEffect(() => {
     if (!sdk) return;
     void fetchAccounts();
-  }, [sdk]);
+  }, [sdk, connectedWallets]);
 
   const contextValue = useMemo(() => ({
     accounts,

@@ -5,15 +5,15 @@ import { Dispatch, SetStateAction } from "react";
 
 export enum SignerTypeEnum {
   Local = 'Local',
-  Polkadot = 'Polkadot',
-  Metamask = 'Metamask'
+  Polkadot = 'substrate',
+  Metamask = 'evm'
 }
 
 export interface Account {
   name: string;
   address: string;
-  signerType: SignerTypeEnum; 
-  signer: (Signer | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> | Uint8Array } ;
+  signerType: 'evm' | 'substrate'; 
+  // signer: (Signer | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> | Uint8Array } ;
   balance?: number;
 }
 

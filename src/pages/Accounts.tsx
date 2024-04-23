@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
 import { useBalances } from "../balances/useBalances";
@@ -6,6 +6,7 @@ import { List } from "../components/List";
 import { CreateLocalAccountModal } from "../modals/CreateLocalAccountModal";
 import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
+import { useConnectWallet, useWallets } from "@subwallet-connect/react";
 
 export const AccountsPage = () => {
   const { accounts } = useContext(AccountsContext);
@@ -45,22 +46,31 @@ export const AccountsPage = () => {
     setCreateAccountIsVisible(false);
   }, []);
 
+  const [{ wallet }, connect,disconnect] = useConnectWallet();
+  const connectedWallets = useWallets();
+
+  const disconnectWallet = () =>  wallet && disconnect({label: wallet?.label, type: wallet?.type});
+
+
   return <div className="page">
-    <div className="top-bar">
+    {/* <div className="top-bar">
       <button onClick={onCreateAccountClick}>Create local account</button>
-    </div>
+    </div> */}
     <List>
       {accountsArray.map(account => {
-        return <List.Item key={account.address}>
-            <span>{account.signerType}</span>
-            <span>{account.name}</span>
-            <span>{account.address}</span>
-            <span>{account.balance?.toFixed(2) || '0'}</span>
+        return <List.Item key={account?.address}>
+            <span>{account?.signerType}</span>
+            <span>{account?.name}</span>
+            <span>{account?.address}</span>
+            <span>{account?.balance?.toFixed(2) || '0'}</span>
               <button onClick={onSend(account)}>Send amount</button>
-              <button onClick={onSignMessage(account)}>Sign message</button>
+              {/* <button onClick={onSignMessage(account)}>Sign message</button> */}
         </List.Item>
       })}
     </List>
+    <div className="top-bar">
+      {connectedWallets?.length > 0 ? <button onClick={disconnectWallet}>Disconnect</button> : <button onClick={() => connect()}>Connect New Account</button>}
+    </div>
     <TransferAmountModal 
       isVisible={transferAmountIsVisible} 
       sender={currentAccount}
