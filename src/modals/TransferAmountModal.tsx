@@ -9,7 +9,6 @@ import { ethers } from "ethers"
 import { useConnectWallet } from "@subwallet-connect/react"
 import { SubstrateProvider } from "@subwallet-connect/common";
 import { substrateApi } from "../utils/substrateApi"
-import { Sdk } from "@unique-nft/sdk/full"
 import { SignerPayloadJSON, SignerPayloadRaw } from "@polkadot/types/types"
 
 type TransferAmountModalProps = {
@@ -50,17 +49,9 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
 
       await (await uniqueFungible.transferFromCross(from, to, amountRaw, { from: sender.address })).wait();
     } else {
-      let chainInfo = {
-        id: "0xc87870ef90a438d574b8e320f17db372c50f62beb52e479c8ff6ee5b460670b9",
-        label: "OPAL",
-        decimal: 18,
-        namespace: "substrate",
-        token: "OPL",
-        blockExplorerUrl: "scan.uniquenetwork.dev/opal/",
-        wsProvider: "wss://ws-opal.unique.network",
-      };
+      if (!sdk) return;
 
-      const substrateProvider = new substrateApi(chainInfo.wsProvider);
+      const substrateProvider = new substrateApi(chainProperties?.wsUrl);
 
       const getSigner = async () => {
         const provider = wallet.provider as SubstrateProvider;
@@ -80,7 +71,7 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
           wallet.signer = await substrateProvider?.getQrSigner(
             sender.address,
             provider,
-            chainInfo.id
+            chainProperties?.genesisHash || ''
           );
         }
         return wallet.signer;
@@ -103,16 +94,14 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
         }
       };
 
-      const uniqueSdk = new Sdk({
-        baseUrl: "https://rest.unique.network/opal/v1",
-        signer,
-      });
-
-      await uniqueSdk.balance.transfer.submitWaitResult({
-        address: sender.address,
-        destination: receiverAddress,
-        amount: +amount,
-      });
+      await sdk.balance.transfer.submitWaitResult(
+        {
+          address: sender.address,
+          destination: receiverAddress,
+          amount: +amount,
+        },
+        { signer }
+      );
     }
 
     setIsLoading(false)
