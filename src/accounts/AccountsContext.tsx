@@ -1,4 +1,5 @@
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Address } from "@unique-nft/utils"
 import { SdkContext } from "../sdk/SdkContext";
 import { SignByLocalSignerModalContext } from "../signModal/SignByLocalSignerModalContext";
 import { noop } from "../utils/common";
@@ -29,18 +30,15 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
     const accs: Map<string, Account> = new Map(
       wallet.accounts.map(({ address }, index) => [
-        address,
+        Address.extract.substrateOrMirrorIfEthereumNormalized(address),
         {
           name: `${++index}`,
           address,
           signerType: wallet.type,
-          // signer: undefined,
           balance: 0,
         },
       ])
     );
-
-    const testAddr = wallet?.accounts[0]?.address;
 
     //get balances
     await Promise.all(
