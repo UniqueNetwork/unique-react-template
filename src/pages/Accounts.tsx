@@ -1,9 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
 import { useBalances } from "../balances/useBalances";
 import { List } from "../components/List";
-import { CreateLocalAccountModal } from "../modals/CreateLocalAccountModal";
 import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 import { useConnectWallet, useWallets } from "@subwallet-connect/react";
@@ -80,10 +79,6 @@ export const AccountsPage = () => {
       isVisible={signMessageIsVisible} 
       account={currentAccount}
       onClose={onCloseSignMessage}
-    />
-    <CreateLocalAccountModal 
-      isVisible={createAccountIsVisible} 
-      onClose={onCloseCreateAccount}
     />
   </div>;
 }

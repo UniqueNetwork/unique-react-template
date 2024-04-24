@@ -1,7 +1,6 @@
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Address } from "@unique-nft/utils"
 import { SdkContext } from "../sdk/SdkContext";
-import { SignByLocalSignerModalContext } from "../signModal/SignByLocalSignerModalContext";
 import { noop } from "../utils/common";
 import { Account, AccountsContextValue } from "./types";
 import { useWallets } from "@subwallet-connect/react";
@@ -14,7 +13,6 @@ export const AccountsContext = createContext<AccountsContextValue>({
 
 export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const [accounts, setAccounts] = useState<Map<string, Account>>(new Map());
-  const { openModal } = useContext(SignByLocalSignerModalContext);
   const { sdk } = useContext(SdkContext);
   const connectedWallets = useWallets();
 
@@ -55,7 +53,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       });
     });
     setAccounts(accs);
-  }, [openModal, sdk, connectedWallets]);
+  }, [sdk, connectedWallets]);
 
   useEffect(() => {
     if (!sdk) return;

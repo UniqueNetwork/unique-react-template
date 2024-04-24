@@ -1,10 +1,6 @@
-import { AskPassphraseCallback, LocalAccountSigner, NONCE } from "./LocalAccountSigner";
 import { Account, SignerTypeEnum } from "./types";
-import { Polkadot, Ethereum } from '@unique-nft/utils/extension';
-import { ethers, Signer as EthersSigner } from "ethers";
-import { StringUtils } from '@unique-nft/utils'
-import { secretbox } from 'tweetnacl-ts';
-import { algorithms } from '@unique-nft/utils/address'
+import { Polkadot } from '@unique-nft/utils/extension';
+import { Signer as EthersSigner } from "ethers";
 /**
  * @func getLocalAccounts
  * 
@@ -111,17 +107,3 @@ export const getPolkadotAccounts = async () => {
 
 export const isEthersSigner = (signer: any): signer is EthersSigner =>
   (signer instanceof EthersSigner);
-
-export const addLocalAccount = (address: string, name: string, mnemonicPhrase: string, passphrase: string) => {
-  const passwordHash = algorithms.keccak_256(passphrase)
-  const secret = secretbox(
-    StringUtils.Utf8.stringToU8a(mnemonicPhrase), 
-    NONCE, 
-    passwordHash
-  );
-
-  localStorage.setItem(`account:${address}`, JSON.stringify({ 
-    name, 
-    secret: StringUtils.HexString.fromU8a(secret) 
-  }));
-}

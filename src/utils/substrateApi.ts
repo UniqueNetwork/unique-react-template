@@ -1,7 +1,6 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import type { Signer, SignerPayloadJSON, SignerResult } from '@polkadot/types/types';
 import { SubstrateProvider } from "@subwallet-connect/common";
-import { LedgerSignature } from "@polkadot/hw-ledger/types";
 import { blake2AsU8a } from '@polkadot/util-crypto'
 
 export type RequestArguments  ={
@@ -32,26 +31,6 @@ export class substrateApi {
         };
 
         const { signature }  = (await provider.request(args)) as Pick<SignerResult, 'signature'>;
-        return { id: 0, signature };
-      }
-    }
-  }
-
-  public async getLedgerSigner ( senderAddress: string, provider: SubstrateProvider) : Promise<Signer> {
-    if(!this.api) return {} ;
-
-    return {
-      signPayload : async (payload: SignerPayloadJSON): Promise<SignerResult>  => {
-        const raw = this.api?.registry.createType('ExtrinsicPayload', payload, { version: payload.version });
-        const args = {} as RequestArguments;
-
-        args.method = 'polkadot_sendTransaction';
-        args.params = {
-          address: senderAddress,
-          transactionPayload: raw?.toU8a(true)
-        };
-
-        const { signature }   = (await provider.request(args)) as LedgerSignature
         return { id: 0, signature };
       }
     }

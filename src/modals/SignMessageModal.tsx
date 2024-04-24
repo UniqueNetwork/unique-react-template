@@ -1,9 +1,6 @@
-import { SignerResult } from "@unique-nft/utils/extension"
 import { ChangeEvent, useState } from "react"
-import { LocalAccountSigner } from "../accounts/LocalAccountSigner"
-import { Account, SignerTypeEnum } from "../accounts/types"
+import { Account } from "../accounts/types"
 import { Modal } from "../components/Modal"
-import { Signer as EthersSigner } from "ethers"
 
 type SignMessageModalProps = {
   isVisible: boolean
