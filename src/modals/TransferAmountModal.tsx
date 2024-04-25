@@ -10,6 +10,7 @@ import { useConnectWallet } from "@subwallet-connect/react"
 import { SubstrateProvider } from "@subwallet-connect/common";
 import { substrateApi } from "../utils/substrateApi"
 import { SignerPayloadJSON, SignerPayloadRaw } from "@polkadot/types/types"
+import { AccountsContext } from "../accounts/AccountsContext"
 
 type TransferAmountModalProps = {
   isVisible: boolean
@@ -19,9 +20,11 @@ type TransferAmountModalProps = {
 
 export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmountModalProps) => {
   const { sdk, chainProperties } = useContext(SdkContext);
+  const { fetchAccounts } = useContext(AccountsContext);
   const [receiverAddress, setReceiverAddress] = useState<string>();
   const [amount, setAmount] = useState<number>();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const onReceiverAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     setReceiverAddress(e.target.value);
@@ -36,7 +39,9 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
 
   const onSend = async () => {
     if(!receiverAddress || !amount || !sender) return;
-    setIsLoading(true);
+    setError('')
+;   setIsLoading(true);
+
     if (!wallet) return;
 
     if(wallet?.type === "evm") {
@@ -94,14 +99,23 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
         }
       };
 
-      await sdk.balance.transfer.submitWaitResult(
-        {
-          address: sender.address,
-          destination: receiverAddress,
-          amount: +amount,
-        },
-        { signer }
-      );
+      try {
+        await sdk.balance.transfer.submitWaitResult(
+          {
+            address: sender.address,
+            destination: receiverAddress,
+            amount: +amount,
+          },
+          { signer }
+        );
+
+        fetchAccounts();
+      } catch (err) {
+        console.error(err);
+        setIsLoading(false);
+        setError(err.name);
+        return;
+      }
     }
 
     setIsLoading(false)
@@ -131,6 +145,7 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
         onChange={onAmountChange} 
       />
     </div>
+    {error && <div style={{ color: 'red' }}>{error}</div>}
     <div className="form-item">
       <button onClick={onSend} disabled={isLoading} >Send</button>
       <button onClick={onClose} >Cancel</button>
