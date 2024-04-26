@@ -78,5 +78,5 @@ export const useBalances = () => {
     return () => {
       sdkSocketClient.current?.unsubscribeAccountCurrentBalance({ address: '*' });
     }
-  }, [sdk, accounts]);
+  }, [sdk, accounts, subscribeBalancesChanges, setAccounts]);
 }

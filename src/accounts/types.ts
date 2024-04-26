@@ -20,5 +20,7 @@ export interface Account {
 export interface AccountsContextValue {
   accounts: Map<string, Account>;
   setAccounts: Dispatch<SetStateAction<Map<string, Account>>>
-  fetchAccounts(): Promise<void>;
+  fetchMetamaskAccounts(): Promise<void>;
+  fetchPolkadotAccounts(): Promise<void>;
+  fetchLocalAccounts(): Promise<void>;
 }

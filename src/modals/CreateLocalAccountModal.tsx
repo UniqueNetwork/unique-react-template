@@ -15,7 +15,7 @@ export const CreateLocalAccountModal = ({isVisible, onClose}: CreateLocalAccount
   const [password, setPassword] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { fetchAccounts } = useContext(AccountsContext)
+  const { fetchLocalAccounts } = useContext(AccountsContext)
 
   const onMnemonicPhraseChange = (e: ChangeEvent<HTMLInputElement>) => {
     setMnemonicPhrase(e.target.value);
@@ -41,7 +41,7 @@ export const CreateLocalAccountModal = ({isVisible, onClose}: CreateLocalAccount
 
     addLocalAccount(address, name, mnemonicPhrase, password);
 
-    await fetchAccounts();
+    fetchLocalAccounts();
 
     setIsLoading(false)
     onClose();
