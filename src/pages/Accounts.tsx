@@ -1,16 +1,13 @@
 import { useCallback, useContext, useState } from "react";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
-import { useBalances } from "../balances/useBalances";
 import { List } from "../components/List";
 import { CreateLocalAccountModal } from "../modals/CreateLocalAccountModal";
 import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 
 export const AccountsPage = () => {
-  const { accounts } = useContext(AccountsContext);
-  useBalances();
-
+  const { accounts, fetchMetamaskAccounts, fetchPolkadotAccounts } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);
@@ -45,8 +42,11 @@ export const AccountsPage = () => {
     setCreateAccountIsVisible(false);
   }, []);
 
+
   return <div className="page">
     <div className="top-bar">
+      <button onClick={fetchMetamaskAccounts}>Connect MetaMask Wallet</button>
+      <button onClick={fetchPolkadotAccounts}>Connect Polkadot Wallet</button>
       <button onClick={onCreateAccountClick}>Create local account</button>
     </div>
     <List>

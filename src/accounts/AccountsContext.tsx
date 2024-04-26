@@ -8,7 +8,9 @@ import { Account, AccountsContextValue } from "./types";
 export const AccountsContext = createContext<AccountsContextValue>({
   accounts: new Map(),
   setAccounts: noop,
-  fetchAccounts: noop
+  fetchPolkadotAccounts: noop,
+  fetchMetamaskAccounts: noop,
+  fetchLocalAccounts: noop,
 });
 
 export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
@@ -16,40 +18,57 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const { openModal } = useContext(SignByLocalSignerModalContext);
   const { sdk } = useContext(SdkContext);
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchLocalAccounts = useCallback(async () => {
     if (!sdk) return;
-    const localAccounts = getLocalAccounts(openModal)
-    const polkadotAccounts = await getPolkadotAccounts();
+    const localAccounts = getLocalAccounts(openModal);
+    if (localAccounts) {
+      for (let [address, account] of localAccounts) {
+        const balanceResponse = await sdk.balance.get({ address });
+        account.balance = Number(balanceResponse.availableBalance.amount);
+        localAccounts.set(address, account);
+      }
+      const accountsToUpdate = new Map([...accounts, ...localAccounts]);
+      setAccounts(accountsToUpdate);
+    }
+  }, [sdk, openModal, accounts]);
+
+  const fetchMetamaskAccounts = useCallback(async () => {
+    if (!sdk) return;
     const metamaskAccounts = await getMetamaskAccount();
+    if (metamaskAccounts) {
+      for (let [address, account] of metamaskAccounts) {
+        const balanceResponse = await sdk.balance.get({ address });
+        account.balance = Number(balanceResponse.availableBalance.amount);
+        metamaskAccounts.set(address, account);
+      }
+      const accountsToUpdate = new Map([...accounts, ...metamaskAccounts]);
+      setAccounts(accountsToUpdate);
+    }
+  }, [sdk, accounts]);
 
-    //all accounts
-    const accounts = new Map([...localAccounts, ...polkadotAccounts, ...metamaskAccounts]);
-
-    //get balances
-    await Promise.all([...accounts.keys()]
-      .map((address) => sdk.balance.get({ address })))
-      .then((responses) => {
-      responses.forEach(({ address, availableBalance }) => {
-        const account =  accounts.get(address);
-        if (account) { 
-          account.balance = Number(availableBalance.amount);
-        }
-      })
-    })
-
-    setAccounts(accounts);
-  }, [openModal, sdk]);
+  const fetchPolkadotAccounts = useCallback(async () => {
+    if (!sdk) return;
+    const polkadotAccounts = await getPolkadotAccounts();
+    for (let [address, account] of polkadotAccounts) {
+      const balanceResponse = await sdk.balance.get({ address });
+      account.balance = Number(balanceResponse.availableBalance.amount);
+      polkadotAccounts.set(address, account);
+    }
+    const accountsToUpdate = new Map([...accounts, ...polkadotAccounts]);
+    setAccounts(accountsToUpdate);
+  }, [sdk, accounts]);
 
   useEffect(() => {
-    if (!sdk) return;
-    void fetchAccounts();
-  }, [sdk]);
+    fetchLocalAccounts();
+  }, [sdk])
 
   const contextValue = useMemo(() => ({
     accounts,
     setAccounts,
-    fetchAccounts
-  }), [accounts, fetchAccounts]);
+    fetchMetamaskAccounts,
+    fetchPolkadotAccounts,
+    fetchLocalAccounts
+  }), [accounts, fetchMetamaskAccounts, fetchPolkadotAccounts, fetchLocalAccounts]);
 
-  return <AccountsContext.Provider value={contextValue} >{children}</AccountsContext.Provider>
+  return <AccountsContext.Provider value={contextValue}>{children}</AccountsContext.Provider>;
 }

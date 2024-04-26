@@ -76,9 +76,13 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
         onChange={onAmountChange} 
       />
     </div>
+    {isLoading && <div className="form-item">
+      <div>Transferring...</div>
+    </div>}
     <div className="form-item">
       <button onClick={onSend} disabled={isLoading} >Send</button>
       <button onClick={onClose} >Cancel</button>
     </div>
+
   </Modal>
 }
