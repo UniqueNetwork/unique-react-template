@@ -1,6 +1,3 @@
-import { Signer } from "@unique-nft/sdk";
-import { SignerResult } from "@unique-nft/utils/extension";
-import { Signer as EthersSigner } from "ethers";
 import { Dispatch, SetStateAction } from "react";
 
 export enum SignerTypeEnum {
