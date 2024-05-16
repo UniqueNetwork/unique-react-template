@@ -62,7 +62,7 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
     if(!receiverAddress || !amount || !sender) return;
     setError('')
 ;   setIsLoading(true);
-    if (sender.type === 'evm') {
+    if (sender.signerType === 'evm') {
       const from = Address.extract.ethCrossAccountId(sender.address);
       const to = Address.extract.ethCrossAccountId(receiverAddress);
       const uniqueFungible = await UniqueFungibleFactory(0, signer);

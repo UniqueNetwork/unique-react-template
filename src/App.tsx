@@ -26,7 +26,7 @@ export const chains = [
     nativeCurrency: { name: "OPL", symbol: "OPL", decimals: 18 },
     rpcUrls: {
       default: {
-        http: ["https://rpc.unique.network/"],
+        http: ["https://rpc.unique.network/opal"],
       },
     },
   },
