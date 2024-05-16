@@ -22,8 +22,8 @@ type TransferAmountModalProps = {
 export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmountModalProps) => {
   const { sdk, chainProperties } = useContext(SdkContext);
   const { fetchAccounts } = useContext(AccountsContext);
-  const [receiverAddress, setReceiverAddress] = useState<string>();
-  const [amount, setAmount] = useState<number>();
+  const [receiverAddress, setReceiverAddress] = useState<string>('');
+  const [amount, setAmount] = useState<number>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const signer = useEthersSigner(config);
@@ -33,8 +33,10 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
   }
 
   const onAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if(!Number(e.target.value)) return;
-    setAmount(Number(e.target.value));
+    const value = e.target.value;
+    if (!isNaN(Number(value))) {
+      setAmount(value);
+    }
   }
 
   const [{ wallet }] = useConnectWallet();
