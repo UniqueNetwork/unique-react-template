@@ -6,6 +6,7 @@ import { List } from "../components/List";
 import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 import { useConnectWallet, useWallets } from "@subwallet-connect/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 export const AccountsPage = () => {
   const { accounts } = useContext(AccountsContext);
@@ -15,7 +16,6 @@ export const AccountsPage = () => {
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);
   const [signMessageIsVisible, setSignMessageIsVisible] = useState(false);
-  const [createAccountIsVisible, setCreateAccountIsVisible] = useState(false);
 
   const onSend = useCallback((account: Account) => () => {
     setCurrentAccount(account);
@@ -27,34 +27,17 @@ export const AccountsPage = () => {
     setTransferAmountIsVisible(false);
   }, []);
 
-  const onSignMessage = useCallback((account: Account) => () => {
-    setCurrentAccount(account);
-    setSignMessageIsVisible(true);
-  }, []);
-
-  const onCreateAccountClick = useCallback(() => {
-    setCreateAccountIsVisible(true);
-  }, []);
-
   const onCloseSignMessage = useCallback(() => {
     setCurrentAccount(undefined);
     setSignMessageIsVisible(false);
   }, []);
 
-  const onCloseCreateAccount = useCallback(() => {
-    setCreateAccountIsVisible(false);
-  }, []);
-
-  const [{ wallet }, connect,disconnect] = useConnectWallet();
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
   const connectedWallets = useWallets();
-
   const disconnectWallet = () =>  wallet && disconnect({label: wallet?.label, type: wallet?.type});
-
+  const { open } = useWeb3Modal()
 
   return <div className="page">
-    {/* <div className="top-bar">
-      <button onClick={onCreateAccountClick}>Create local account</button>
-    </div> */}
     <List>
       {accountsArray.map(account => {
         return <List.Item key={account?.address}>
@@ -68,7 +51,8 @@ export const AccountsPage = () => {
       })}
     </List>
     <div className="top-bar">
-      {connectedWallets?.length > 0 ? <button onClick={disconnectWallet}>Disconnect</button> : <button onClick={() => connect()}>Connect New Account</button>}
+      {connectedWallets?.length > 0 ? <button onClick={disconnectWallet}>POLKADOT Disconnect</button> : <button onClick={() => connect()}>POLKADOT wallets</button>}
+      <button onClick={() => open()}>ETHEREUM Wallets</button>
     </div>
     <TransferAmountModal 
       isVisible={transferAmountIsVisible} 

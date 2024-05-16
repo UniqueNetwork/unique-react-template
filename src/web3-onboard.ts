@@ -1,50 +1,14 @@
 import { init } from '@subwallet-connect/react';
-import walletConnectPolkadotModule from '@subwallet-connect/walletconnect-polkadot';
-import metamaskSDK from '@subwallet-connect/metamask';
-import subwalletModule from '@subwallet-connect/subwallet';
 import talismanModule from '@subwallet-connect/talisman';
 import polkadot_jsModule from '@subwallet-connect/polkadot-js';
 import subwalletPolkadotModule from '@subwallet-connect/subwallet-polkadot';
 import polkadotVaultModule from '@subwallet-connect/polkadot-vault';
-import ledgerModule from '@subwallet-connect/ledger';
-import walletConnectModule from '@subwallet-connect/walletconnect';
 import { TransactionHandlerReturn } from '@subwallet-connect/core/dist/types';
-// import coinbaseWallet from '@subwallet-connect/coinbase';
 
-
-const walletConnectPolkadot = walletConnectPolkadotModule({
-  projectId: process.env.REACT_APP_PROJECT_ID,
-  dappUrl: 'https://w3o-demo.subwallet.app/'
-});
-const metamaskSDKWallet = metamaskSDK({
-  options: {
-    extensionOnly: false,
-    i18nOptions: {
-      enabled: true
-    },
-    infuraAPIKey: process.env.REACT_APP_INFURA_KEY,
-    dappMetadata: {
-      name: 'SubConnect'
-    }
-  }
-});
-// const iCoinbaseWallet = coinbaseWallet({
-//   darkMode: false
-// });
-
-const subwalletWallet = subwalletModule();
 const polkadotWallet = polkadot_jsModule();
 const subwalletPolkadotWalet = subwalletPolkadotModule();
 const talismanWallet = talismanModule();
 const polkadotVaultWallet = polkadotVaultModule();
-const ledger = ledgerModule({
-  projectId: process.env.REACT_APP_PROJECT_ID || '',
-  walletConnectVersion: 2
-});
-const walletConnect = walletConnectModule({
-  projectId: process.env.REACT_APP_PROJECT_ID,
-  dappUrl: 'https://w3o-demo.subwallet.app/'
-});
 
 export default init({
   theme: 'dark',
@@ -65,17 +29,16 @@ export default init({
   // An array of wallet modules that you would like to be presented to the user to select from when connecting a wallet.
   wallets: [
     subwalletPolkadotWalet,
-    subwalletWallet,
-    walletConnectPolkadot,
-    walletConnect,
-    metamaskSDKWallet,
+    // subwalletWallet,
+    // walletConnectPolkadot,
+    // walletConnect,
+    // metamaskSDKWallet,
     // ledgerPolkadot_,
     // iCoinbaseWallet,
-    ledger,
+    // ledger,
     talismanWallet,
     polkadotWallet,
     polkadotVaultWallet
-    // injected
   ],
   chains: [
     {

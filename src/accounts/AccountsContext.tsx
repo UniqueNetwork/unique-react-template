@@ -1,38 +1,53 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Address } from "@unique-nft/utils"
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Address } from "@unique-nft/utils";
 import { SdkContext } from "../sdk/SdkContext";
 import { noop } from "../utils/common";
 import { Account, AccountsContextValue } from "./types";
-import { useWallets } from "@subwallet-connect/react";
+import { useConnectWallet } from "@subwallet-connect/react";
+import { useAccount } from "wagmi";
 
 export const AccountsContext = createContext<AccountsContextValue>({
   accounts: new Map(),
   setAccounts: noop,
-  fetchAccounts: noop
+  fetchAccounts: noop,
 });
 
 export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const [accounts, setAccounts] = useState<Map<string, Account>>(new Map());
   const { sdk } = useContext(SdkContext);
-  const connectedWallets = useWallets();
+  const { address } = useAccount();
+
+  const [{ wallet }] = useConnectWallet();
 
   const fetchAccounts = useCallback(async () => {
     if (!sdk) return;
-    const wallet = connectedWallets[0];
-    if (connectedWallets.length === 0) {
-      setAccounts(new Map());
-      return;
-    }
+    // const wallet = connectedWallets[0];
+    console.log(wallet, "WALLET");
+    const polkadotWallets =
+      wallet?.accounts.map(({ address }) => ({ address, type: "sub" })) || [];
+    const ethereumWallets = address ? [{ address, type: "evm" }] : [];
+    const accsAddresses = [...polkadotWallets, ...ethereumWallets];
 
-    if (!wallet || !Array.isArray(wallet.accounts)) return;
-
-    const accs: Map<string, Account> = new Map(
-      wallet.accounts.map(({ address }, index) => [
+    // if (!wallet || !Array.isArray(wallet.accounts)) return;
+    let accs: Map<string, Account>;
+    console.log(address, "AFFR");
+    //@ts-ignore
+    accs = new Map(
+      accsAddresses.map(({ address, type }, index) => [
+        //@ts-ignore
         Address.extract.substrateOrMirrorIfEthereumNormalized(address),
         {
           name: `${++index}`,
           address,
-          signerType: wallet.type,
+          signerType: type,
           balance: 0,
         },
       ])
@@ -40,7 +55,9 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
     //get balances
     await Promise.all(
-      [...wallet.accounts].map(({ address }) => sdk.balance.get({ address }))
+      accsAddresses.map(
+        ({ address }) => address && sdk.balance.get({ address })
+      )
     ).then((responses) => {
       //for eth case amount included
       //@ts-ignore
@@ -52,19 +69,27 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
         //create balance subscription
       });
     });
+
     setAccounts(accs);
-  }, [sdk, connectedWallets]);
+  }, [sdk, address, wallet]);
 
   useEffect(() => {
     if (!sdk) return;
-    void fetchAccounts();
-  }, [sdk, connectedWallets]);
+    fetchAccounts();
+  }, [sdk, address, wallet]);
 
-  const contextValue = useMemo(() => ({
-    accounts,
-    setAccounts,
-    fetchAccounts
-  }), [accounts, fetchAccounts]);
+  const contextValue = useMemo(
+    () => ({
+      accounts,
+      setAccounts,
+      fetchAccounts,
+    }),
+    [accounts, fetchAccounts]
+  );
 
-  return <AccountsContext.Provider value={contextValue} >{children}</AccountsContext.Provider>
-}
+  return (
+    <AccountsContext.Provider value={contextValue}>
+      {children}
+    </AccountsContext.Provider>
+  );
+};

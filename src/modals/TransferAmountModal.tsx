@@ -1,5 +1,4 @@
 //@ts-nocheck
-import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces"
 import { Address } from "@unique-nft/utils"
 import { ChangeEvent, useContext, useState } from "react"
 import { Account } from "../accounts/types"
@@ -11,6 +10,8 @@ import { SubstrateProvider } from "@subwallet-connect/common";
 import { substrateApi } from "../utils/substrateApi"
 import { SignerPayloadJSON, SignerPayloadRaw } from "@polkadot/types/types"
 import { AccountsContext } from "../accounts/AccountsContext"
+import { config } from "../App"
+import { useEthersSigner } from "./useSigner"
 
 type TransferAmountModalProps = {
   isVisible: boolean
@@ -25,6 +26,7 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
   const [amount, setAmount] = useState<number>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const signer = useEthersSigner(config);
 
   const onReceiverAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     setReceiverAddress(e.target.value);
@@ -37,22 +39,50 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
 
   const [{ wallet }] = useConnectWallet();
 
+  const collectionIdOrAddressToAddress = (collectionIdOrAddress: any) => {
+    if (typeof collectionIdOrAddress === "number") {
+      return Address.collection.idToAddress(collectionIdOrAddress);
+    } else if (typeof collectionIdOrAddress === "string") {
+      Address.validate.collectionAddress(collectionIdOrAddress);
+      return collectionIdOrAddress;
+    } else {
+      throw new Error("Collection ID or address must be a number or a string");
+    }
+  };
+
+  const UniqueFungibleFactory = async (collectionIdOrAddress: any, signerOrProvider: any) => {
+    return new ethers.Contract(
+      collectionIdOrAddressToAddress(collectionIdOrAddress),
+      (await import('./abi/UniqueFungible.json')).default,
+      signerOrProvider
+    );
+  };
+
   const onSend = async () => {
     if(!receiverAddress || !amount || !sender) return;
     setError('')
 ;   setIsLoading(true);
-
-    if (!wallet) return;
-
-    if(wallet?.type === "evm") {
-      const evmProvider = new ethers.providers.Web3Provider(wallet.provider, 'any');
-      const signer = evmProvider.getSigner(sender.address);
+    if (sender.type === 'evm') {
       const from = Address.extract.ethCrossAccountId(sender.address);
       const to = Address.extract.ethCrossAccountId(receiverAddress);
       const uniqueFungible = await UniqueFungibleFactory(0, signer);
       const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(chainProperties?.decimals || 18);
 
-      await (await uniqueFungible.transferFromCross(from, to, amountRaw, { from: sender.address })).wait();
+      try {
+        await(
+          await uniqueFungible.transferFromCross(from, to, amountRaw, {
+            from: sender.address,
+          })
+        ).wait();
+        fetchAccounts();
+      } catch (err) {
+        console.log("ERROR CATCHED");
+        console.error(err);
+        setIsLoading(false);
+        setError(err.name);
+        return;
+      }
+
     } else {
       if (!sdk) return;
 
