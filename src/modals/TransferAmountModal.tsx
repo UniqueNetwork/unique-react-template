@@ -48,7 +48,7 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
         const sdk = await connectSdk(baseUrl, sender);
 
         await sdk?.balance.transfer({
-          to: receiverAddress,
+          to: receiverAddress.trim(),
           amount: `${amount}`,
           isAmountInCoins: true,
         });
