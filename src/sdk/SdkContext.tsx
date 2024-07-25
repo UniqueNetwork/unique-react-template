@@ -1,9 +1,10 @@
+//@ts-nocheck
 import { createContext, PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { ChainPropertiesResponse } from "@unique-nft/sdk";
-import { Sdk } from '@unique-nft/sdk/full';
+import { getAccountFromMnemonic } from "./accounts";
+import { connectSdk } from "./connect";
 
 export type SdkContextValueType = {
-  sdk: Sdk | undefined
+  sdk: any | undefined
   chainProperties: ChainPropertiesResponse | undefined
 }
 
@@ -12,23 +13,27 @@ export const SdkContext = createContext<SdkContextValueType>({
   chainProperties: undefined
 });
 
-const baseUrl = "https://rest.unique.network/opal/v1/";
+// const corsAnywhere = 'http://localhost:8080/';
+const corsAnywhere = '';
+export const baseUrl = `${corsAnywhere}https://rest.unique.network/v2/opal`;
+//some test acc
+const SUBSTRATE_MNEMONIC = 'produce provide explain away market town collect toast finger urban doll seminar';
 
 export const SdkProvider = ({ children }: PropsWithChildren) => {
-  const [sdk, setSdk] = useState<Sdk>();
-  const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
+  const [sdk, setSdk] = useState<any>();
+  const [chainProperties, setChainProperties] = useState<any>();
 
   useEffect(() => {
-
-    const sdk = new Sdk({
-      baseUrl,
-    });
-    setSdk(sdk);
-
     void (async () => {
-      const chainProperties = await sdk?.common.chainProperties();
-      setChainProperties(chainProperties);
-    })();
+    const account = getAccountFromMnemonic(SUBSTRATE_MNEMONIC);
+    const sdk = await connectSdk(baseUrl, account);
+    const balance = await sdk.balance.get({address: account.address});
+    setSdk(sdk);
+  })();
+    // void (async () => {
+    //   const chainProperties = await sdk?.common.chainProperties();
+    //   setChainProperties(chainProperties);
+    // })();
   }, []);   
 
   return <SdkContext.Provider value={useMemo(() => ({ sdk, chainProperties }), [sdk, chainProperties])}>

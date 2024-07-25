@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } from "react"
 import { AccountsContext } from "../accounts/AccountsContext"
 import { SdkContext } from "../sdk/SdkContext";

@@ -24,7 +24,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     if (localAccounts) {
       for (let [address, account] of localAccounts) {
         const balanceResponse = await sdk.balance.get({ address });
-        account.balance = Number(balanceResponse.availableBalance.amount);
+        account.balance = Number(balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals)));
         localAccounts.set(address, account);
       }
       const accountsToUpdate = new Map([...accounts, ...localAccounts]);
@@ -38,7 +38,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     if (metamaskAccounts) {
       for (let [address, account] of metamaskAccounts) {
         const balanceResponse = await sdk.balance.get({ address });
-        account.balance = Number(balanceResponse.availableBalance.amount);
+        account.balance = Number(balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals)));
         metamaskAccounts.set(address, account);
       }
       const accountsToUpdate = new Map([...accounts, ...metamaskAccounts]);
@@ -51,7 +51,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     const polkadotAccounts = await getPolkadotAccounts();
     for (let [address, account] of polkadotAccounts) {
       const balanceResponse = await sdk.balance.get({ address });
-      account.balance = Number(balanceResponse.availableBalance.amount);
+      account.balance = Number(balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals)));
       polkadotAccounts.set(address, account);
     }
     const accountsToUpdate = new Map([...accounts, ...polkadotAccounts]);

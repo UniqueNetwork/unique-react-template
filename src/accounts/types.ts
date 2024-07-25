@@ -1,4 +1,4 @@
-import { Signer } from "@unique-nft/sdk";
+//import { Signer } from "@unique-nft/sdk";
 import { SignerResult } from "@unique-nft/utils/extension";
 import { Signer as EthersSigner } from "ethers";
 import { Dispatch, SetStateAction } from "react";
@@ -12,8 +12,9 @@ export enum SignerTypeEnum {
 export interface Account {
   name: string;
   address: string;
-  signerType: SignerTypeEnum; 
-  signer: (Signer | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> | Uint8Array } ;
+  signerType: SignerTypeEnum;
+  //TO DO change after SDK types implementation
+  signer: (any | EthersSigner) & { signMessage?(message: string): Promise<string | SignerResult> | Uint8Array } ;
   balance?: number;
 }
 

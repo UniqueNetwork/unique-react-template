@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Signer, SignTxResultResponse, UnsignedTxPayloadBody } from "@unique-nft/sdk";
 import { Sr25519Account } from '@unique-nft/sr25519';
 import { secretbox_open } from 'tweetnacl-ts';

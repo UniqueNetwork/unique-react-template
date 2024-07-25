@@ -45,9 +45,9 @@ export const AccountsPage = () => {
 
   return <div className="page">
     <div className="top-bar">
-      <button onClick={fetchMetamaskAccounts}>Connect MetaMask Wallet</button>
+      {/* <button onClick={fetchMetamaskAccounts}>Connect MetaMask Wallet</button> */}
       <button onClick={fetchPolkadotAccounts}>Connect Polkadot Wallet</button>
-      <button onClick={onCreateAccountClick}>Create local account</button>
+      {/* <button onClick={onCreateAccountClick}>Create local account</button> */}
     </div>
     <List>
       {accountsArray.map(account => {
