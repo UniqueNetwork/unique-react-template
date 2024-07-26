@@ -22,8 +22,7 @@ Read more about SDK in [documentation](https://docs.unique.network/build/sdk/get
 
 ## Wallets
 
-This boilerplate supports `Polkadot{.js}` wallet as well as Local signers.
+This boilerplate supports `Polkadot{.js}` wallet.
 
 - learn how to connect wallets: [`src/accounts`](./src/accounts/)
-- learn how to create a local signer: [`src/accounts/LocalAccountSigner.ts`](./src/accounts/LocalAccountSigner.ts)
 - read more about working with accounts in [documentation](https://docs.unique.network/tutorials/work-with-accounts.html) 
