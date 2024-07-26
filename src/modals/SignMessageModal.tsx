@@ -1,9 +1,7 @@
 import { SignerResult } from "@unique-nft/utils/extension"
 import { ChangeEvent, useState } from "react"
-import { LocalAccountSigner } from "../accounts/LocalAccountSigner"
-import { Account, SignerTypeEnum } from "../accounts/types"
+import { Account } from "../accounts/types"
 import { Modal } from "../components/Modal"
-import { Signer as EthersSigner } from "ethers"
 
 type SignMessageModalProps = {
   isVisible: boolean
@@ -24,19 +22,8 @@ export const SignMessageModal = ({isVisible, account, onClose}: SignMessageModal
     if(!message || !account) return;
     setIsLoading(true);
 
-    let signature: string;
-
-    switch (account.signerType) {
-      case SignerTypeEnum.Local: 
-        signature = await (account.signer as LocalAccountSigner).signMessage(message); 
-        break;
-      case SignerTypeEnum.Polkadot: 
-        const result = await account.signer.signMessage?.(message) as SignerResult; 
-        signature = result.signature;
-        break;
-      case SignerTypeEnum.Metamask: 
-        signature = await (account.signer as EthersSigner).signMessage(message); 
-    }
+    const result = await account.signer.signMessage?.(message) as SignerResult; 
+    const signature = result.signature;
   
     setResult(signature);
     setIsLoading(false);

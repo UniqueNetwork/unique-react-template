@@ -1,7 +1,4 @@
 import { ChangeEvent, useContext, useState } from "react"
-import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces"
-import { Address } from "@unique-nft/utils"
-import { isEthersSigner } from "../accounts/AccountsManager"
 import { Account } from "../accounts/types"
 import { Modal } from "../components/Modal"
 import { baseUrl } from "../sdk/SdkContext"
@@ -34,33 +31,24 @@ export const TransferAmountModal = ({isVisible, sender, onClose}: TransferAmount
   const onSend = async () => {
     if(!receiverAddress || !amount || !sender) return;
     setIsLoading(true);
+    try {
+      //@ts-ignore
+      const sdk = await connectSdk(baseUrl, sender);
 
-    if(isEthersSigner(sender.signer)) {
-      const from = Address.extract.ethCrossAccountId(sender.address);
-      const to = Address.extract.ethCrossAccountId(receiverAddress);
-      const uniqueFungible = await UniqueFungibleFactory(0, sender.signer);
-      const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
+      await sdk?.balance.transfer({
+        to: receiverAddress.trim(),
+        amount: `${amount}`,
+        isAmountInCoins: true,
+      });
+      setIsLoading(false);
 
-      await (await uniqueFungible.transferFromCross(from, to, amountRaw, { from: sender.address })).wait();
-    } else {
-      try {
-        //@ts-ignore
-        const sdk = await connectSdk(baseUrl, sender);
-
-        await sdk?.balance.transfer({
-          to: receiverAddress.trim(),
-          amount: `${amount}`,
-          isAmountInCoins: true,
-        });
-        setIsLoading(false);
-
-        //refetch accounts balances
-        fetchPolkadotAccounts();
-      } catch(err) {
-        console.log(err, 'ERROR');
-        setIsLoading(false);
-      }
+      //refetch accounts balances
+      fetchPolkadotAccounts();
+    } catch(err) {
+      console.log(err, 'ERROR');
+      setIsLoading(false);
     }
+    
     onClose();
   }
 

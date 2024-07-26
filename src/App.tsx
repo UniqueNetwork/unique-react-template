@@ -1,18 +1,15 @@
-import { AccountsContextProvider } from './accounts/AccountsContext';
-import './App.css';
-import { AccountsPage } from './pages/Accounts';
-import { SdkProvider } from './sdk/SdkContext';
-import { SignByLocalSignerModalProvider } from './signModal/SignByLocalSignerModalContext';
+import { AccountsContextProvider } from "./accounts/AccountsContext";
+import "./App.css";
+import { AccountsPage } from "./pages/Accounts";
+import { SdkProvider } from "./sdk/SdkContext";
 
 function App() {
   return (
     <div className="App">
       <SdkProvider>
-        <SignByLocalSignerModalProvider>
-          <AccountsContextProvider>
-            <AccountsPage />
-          </AccountsContextProvider>
-        </SignByLocalSignerModalProvider>
+        <AccountsContextProvider>
+          <AccountsPage />
+        </AccountsContextProvider>
       </SdkProvider>
     </div>
   );
