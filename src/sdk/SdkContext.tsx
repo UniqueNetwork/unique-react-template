@@ -5,7 +5,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getAccountFromMnemonic } from "./accounts";
 import { connectSdk } from "./connect";
 
 export type SdkContextValueType = {
@@ -16,20 +15,14 @@ export const SdkContext = createContext<SdkContextValueType>({
   sdk: undefined,
 });
 
-
-// const corsAnywhere = '';
-export const baseUrl = `https://rest.unique.network/v2/opal`;
-//some test acc
-const SUBSTRATE_MNEMONIC =
-  "produce provide explain away market town collect toast finger urban doll seminar";
+export const baseUrl = "https://rest.unique.network/v2/opal";
 
 export const SdkProvider = ({ children }: PropsWithChildren) => {
   const [sdk, setSdk] = useState<any>();
 
   useEffect(() => {
     void (async () => {
-      const account = getAccountFromMnemonic(SUBSTRATE_MNEMONIC);
-      const sdk = await connectSdk(baseUrl, account);
+      const sdk = await connectSdk(baseUrl);
       setSdk(sdk);
     })();
   }, []);
