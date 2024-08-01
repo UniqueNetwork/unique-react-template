@@ -16,9 +16,9 @@ export const SdkContext = createContext<SdkContextValueType>({
   sdk: undefined,
 });
 
-const corsAnywhere = "http://localhost:8080/";
+
 // const corsAnywhere = '';
-export const baseUrl = `${corsAnywhere}https://rest.unique.network/v2/opal`;
+export const baseUrl = `https://rest.unique.network/v2/opal`;
 //some test acc
 const SUBSTRATE_MNEMONIC =
   "produce provide explain away market town collect toast finger urban doll seminar";

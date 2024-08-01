@@ -4,6 +4,8 @@ import { Account } from "../accounts/types";
 import { List } from "../components/List";
 import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
+import styled from "styled-components";
+import { NavLink } from "react-router-dom";
 
 export const AccountsPage = () => {
   const { accounts, fetchPolkadotAccounts } = useContext(AccountsContext);
@@ -43,8 +45,9 @@ export const AccountsPage = () => {
             <span>{account.name}</span>
             <span>{account.address}</span>
             <span>{account.balance?.toFixed(2) || '0'}</span>
-              <button onClick={onSend(account)}>Send amount</button>
-              <button onClick={onSignMessage(account)}>Sign message</button>
+              <Button onClick={onSend(account)}>Send amount</Button>
+              <Button onClick={onSignMessage(account)}>Sign message</Button>
+              <ButtonLink to={`/account/${account.address}`}>Account data</ButtonLink>
         </List.Item>
       })}
     </List>
@@ -60,3 +63,30 @@ export const AccountsPage = () => {
     />
   </div>;
 }
+
+const Button = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  background-color: #007bff;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const ButtonLink = styled(NavLink)`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+	background-color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
