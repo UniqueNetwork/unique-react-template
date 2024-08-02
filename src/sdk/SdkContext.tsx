@@ -15,7 +15,7 @@ export const SdkContext = createContext<SdkContextValueType>({
   sdk: undefined,
 });
 
-export const baseUrl = "https://rest.unique.network/v2/opal";
+export const baseUrl = process.env.REACT_APP_REST_URL || "";
 
 export const SdkProvider = ({ children }: PropsWithChildren) => {
   const [sdk, setSdk] = useState<any>();

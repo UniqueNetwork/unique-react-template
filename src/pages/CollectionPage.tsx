@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
+import { TransferModal } from "../modals/TransferModal";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -31,12 +32,15 @@ const Title = styled.h2`
   text-align: left;
 `;
 
-const Avatar = styled.div`
-  width: 100px;
-  height: 100px;
+const Avatar = styled.div<{ imageUrl: string }>`
+  width: 250px;
+  height: 250px;
   background-color: #ccc;
   border-radius: 50%;
   margin: 20px 0;
+  background-image: url(${(props) => props.imageUrl});
+  background-size: cover;
+  background-position: center;
 `;
 
 const InfoList = styled.div`
@@ -51,6 +55,16 @@ const InfoItem = styled.div`
   display: flex;
   width: 80%;
   justify-content: space-between;
+
+  span:first-child {
+    text-align: left;
+    flex: 1;
+  }
+
+  span:last-child {
+    text-align: right;
+    flex: 1;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -67,22 +81,90 @@ const TransferButton = styled(Button)`
   width: 200px;
 `;
 
+interface Sponsorship {
+  isEnabled: boolean;
+  isConfirmed: boolean;
+  sponsor: string | null;
+}
+
+interface Property {
+  key: string;
+  value: string;
+  valueHex: string;
+}
+
+interface Permission {
+  mutable: boolean;
+  collectionAdmin: boolean;
+  tokenOwner: boolean;
+}
+
+interface TokenPropertyPermission {
+  key: string;
+  permission: Permission;
+}
+
+interface CoverImage {
+  url: string;
+}
+
+interface Info {
+  schemaName: string;
+  schemaVersion: string;
+  cover_image: CoverImage;
+  potential_attributes: any[];
+}
+
+interface Limits {
+  accountTokenOwnershipLimit: number;
+  ownerCanDestroy: boolean;
+  ownerCanTransfer: boolean;
+  sponsorApproveTimeout: number;
+  sponsorTransferTimeout: number;
+  sponsoredDataRateLimit: string;
+  sponsoredDataSize: number;
+  tokenLimit: number;
+  transfersEnabled: boolean;
+}
+
+interface NFTCollection {
+  collectionId: number;
+  collectionAddress: string;
+  owner: string;
+  mode: string;
+  name: string;
+  description: string;
+  tokenPrefix: string;
+  properties: Property[];
+  limits?: Limits;
+  admins: any | null;
+  lastTokenId: any | null;
+  sponsorship: Sponsorship;
+  readOnly: boolean;
+  tokenPropertyPermissions: TokenPropertyPermission[];
+  info: Info;
+  infoDecodingError: any | null;
+}
+
 const CollectionPage = () => {
   const { sdk } = useContext(SdkContext);
   const { collectionId } = useParams<{ collectionId: string }>();
-  const [collectionData, setCollectionData] = useState<any>(null);
+  const [collectionData, setCollectionData] = useState<NFTCollection | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
+  const [transferModalIsVisible, setTransferModalIsVisible] = useState(false);
 
   useEffect(() => {
     const fetchCollectionData = async () => {
       try {
         const collection = await sdk.collection.get({
           idOrAddress: collectionId,
+          withLimits:  true,
+          // withLastTokenId: true,
         });
-        console.log(collection, 'COLLECTION');
         setCollectionData(collection);
       } catch (error) {
-        console.error("Error fetching collection data:", error);
         setError("Failed to fetch collection data. Please try again later.");
       }
     };
@@ -105,13 +187,15 @@ const CollectionPage = () => {
     return <div>Loading...</div>;
   }
 
+  const coverImageUrl = collectionData.info.cover_image.url;
+
   return (
     <Container>
       <Title>Collection information</Title>
-      <Avatar />
+      <Avatar imageUrl={coverImageUrl} />
       <InfoList>
         <InfoItem>
-          <span>ID:</span> <span>{collectionData.collectionAddress}</span>
+          <span>ID:</span> <span>{collectionData.collectionId}</span>
         </InfoItem>
         <InfoItem>
           <span>Name:</span> <span>{collectionData.name}</span>
@@ -125,22 +209,29 @@ const CollectionPage = () => {
         <InfoItem>
           <span>Owner:</span> <span>{collectionData.owner}</span>
         </InfoItem>
+        <InfoItem>{/* <span>Created at:</span> <span>{'-'}</span> */}</InfoItem>
         <InfoItem>
-          <span>Created at:</span> <span>{collectionData.createdAt}</span>
-        </InfoItem>
-        <InfoItem>
-          <span>Collection EVM address:</span> <span>{collectionData.evmAddress}</span>
+          <span>Collection EVM address:</span>{" "}
+          <span>{collectionData.collectionAddress}</span>
         </InfoItem>
         <InfoItem>
           <span>SubScan UI link:</span>
-          <a href={collectionData.subScanLink} target="_blank" rel="noopener noreferrer">
-            {collectionData.subScanLink}
+          <a
+            href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item?collection_id=${collectionData.collectionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {collectionData.collectionId}
           </a>
         </InfoItem>
         <InfoItem>
           <span>Uniquescan UI link:</span>
-          <a href={collectionData.uniqueScanLink} target="_blank" rel="noopener noreferrer">
-            {collectionData.uniqueScanLink}
+          <a
+            href={`${process.env.REACT_APP_UNIQUESCAN_LINK}collections/${collectionData.collectionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {collectionData.collectionId}
           </a>
         </InfoItem>
       </InfoList>
@@ -148,23 +239,30 @@ const CollectionPage = () => {
         <Title>Settings</Title>
         <InfoList>
           <InfoItem>
-            <span>Collection size (max):</span> <span>{collectionData.collectionSizeMax}</span>
+            <span>Collection size (max):</span> <span>{collectionData.limits?.tokenLimit}</span>
           </InfoItem>
           <InfoItem>
-            <span>NFTs per account limit:</span> <span>{collectionData.nftsPerAccountLimit}</span>
+            <span>NFTs per account limit:</span> <span>{collectionData.limits?.accountTokenOwnershipLimit}</span>
           </InfoItem>
           <InfoItem>
-            <span>NFT transfers permission:</span> <span>{collectionData.nftTransfersPermission}</span>
+            <span>NFT transfers permission:</span> <span>{collectionData.limits?.transfersEnabled? 'Allowed' : 'Disabled'}</span>
           </InfoItem>
           <InfoItem>
-            <span>Nesting permission:</span> <span>{collectionData.nestingPermission}</span>
+            <span>Nesting permission:</span> <span>{}</span>
           </InfoItem>
           <InfoItem>
-            <span>Sponsor:</span> <span>{collectionData.sponsor}</span>
+            <span>Sponsor:</span>{" "}
+            <span>{collectionData.sponsorship.sponsor || "-"}</span>
           </InfoItem>
         </InfoList>
       </SettingsContainer>
-      <TransferButton>Transfer</TransferButton>
+      <TransferModal
+        isVisible={transferModalIsVisible}
+        onClose={() => setTransferModalIsVisible(false)}
+      />
+      <TransferButton onClick={() => setTransferModalIsVisible(true)}>
+        Transfer
+      </TransferButton>
     </Container>
   );
 };

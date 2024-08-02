@@ -1,11 +1,11 @@
 import { AccountsContextProvider } from "./accounts/AccountsContext";
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { AccountsPage } from "./pages/Accounts";
+import { AccountsPage } from "./pages/AccountListPage";
 import { SdkProvider } from "./sdk/SdkContext";
 import CollectionPage from "./pages/CollectionPage";
 import { Header } from "./components/Header";
-import AccountPage from "./pages/AccountPage";
+import SingleAccountPage from "./pages/SingleAccountPage";
 import TokenPage from "./pages/TokenPage";
 import styled from "styled-components";
 
@@ -13,6 +13,7 @@ const ContentLayout = styled.div`
   width: 90vw;
   max-width: 1260px;
   margin: 0 auto;
+  margin-bottom: 60px;
 `;
 
 function App() {
@@ -29,11 +30,15 @@ function App() {
                   path="/collection/:collectionId"
                   element={<CollectionPage />}
                 />
-                <Route path="/account/:accountId" element={<AccountPage />} />
+                <Route
+                  path="/account/:accountId"
+                  element={<SingleAccountPage />}
+                />
                 <Route
                   path="/token/:collectionId/:tokenId"
                   element={<TokenPage />}
                 />
+                <Route path="*" element={<>NOT FOUND</>} />
               </Routes>
             </ContentLayout>
           </Router>

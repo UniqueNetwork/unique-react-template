@@ -1,7 +1,7 @@
-// Header.js
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { AccountsContext } from "../accounts/AccountsContext";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -9,8 +9,9 @@ const Button = styled(NavLink)`
   border-radius: 5px;
   color: white;
   cursor: pointer;
-	background-color: #f0ad4e;
-	text-decoration: none;
+  background-color: #f0ad4e;
+  text-decoration: none;
+  font-size: 24px;
 
   &:hover {
     opacity: 0.8;
@@ -20,7 +21,6 @@ const Button = styled(NavLink)`
 const ConnectedAccountsButton = styled(Button)`
   background-color: #007bff;
 `;
-
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -36,20 +36,39 @@ const HeaderContainer = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
-	gap: 10px;
+  gap: 10px;
 `;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const Header: React.FC = () => {
+  const { fetchPolkadotAccounts } = useContext(AccountsContext);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await sleep(1000);
+      await fetchPolkadotAccounts();
+      setHasFetched(true);
+    };
+
+    if (!hasFetched) {
+      fetchData();
+    }
+  }, [fetchPolkadotAccounts, hasFetched]);
+
   return (
     <HeaderContainer>
-      <ConnectedAccountsButton to="/">Connected accounts</ConnectedAccountsButton>
+      <ConnectedAccountsButton to="/">
+        Connected accounts
+      </ConnectedAccountsButton>
       <ButtonsWrapper>
-        <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu">Test account</Button>
-				<Button to="/collection/3128">Test Collection</Button>
-				
-        <Button to="/token/3128/3">Test NFT</Button>
+        <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu">
+          Test account
+        </Button>
+        <Button to="/collection/665">Test Collection</Button>
+        <Button to="/token/665/14">Test NFT</Button>
       </ButtonsWrapper>
     </HeaderContainer>
   );
 };
-

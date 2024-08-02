@@ -4,6 +4,12 @@ import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { TokenSlider } from "../components/Slider/TokenSlider";
 import { Picture } from "../components/Picture";
+import { TransferNFTModal } from "../modals/TransferNFTModal";
+import { BurnModal } from "../modals/BurnModal";
+import { NestTModal } from "../modals/NestModal";
+import { UnnestTModal } from "../modals/UnnestModal";
+import { compareEncodedAddresses } from "../utils/common";
+import { AccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
 
 const Button = styled.button`
@@ -13,8 +19,16 @@ const Button = styled.button`
   color: white;
   cursor: pointer;
   background-color: #007bff;
+  font-size: 24px;
+  width: 250px;
+
   &:hover {
     opacity: 0.8;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
   }
 `;
 
@@ -39,6 +53,11 @@ const InfoContainer = styled.div`
   @media (max-width: 1260px) {
     flex-direction: column;
   }
+
+  .picture {
+    width: 500px;
+    height: 500px;
+  }
 `;
 
 const TokenInfoWrap = styled.div`
@@ -48,14 +67,10 @@ const TokenInfoWrap = styled.div`
 
   & > div {
     width: 100% !important;
-
-    @media (max-width: 1260px) {
-      width: 80%;
-      justify-content: space-between;
-    }
   }
 
   @media (max-width: 1260px) {
+    width: 80%;
     margin-left: 0;
   }
 `;
@@ -66,6 +81,16 @@ const InfoItem = styled.div`
   display: flex;
   width: 80%;
   justify-content: space-between;
+
+  span:first-child {
+    text-align: left;
+    flex: 1;
+  }
+
+  span:last-child {
+    text-align: right;
+    flex: 1;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -90,6 +115,7 @@ const ActionsContainer = styled.div`
   gap: 20px;
   margin-top: 20px;
 `;
+
 interface Attribute {
   trait_type: string;
   value: string;
@@ -134,16 +160,31 @@ interface TokenData {
   decodingError?: string | null;
   youtube_url?: string;
   animation_url?: string;
-
-  createdAt?: string;
   tokenPrefix?: string;
+}
+
+enum TokenModalEnum {
+  TRANSFER = "TRANSFER",
+  NEST = "NEST",
+  UNNEST = "UNNEST",
+  BURN = "BURN",
 }
 
 const TokenPage: React.FC = () => {
   const { sdk } = useContext(SdkContext);
-  const { tokenId, collectionId } = useParams<{ tokenId: string; collectionId: string }>();
+  const { selectedAccount } = useContext(AccountsContext);
+  const { tokenId, collectionId } = useParams<{
+    tokenId: string;
+    collectionId: string;
+  }>();
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState<TokenModalEnum | null>(null);
+  const isOwner = useMemo(() => {
+    if (!selectedAccount?.address || !tokenData?.owner) return;
+    if (!Address.is.substrateAddress(selectedAccount?.address) || !Address.is.substrateAddress(tokenData?.owner)) return;
+    return compareEncodedAddresses(selectedAccount?.address, tokenData?.owner)
+  }, [tokenData,selectedAccount])
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -164,43 +205,70 @@ const TokenPage: React.FC = () => {
     }
   }, [tokenId, sdk, collectionId]);
 
-  const { sliderItems, mediaTypes, attributesString, royaltiesString } = useMemo(() => {
-    if (!tokenData) return { sliderItems: [], mediaTypes: '', attributesString: '', royaltiesString: '' };
+  const { sliderItems, mediaTypes, attributesString, royaltiesString } =
+    useMemo(() => {
+      if (!tokenData)
+        return {
+          sliderItems: [],
+          mediaTypes: "",
+          attributesString: "",
+          royaltiesString: "",
+        };
 
-    const sliderItems: { src: string; type: string; thumbnail?: string }[] = [];
-    const { image, youtube_url, animation_url, media, attributes, royalties } = tokenData;
+      const sliderItems: { src: string; type: string; thumbnail?: string }[] =
+        [];
+      const {
+        image,
+        youtube_url,
+        animation_url,
+        media,
+        attributes,
+        royalties,
+      } = tokenData;
 
-    if (image) {
-      sliderItems.push({ src: image, type: "image" });
-    }
-    if (youtube_url) {
-      sliderItems.push({ src: youtube_url, type: "youtube_url" });
-    }
-    if (animation_url) {
-      sliderItems.push({ src: animation_url, type: "animation_url" });
-    }
-    if (media) {
-      const mediaItems = Object.values(media);
-      const images = mediaItems.filter((item) => item.type === "image");
-      const videos = mediaItems.filter((item) => item.type === "video");
-      const audios = mediaItems.filter((item) => item.type === "audio");
+      if (image) {
+        sliderItems.push({ src: image, type: "image" });
+      }
+      if (youtube_url) {
+        sliderItems.push({ src: youtube_url, type: "youtube_url" });
+      }
+      if (animation_url) {
+        sliderItems.push({ src: animation_url, type: "animation_url" });
+      }
+      if (media) {
+        const mediaItems = Object.values(media);
+        const images = mediaItems.filter((item) => item.type === "image");
+        const videos = mediaItems.filter((item) => item.type === "video");
+        const audios = mediaItems.filter((item) => item.type === "audio");
 
-      images.forEach((image) => sliderItems.push({ src: image.url, type: "image" }));
-      videos.forEach((video) => sliderItems.push({ src: video.url, type: "video" }));
-      audios.forEach((audio) => sliderItems.push({ src: audio.url, type: "audio", thumbnail: image }));
-    }
+        images.forEach((image) =>
+          sliderItems.push({ src: image.url, type: "image" })
+        );
+        videos.forEach((video) =>
+          sliderItems.push({ src: video.url, type: "video" })
+        );
+        audios.forEach((audio) =>
+          sliderItems.push({ src: audio.url, type: "audio", thumbnail: image })
+        );
+      }
 
-    const mediaTypesSet = new Set(sliderItems.map(item => item.type));
-    const mediaTypes = Array.from(mediaTypesSet).join(', ');
+      const mediaTypesSet = new Set(sliderItems.map((item) => item.type));
+      const mediaTypes = Array.from(mediaTypesSet).join(", ");
 
-    const attributesString = attributes ? 
-      attributes.map(attr => `${attr.trait_type || '-'}: ${attr.value || '-'}`).join(', ') : '-';
+      const attributesString = attributes
+        ? attributes
+            .map((attr) => `${attr.trait_type || "-"}: ${attr.value || "-"}`)
+            .join(", ")
+        : "-";
 
-    const royaltiesString = royalties ? 
-      royalties.map(royalty => `${royalty.address}: ${royalty.percent}%`).join(', ') : '-';
+      const royaltiesString = royalties
+        ? royalties
+            .map((royalty) => `${royalty.address}: ${royalty.percent}%`)
+            .join(", ")
+        : "-";
 
-    return { sliderItems, mediaTypes, attributesString, royaltiesString };
-  }, [tokenData]);
+      return { sliderItems, mediaTypes, attributesString, royaltiesString };
+    }, [tokenData]);
 
   if (error) {
     return (
@@ -228,46 +296,67 @@ const TokenPage: React.FC = () => {
             previewMode={true}
           />
         ) : (
-          <Picture size={500} alt={tokenId?.toString() || ""} src={sliderItems[0].src} badges={[]} />
+          <Picture
+            size={500}
+            alt={tokenId?.toString() || ""}
+            src={sliderItems[0].src}
+            badges={[]}
+          />
         )}
 
         <TokenInfoWrap>
           <InfoItem>
-            <span>Symbol:</span> <span>{tokenData.tokenPrefix || '-'}</span>
+            <span>Symbol:</span> <span>{tokenData.tokenPrefix || "-"}</span>
           </InfoItem>
           <InfoItem>
-            <span>ID:</span> <span>{tokenData.tokenId !== undefined ? tokenData.tokenId : '-'}</span>
+            <span>ID:</span>{" "}
+            <span>
+              {tokenData.tokenId !== undefined ? tokenData.tokenId : "-"}
+            </span>
           </InfoItem>
           <InfoItem>
-            <span>Owner:</span> <span>{tokenData.owner || '-'}</span>
+            <span>Owner:</span> <span>{tokenData.owner || "-"}</span>
           </InfoItem>
           <InfoItem>
-            <span>Collection:</span> <span>{tokenData.collectionAddress || '-'}</span>
+            <span>Collection:</span>{" "}
+            <span>{tokenData.collectionId || "-"}</span>
           </InfoItem>
         </TokenInfoWrap>
       </InfoContainer>
 
       <Title>Attributes</Title>
       <InfoItem>
-        <span>Name:</span> <span>{tokenData.name || '-'}</span>
+        <span>Name:</span> <span>{tokenData.name || "-"}</span>
       </InfoItem>
       <InfoItem>
-        <span>Description:</span> <span>{tokenData.description || '-'}</span>
+        <span>Description:</span> <span>{tokenData.description || "-"}</span>
       </InfoItem>
       <InfoItem>
         <span>Attributes:</span> <span>{attributesString}</span>
       </InfoItem>
 
-
       <Title>More info</Title>
       <InfoItem>
-        <span>Media types:</span> <span>{mediaTypes || '-'}</span>
+        <span>Media types:</span> <span>{mediaTypes || "-"}</span>
       </InfoItem>
       <InfoItem>
-        <span>Nested NFTs:</span> <span>{'-'}</span>
+        <span>Nested NFTs:</span> <span>{"-"}</span>
       </InfoItem>
       <InfoItem>
-        <span>Nested to:</span> <span>{'-'}</span>
+        <span>Nested to:</span>{" "}
+        <span>
+          {tokenData.parentToken ? (
+            <a
+              href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${collectionId}-${tokenId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {`${tokenData.parentToken.collectionId}-${tokenData.parentToken.tokenId}`}
+            </a>
+          ) : (
+            "-"
+          )}
+        </span>
       </InfoItem>
       <InfoItem>
         <span>Royalty:</span> <span>{royaltiesString}</span>
@@ -276,23 +365,48 @@ const TokenPage: React.FC = () => {
         {/* <span>NFT EVM address:</span> <span>{tokenData.collectionAddress ? Address.mirror.substrateToEthereum(tokenData.collectionAddress) : '-'}</span> */}
       </InfoItem>
       <InfoItem>
-        <span>Created at:</span> <span>{tokenData.createdAt || '-'}</span>
+        {/* <span>Created at:</span> <span>{tokenData.createdAt || "-"}</span> */}
       </InfoItem>
       <InfoItem>
         <span>SubScan UI link:</span>
 
+        <a
+          href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${collectionId}-${tokenId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {`${collectionId}-${tokenId}`}
+        </a>
       </InfoItem>
-      <InfoItem>
-        <span>Uniquescan UI link:</span>
 
-      </InfoItem>
-
+      {!isOwner && <>You are not token's owner</>}
       <ActionsContainer>
-        <Button>Transfer</Button>
-        <Button>Nest</Button>
-        <Button>Unnest</Button>
-        <Button>Burn</Button>
+        <Button onClick={() => setOpenModal(TokenModalEnum.TRANSFER)} disabled={!isOwner}>
+          Transfer
+        </Button>
+        <Button onClick={() => setOpenModal(TokenModalEnum.NEST)} disabled={!isOwner}>Nest</Button>
+        <Button onClick={() => setOpenModal(TokenModalEnum.UNNEST)} disabled={!isOwner}>
+          Unnest
+        </Button>
+        <Button onClick={() => setOpenModal(TokenModalEnum.BURN)} disabled={!isOwner}>Burn</Button>
       </ActionsContainer>
+
+      <TransferNFTModal
+        isVisible={openModal === TokenModalEnum.TRANSFER}
+        onClose={() => setOpenModal(null)}
+      />
+      <NestTModal
+        isVisible={openModal === TokenModalEnum.NEST}
+        onClose={() => setOpenModal(null)}
+      />
+      <UnnestTModal
+        isVisible={openModal === TokenModalEnum.UNNEST}
+        onClose={() => setOpenModal(null)}
+      />
+      <BurnModal
+        isVisible={openModal === TokenModalEnum.BURN}
+        onClose={() => setOpenModal(null)}
+      />
     </Container>
   );
 };

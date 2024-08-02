@@ -58,7 +58,7 @@ const ButtonContainer = styled.div`
   margin-top: 20px;
 `;
 
-const AccountPage = () => {
+const SingleAccountPage = () => {
   const { accounts } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
 
@@ -141,7 +141,7 @@ const AccountPage = () => {
           <InfoItem>
             SubScan UI link:{" "}
             <a
-              href={`https://unique.subscan.io/account/${uniqueAddress}`}
+              href={`${process.env.REACT_APP_SUBSCAN_LINK}account/${uniqueAddress}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -153,7 +153,7 @@ const AccountPage = () => {
           <InfoItem>
             Uniquescan UI link:{" "}
             <a
-              href={`https://uniquescan.io/UNIQUE/account/${uniqueAddress}`}
+              href={`${process.env.REACT_APP_UNIQUESCAN_LINK}account/${uniqueAddress}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -170,4 +170,4 @@ const AccountPage = () => {
   );
 };
 
-export default AccountPage;
+export default SingleAccountPage;
