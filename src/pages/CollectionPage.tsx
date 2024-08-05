@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { TransferModal } from "../modals/TransferModal";
+import useIsOwner from "../hooks/useIsOwner";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -16,6 +17,11 @@ const Button = styled.button`
 
   &:hover {
     opacity: 0.8;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
   }
 `;
 
@@ -154,13 +160,14 @@ const CollectionPage = () => {
   );
   const [error, setError] = useState<string | null>(null);
   const [transferModalIsVisible, setTransferModalIsVisible] = useState(false);
+  const isOwner = useIsOwner(collectionData?.owner);
 
   useEffect(() => {
     const fetchCollectionData = async () => {
       try {
         const collection = await sdk.collection.get({
           idOrAddress: collectionId,
-          withLimits:  true,
+          withLimits: true,
           // withLastTokenId: true,
         });
         setCollectionData(collection);
@@ -239,13 +246,18 @@ const CollectionPage = () => {
         <Title>Settings</Title>
         <InfoList>
           <InfoItem>
-            <span>Collection size (max):</span> <span>{collectionData.limits?.tokenLimit}</span>
+            <span>Collection size (max):</span>{" "}
+            <span>{collectionData.limits?.tokenLimit}</span>
           </InfoItem>
           <InfoItem>
-            <span>NFTs per account limit:</span> <span>{collectionData.limits?.accountTokenOwnershipLimit}</span>
+            <span>NFTs per account limit:</span>{" "}
+            <span>{collectionData.limits?.accountTokenOwnershipLimit}</span>
           </InfoItem>
           <InfoItem>
-            <span>NFT transfers permission:</span> <span>{collectionData.limits?.transfersEnabled? 'Allowed' : 'Disabled'}</span>
+            <span>NFT transfers permission:</span>{" "}
+            <span>
+              {collectionData.limits?.transfersEnabled ? "Allowed" : "Disabled"}
+            </span>
           </InfoItem>
           <InfoItem>
             <span>Nesting permission:</span> <span>{}</span>
@@ -260,7 +272,11 @@ const CollectionPage = () => {
         isVisible={transferModalIsVisible}
         onClose={() => setTransferModalIsVisible(false)}
       />
-      <TransferButton onClick={() => setTransferModalIsVisible(true)}>
+      {!isOwner && <>You are not collection's owner</>}
+      <TransferButton
+        onClick={() => setTransferModalIsVisible(true)}
+        disabled={!isOwner}
+      >
         Transfer
       </TransferButton>
     </Container>

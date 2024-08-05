@@ -5,21 +5,6 @@ import { SdkContext } from "../sdk/SdkContext";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
 
-const Button = styled.button`
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  background-color: #007bff;
-  font-size: 24px;
-  width: 250px;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -162,10 +147,10 @@ const SingleAccountPage = () => {
           </InfoItem>
         )}
       </InfoList>
-      <ButtonContainer>
+      {/* <ButtonContainer>
         <Button>Owned collections</Button>
         <Button>Owned NFTs</Button>
-      </ButtonContainer>
+      </ButtonContainer> */}
     </Container>
   );
 };

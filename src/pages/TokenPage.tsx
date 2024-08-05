@@ -8,9 +8,7 @@ import { TransferNFTModal } from "../modals/TransferNFTModal";
 import { BurnModal } from "../modals/BurnModal";
 import { NestTModal } from "../modals/NestModal";
 import { UnnestTModal } from "../modals/UnnestModal";
-import { compareEncodedAddresses } from "../utils/common";
-import { AccountsContext } from "../accounts/AccountsContext";
-import { Address } from "@unique-nft/utils";
+import useIsOwner from "../hooks/useIsOwner";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -172,7 +170,6 @@ enum TokenModalEnum {
 
 const TokenPage: React.FC = () => {
   const { sdk } = useContext(SdkContext);
-  const { selectedAccount } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -180,11 +177,7 @@ const TokenPage: React.FC = () => {
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState<TokenModalEnum | null>(null);
-  const isOwner = useMemo(() => {
-    if (!selectedAccount?.address || !tokenData?.owner) return;
-    if (!Address.is.substrateAddress(selectedAccount?.address) || !Address.is.substrateAddress(tokenData?.owner)) return;
-    return compareEncodedAddresses(selectedAccount?.address, tokenData?.owner)
-  }, [tokenData,selectedAccount])
+  const isOwner = useIsOwner(tokenData?.owner);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -379,16 +372,32 @@ const TokenPage: React.FC = () => {
         </a>
       </InfoItem>
 
-      {!isOwner && <>You are not token's owner</>}
+      {!isOwner && <>You are not NFT's owner</>}
       <ActionsContainer>
-        <Button onClick={() => setOpenModal(TokenModalEnum.TRANSFER)} disabled={!isOwner}>
+        <Button
+          onClick={() => setOpenModal(TokenModalEnum.TRANSFER)}
+          disabled={!isOwner}
+        >
           Transfer
         </Button>
-        <Button onClick={() => setOpenModal(TokenModalEnum.NEST)} disabled={!isOwner}>Nest</Button>
-        <Button onClick={() => setOpenModal(TokenModalEnum.UNNEST)} disabled={!isOwner}>
+        <Button
+          onClick={() => setOpenModal(TokenModalEnum.NEST)}
+          disabled={!isOwner}
+        >
+          Nest
+        </Button>
+        <Button
+          onClick={() => setOpenModal(TokenModalEnum.UNNEST)}
+          disabled={!isOwner}
+        >
           Unnest
         </Button>
-        <Button onClick={() => setOpenModal(TokenModalEnum.BURN)} disabled={!isOwner}>Burn</Button>
+        <Button
+          onClick={() => setOpenModal(TokenModalEnum.BURN)}
+          disabled={!isOwner}
+        >
+          Burn
+        </Button>
       </ActionsContainer>
 
       <TransferNFTModal
