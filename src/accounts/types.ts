@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 
 export enum SignerTypeEnum {
   Polkadot = "Polkadot",
+  ethereum = "ethereum",
 }
 
 export interface Account {

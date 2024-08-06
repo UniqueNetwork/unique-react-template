@@ -8,6 +8,9 @@ import { Header } from "./components/Header";
 import SingleAccountPage from "./pages/SingleAccountPage";
 import TokenPage from "./pages/TokenPage";
 import styled from "styled-components";
+import { createWeb3Modal } from "@web3modal/wagmi/react";
+import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
+import { WagmiProvider } from "wagmi";
 
 const ContentLayout = styled.div`
   width: 90vw;
@@ -16,34 +19,76 @@ const ContentLayout = styled.div`
   margin-bottom: 60px;
 `;
 
+const projectId = process.env.REACT_APP_PROJECT_ID || "";
+
+const metadata = {
+  name: "Web3Modal",
+  description: "Web3Modal Example",
+  url: "https://web3modal.com",
+  icons: ["https://avatars.githubusercontent.com/u/37784886"],
+};
+
+export const chains = [
+  {
+    id: 8882,
+    name: "OPAL by UNIQUE",
+    nativeCurrency: { name: "OPL", symbol: "OPL", decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: ["https://rpc.unique.network/opal"],
+      },
+    },
+  },
+] as const;
+export const config = defaultWagmiConfig({
+  chains,
+  projectId,
+  metadata,
+});
+
+createWeb3Modal({
+  wagmiConfig: config,
+  projectId,
+  // includeWalletIds: [
+  //   'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+  //   '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+  //   'ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18',
+  // ],
+  // defaultChain
+  enableAnalytics: true,
+  enableOnramp: true,
+});
+
 function App() {
   return (
     <div className="App">
-      <SdkProvider>
-        <AccountsContextProvider>
-          <Router>
-            <Header />
-            <ContentLayout>
-              <Routes>
-                <Route path="/" element={<AccountsPage />} />
-                <Route
-                  path="/collection/:collectionId"
-                  element={<CollectionPage />}
-                />
-                <Route
-                  path="/account/:accountId"
-                  element={<SingleAccountPage />}
-                />
-                <Route
-                  path="/token/:collectionId/:tokenId"
-                  element={<TokenPage />}
-                />
-                <Route path="*" element={<>NOT FOUND</>} />
-              </Routes>
-            </ContentLayout>
-          </Router>
-        </AccountsContextProvider>
-      </SdkProvider>
+      <WagmiProvider config={config}>
+        <SdkProvider>
+          <AccountsContextProvider>
+            <Router>
+              <Header />
+              <ContentLayout>
+                <Routes>
+                  <Route path="/" element={<AccountsPage />} />
+                  <Route
+                    path="/collection/:collectionId"
+                    element={<CollectionPage />}
+                  />
+                  <Route
+                    path="/account/:accountId"
+                    element={<SingleAccountPage />}
+                  />
+                  <Route
+                    path="/token/:collectionId/:tokenId"
+                    element={<TokenPage />}
+                  />
+                  <Route path="*" element={<>NOT FOUND</>} />
+                </Routes>
+              </ContentLayout>
+            </Router>
+          </AccountsContextProvider>
+        </SdkProvider>
+      </WagmiProvider>
     </div>
   );
 }

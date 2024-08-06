@@ -6,6 +6,7 @@ import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 export const AccountsPage = () => {
   const { accounts, setSelectedAccountId, selectedAccountId } =
@@ -14,6 +15,8 @@ export const AccountsPage = () => {
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);
   const [signMessageIsVisible, setSignMessageIsVisible] = useState(false);
+  const { open } = useWeb3Modal()
+
 
   const onSend = useCallback(
     (account: Account) => () => {
@@ -74,6 +77,7 @@ export const AccountsPage = () => {
           );
         })}
       </List>
+      <Button onClick={() => open()}>ETHEREUM Wallets</Button>
       <TransferAmountModal
         isVisible={transferAmountIsVisible}
         sender={currentAccount}
