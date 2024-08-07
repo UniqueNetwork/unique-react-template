@@ -22,9 +22,9 @@ const ContentLayout = styled.div`
 const projectId = process.env.REACT_APP_PROJECT_ID || "";
 
 const metadata = {
-  name: "Web3Modal",
-  description: "Web3Modal Example",
-  url: "https://web3modal.com",
+  name: "Unique - Wallet Connect",
+  description: "Unique boilerplate",
+  url: "https://plate.uniquenetwork.dev/",
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
 };
 
