@@ -99,6 +99,7 @@ const Button = styled.button`
   color: white;
   cursor: pointer;
   background-color: #007bff;
+  font-size: 16px;
 
   &:hover {
     opacity: 0.8;

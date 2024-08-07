@@ -19,13 +19,13 @@ const ContentLayout = styled.div`
   margin-bottom: 60px;
 `;
 
-const projectId = process.env.REACT_APP_PROJECT_ID || "";
+const projectId = process.env.REACT_APP_PROJECT_ID || "59b5826141a56b204e9e0a3f7e46641d";
 
 const metadata = {
   name: "Unique - Wallet Connect",
   description: "Unique boilerplate",
   url: "https://plate.uniquenetwork.dev/",
-  icons: ["https://avatars.githubusercontent.com/u/37784886"],
+  icons: [""],
 };
 
 export const chains = [

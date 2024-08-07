@@ -11,7 +11,7 @@ const Button = styled(NavLink)`
   cursor: pointer;
   background-color: #f0ad4e;
   text-decoration: none;
-  font-size: 24px;
+  font-size: 16px;
 
   &:hover {
     opacity: 0.8;
