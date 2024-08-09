@@ -1,9 +1,12 @@
 import { ChangeEvent, useContext, useState } from "react";
-import { Account } from "../accounts/types";
+import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { baseUrl } from "../sdk/SdkContext";
+import { Address } from "@unique-nft/utils";
+import { useEthersSigner } from "../hooks/useSigner";
+import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces";
 
 type TransferAmountModalProps = {
   isVisible: boolean;
@@ -20,6 +23,8 @@ export const TransferAmountModal = ({
   const [receiverAddress, setReceiverAddress] = useState<string>("");
   const [amount, setAmount] = useState<number | string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const signer = useEthersSigner();
 
   const onReceiverAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     setReceiverAddress(e.target.value);
@@ -31,10 +36,32 @@ export const TransferAmountModal = ({
       setAmount(value);
     }
   };
-
   const onSend = async () => {
     if (!receiverAddress || !amount || !sender) return;
+    setError('')
     setIsLoading(true);
+
+    if (sender.signerType === SignerTypeEnum.Ethereum) {
+      const from = Address.extract.ethCrossAccountId(sender.address);
+      const to = Address.extract.ethCrossAccountId(receiverAddress);
+      //@ts-ignore
+      const uniqueFungible = await UniqueFungibleFactory(0, signer);
+      const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
+
+      try {
+        await(
+          await uniqueFungible.transferFromCross(from, to, amountRaw, {
+            from: sender.address,
+          })
+        ).wait();
+      } catch (err) {
+        console.log("ERROR CATCHED");
+        console.error(err);
+        setIsLoading(false);
+        setError(err.name);
+        return;
+      }
+    } else {
     try {
       //@ts-ignore
       const sdk = await connectSdk(baseUrl, sender);
@@ -51,6 +78,7 @@ export const TransferAmountModal = ({
     } catch (err) {
       setIsLoading(false);
     }
+  }
 
     onClose();
   };

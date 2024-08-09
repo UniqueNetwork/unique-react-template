@@ -17,7 +17,6 @@ export const AccountsPage = () => {
   const [signMessageIsVisible, setSignMessageIsVisible] = useState(false);
   const { open } = useWeb3Modal()
 
-
   const onSend = useCallback(
     (account: Account) => () => {
       setCurrentAccount(account);
@@ -67,7 +66,7 @@ export const AccountsPage = () => {
               <span>{account.signerType}</span>
               <span>{account.name}</span>
               <span>{account.address}</span>
-              <span>{account.balance?.toFixed(2) || "0"}</span>
+              <span>{account.balance?.toFixed(2) || "0"} UNQ</span>
               <Button onClick={onSend(account)}>Send amount</Button>
               <Button onClick={onSignMessage(account)}>Sign message</Button>
               <ButtonLink to={`/account/${account.address}`}>

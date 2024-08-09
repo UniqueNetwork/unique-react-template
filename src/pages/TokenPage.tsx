@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { TokenSlider } from "../components/Slider/TokenSlider";
 import { Picture } from "../components/Picture";
@@ -312,7 +312,10 @@ const TokenPage: React.FC = () => {
           </InfoItem>
           <InfoItem>
             <span>Collection:</span>{" "}
-            <span>{tokenData.collectionId || "-"}</span>
+            {/* <span>{tokenData.collectionId || "-"}</span> */}
+            <NavLink to={`/collection/${tokenData.collectionId}`}>
+              {tokenData.collectionId || "-"}
+            </NavLink>
           </InfoItem>
         </TokenInfoWrap>
       </InfoContainer>

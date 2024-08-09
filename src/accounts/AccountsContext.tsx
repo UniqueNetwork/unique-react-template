@@ -59,7 +59,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       } else {
         const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(address);
         //@ts-ignore
-        const account: Account = { address, signerType: SignerTypeEnum.ethereum };
+        const account: Account = { address, signerType: SignerTypeEnum.Ethereum };
 
         const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
         account.balance = Number(

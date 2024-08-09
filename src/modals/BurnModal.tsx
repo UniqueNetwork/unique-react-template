@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AccountsContext } from "../accounts/AccountsContext";
-import { Account } from "../accounts/types";
+import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
+import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 
 type SignMessageModalProps = {
   isVisible: boolean;
@@ -18,33 +19,53 @@ export const BurnModal = ({ isVisible, onClose }: SignMessageModalProps) => {
     tokenId: string;
     collectionId: string;
   }>();
-  const [receiver, setReceiver] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { getUniqueNFTFactory } = useUniqueNFTFactory(collectionId);
 
   const onSign = async () => {
-    if (!selectedAccount || !collectionId || !tokenId) return;
+    if (!selectedAccount || !collectionId || !tokenId) {
+      setErrorMessage("All fields must be filled out.");
+      return;
+    }
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
-      //@ts-ignore
-      const sdk = await connectSdk(baseUrl, selectedAccount);
+      if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        const collection = await getUniqueNFTFactory();
+        if (!collection) {
+          throw new Error("Failed to initialize the collection helper.");
+        }
 
-      await sdk.token.burn({
-        collectionId,
-        tokenId: +tokenId,
-      });
+        await (await collection.burn(tokenId)).wait();
+      } else {
+        //@ts-ignore
+        const sdk = await connectSdk(baseUrl, selectedAccount);
+        await sdk.token.burn({
+          collectionId,
+          tokenId: +tokenId,
+        });
+      }
 
       setIsLoading(false);
       window.location.reload();
     } catch (error) {
-      console.error("Transfer failed:", error);
+      console.error("Burn failed:", error);
+      setErrorMessage("An error occurred during the burn process. Please try again.");
       setIsLoading(false);
-      alert(error);
     }
   };
 
   return (
     <Modal title="Burn token" isVisible={isVisible} onClose={onClose}>
+      {errorMessage && (
+        <div className="form-item">
+          <div className="error-message">{errorMessage}</div>
+        </div>
+      )}
+
       {isLoading && (
         <div className="form-item">
           <div>Burn in progress...</div>

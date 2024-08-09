@@ -12,6 +12,10 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { WagmiProvider } from "wagmi";
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
+
 const ContentLayout = styled.div`
   width: 90vw;
   max-width: 1260px;
@@ -19,7 +23,7 @@ const ContentLayout = styled.div`
   margin-bottom: 60px;
 `;
 
-const projectId = process.env.REACT_APP_PROJECT_ID || "59b5826141a56b204e9e0a3f7e46641d";
+const projectId = "cd9b26cc5adb69cd8f82d309b4b3dfac";
 
 const metadata = {
   name: "Unique - Wallet Connect",
@@ -30,12 +34,12 @@ const metadata = {
 
 export const chains = [
   {
-    id: 8882,
-    name: "OPAL by UNIQUE",
-    nativeCurrency: { name: "OPL", symbol: "OPL", decimals: 18 },
+    id: 8880,
+    name: "Unique Mainnet",
+    nativeCurrency: { name: "UNQ", symbol: "UNQ", decimals: 18 },
     rpcUrls: {
       default: {
-        http: ["https://rpc.unique.network/opal"],
+        http: ["https://rpc.unique.network"],
       },
     },
   },
@@ -49,11 +53,11 @@ export const config = defaultWagmiConfig({
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
-  // includeWalletIds: [
-  //   'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-  //   '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
-  //   'ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18',
-  // ],
+  includeWalletIds: [
+    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+    '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+    'ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18',
+  ],
   // defaultChain
   enableAnalytics: true,
   enableOnramp: true,
@@ -63,6 +67,7 @@ function App() {
   return (
     <div className="App">
       <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
         <SdkProvider>
           <AccountsContextProvider>
             <Router>
@@ -88,6 +93,7 @@ function App() {
             </Router>
           </AccountsContextProvider>
         </SdkProvider>
+        </QueryClientProvider>
       </WagmiProvider>
     </div>
   );

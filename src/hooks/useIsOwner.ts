@@ -8,12 +8,22 @@ const useIsOwner = (itemOwner: string | undefined) => {
 
   return useMemo(() => {
     if (!selectedAccount?.address || !itemOwner) return false;
+
+    const transformedItemOwner = Address.is.ethereumAddress(itemOwner)
+      ? Address.mirror.ethereumToSubstrate(itemOwner)
+      : itemOwner;
+
+    const transformedAccountAddress = Address.is.ethereumAddress(selectedAccount.address)
+      ? Address.mirror.ethereumToSubstrate(selectedAccount.address)
+      : selectedAccount.address;
+
     if (
-      !Address.is.substrateAddress(selectedAccount.address) ||
-      !Address.is.substrateAddress(itemOwner)
+      !Address.is.substrateAddress(transformedAccountAddress) ||
+      !Address.is.substrateAddress(transformedItemOwner)
     )
       return false;
-    return compareEncodedAddresses(selectedAccount.address, itemOwner);
+      
+    return compareEncodedAddresses(transformedAccountAddress, transformedItemOwner);
   }, [itemOwner, selectedAccount]);
 };
 

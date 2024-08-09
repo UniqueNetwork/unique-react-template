@@ -37,12 +37,6 @@ const ErrorMessage = styled.div`
   margin-top: 20px;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
-`;
-
 const SingleAccountPage = () => {
   const { accounts } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
@@ -57,12 +51,15 @@ const SingleAccountPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchaccountBalance = async () => {
+    const fetchAccountBalance = async () => {
       try {
-        const balance = await sdk.balance.get({
-          address: accountId,
-        });
+        const address = !Address.is.ethereumAddress(accountId || '')
+          ? accountId
+          : Address.mirror.ethereumToSubstrate(accountId || '');
+        console.log(address, 'ADDRESS');
+        
 
+        const balance = await sdk.balance.get({ address });
         setAccountBalance(balance);
       } catch (error) {
         setError("Failed to fetch account data. Please try again later.");
@@ -71,12 +68,25 @@ const SingleAccountPage = () => {
 
     if (!sdk) return;
     if (accountId) {
-      fetchaccountBalance();
+      fetchAccountBalance();
     }
   }, [accountId, sdk]);
 
   const uniqueAddress = useMemo(
-    () => accountId && Address.normalize.substrateAddress(accountId, 7391),
+    () =>
+      accountId && !Address.is.ethereumAddress(accountId)
+        ? Address.normalize.substrateAddress(accountId, 7391)
+        : Address.mirror.ethereumToSubstrate(accountId || ""),
+    [accountId]
+  );
+
+  const mirroredAddress = useMemo(
+    () =>
+      accountId
+        ? !Address.is.ethereumAddress(accountId)
+          ? Address.mirror.substrateToEthereum(accountId)
+          : Address.mirror.ethereumToSubstrate(accountId)
+        : null,
     [accountId]
   );
 
@@ -102,14 +112,10 @@ const SingleAccountPage = () => {
         {currentAccount && (
           <InfoItem>Account name: {currentAccount.name}</InfoItem>
         )}
-        {accountId && (
+        {uniqueAddress && (
           <InfoItem>
             <span>Account mirror address:</span>
-            <span>
-              {Address.is.substrateAddress(accountId)
-                ? Address.mirror.substrateToEthereum(accountId)
-                : Address.mirror.ethereumToSubstrate(accountId)}
-            </span>
+            <span>{uniqueAddress}</span>
           </InfoItem>
         )}
         <InfoItem>
