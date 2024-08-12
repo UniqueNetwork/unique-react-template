@@ -74,7 +74,7 @@ const TokenInfoWrap = styled.div`
 `;
 
 const InfoItem = styled.div`
-  font-size: 24px;
+  font-size: 14px;
   margin-bottom: 20px;
   display: flex;
   width: 80%;
@@ -198,13 +198,13 @@ const TokenPage: React.FC = () => {
     }
   }, [tokenId, sdk, collectionId]);
 
-  const { sliderItems, mediaTypes, attributesString, royaltiesString } =
+  const { sliderItems, mediaTypes, attributes, royaltiesString } =
     useMemo(() => {
       if (!tokenData)
         return {
           sliderItems: [],
           mediaTypes: "",
-          attributesString: "",
+          attributes: [],
           royaltiesString: "",
         };
 
@@ -248,19 +248,13 @@ const TokenPage: React.FC = () => {
       const mediaTypesSet = new Set(sliderItems.map((item) => item.type));
       const mediaTypes = Array.from(mediaTypesSet).join(", ");
 
-      const attributesString = attributes
-        ? attributes
-            .map((attr) => `${attr.trait_type || "-"}: ${attr.value || "-"}`)
-            .join(", ")
-        : "-";
-
       const royaltiesString = royalties
         ? royalties
             .map((royalty) => `${royalty.address}: ${royalty.percent}%`)
             .join(", ")
         : "-";
 
-      return { sliderItems, mediaTypes, attributesString, royaltiesString };
+      return { sliderItems, mediaTypes, attributes, royaltiesString };
     }, [tokenData]);
 
   if (error) {
@@ -312,7 +306,6 @@ const TokenPage: React.FC = () => {
           </InfoItem>
           <InfoItem>
             <span>Collection:</span>{" "}
-            {/* <span>{tokenData.collectionId || "-"}</span> */}
             <NavLink to={`/collection/${tokenData.collectionId}`}>
               {tokenData.collectionId || "-"}
             </NavLink>
@@ -328,7 +321,18 @@ const TokenPage: React.FC = () => {
         <span>Description:</span> <span>{tokenData.description || "-"}</span>
       </InfoItem>
       <InfoItem>
-        <span>Attributes:</span> <span>{attributesString}</span>
+        <span>Attributes</span>
+        <span>
+          {attributes && attributes.length > 0 ? (
+            attributes.map((attr, index) => (
+              <div key={index}>
+                <div>{attr.trait_type || "-"}: {attr.value || "-"}</div>
+              </div>
+            ))
+          ) : (
+            <div>No attributes available</div>
+          )}
+        </span>
       </InfoItem>
 
       <Title>More info</Title>
@@ -356,12 +360,6 @@ const TokenPage: React.FC = () => {
       </InfoItem>
       <InfoItem>
         <span>Royalty:</span> <span>{royaltiesString}</span>
-      </InfoItem>
-      <InfoItem>
-        {/* <span>NFT EVM address:</span> <span>{tokenData.collectionAddress ? Address.mirror.substrateToEthereum(tokenData.collectionAddress) : '-'}</span> */}
-      </InfoItem>
-      <InfoItem>
-        {/* <span>Created at:</span> <span>{tokenData.createdAt || "-"}</span> */}
       </InfoItem>
       <InfoItem>
         <span>SubScan UI link:</span>

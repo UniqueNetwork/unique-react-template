@@ -25,7 +25,7 @@ const InfoList = styled.div`
 `;
 
 const InfoItem = styled.div`
-  font-size: 24px;
+  font-size: 14px;
   margin-bottom: 20px;
   display: flex;
   width: 80%;

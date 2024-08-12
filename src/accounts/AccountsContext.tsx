@@ -41,48 +41,35 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     localStorage.setItem("selectedAccountId", String(selectedAccountId));
   }, [selectedAccountId]);
 
+  const updateEthereumWallet = useCallback(async () => {
+    if (!sdk || !address) return;
+
+    const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(address);
+    const account: Account = { address, signerType: SignerTypeEnum.Ethereum, name: '', signer: undefined };
+
+    const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
+    account.balance = Number(
+      balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
+    );
+
+    setAccounts((prevAccounts) => {
+      const newAccounts = new Map(prevAccounts);
+      newAccounts.set(ethereumAddress, account);
+      return newAccounts;
+    });
+  }, [sdk, address]);
+
   useEffect(() => {
-    const updateEthereumWallet = async () => {
-      if (!sdk) return;
-
-      if (!address) {
-        setAccounts((prevAccounts) => {
-          const newAccounts = new Map(prevAccounts);
-          for (let [key, account] of newAccounts) {
-            //@ts-ignore
-            if (account.type === "evm") {
-              newAccounts.delete(key);
-            }
-          }
-          return newAccounts;
-        });
-      } else {
-        const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(address);
-        //@ts-ignore
-        const account: Account = { address, signerType: SignerTypeEnum.Ethereum };
-
-        const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
-        account.balance = Number(
-          balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
-        );
-
-        setAccounts((prevAccounts) => {
-          const newAccounts = new Map(prevAccounts);
-          newAccounts.set(ethereumAddress, account);
-          return newAccounts;
-        });
-      }
-    };
-
     updateEthereumWallet();
-  }, [address, sdk]);
+  }, [updateEthereumWallet]);
 
   const fetchPolkadotAccounts = useCallback(async () => {
     if (!sdk) return;
+
     const polkadotAccounts = await getPolkadotAccounts();
 
     for (let [address, account] of polkadotAccounts) {
-      account.type = "sub";
+      account.signerType = SignerTypeEnum.Polkadot;
       const balanceResponse = await sdk.balance.get({ address });
       account.balance = Number(
         balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
@@ -90,9 +77,11 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       polkadotAccounts.set(address, account);
     }
 
-    const accountsToUpdate = new Map([...accounts, ...polkadotAccounts]);
-    setAccounts(accountsToUpdate);
-  }, [sdk, accounts]);
+    setAccounts((prevAccounts) => {
+      const accountsToUpdate = new Map([...prevAccounts, ...polkadotAccounts]);
+      return accountsToUpdate;
+    });
+  }, [sdk]);
 
   const contextValue = useMemo(
     () => ({
@@ -102,6 +91,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       setSelectedAccountId,
       selectedAccount,
       fetchPolkadotAccounts,
+      updateEthereumWallet,
     }),
     [
       accounts,
@@ -109,6 +99,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       selectedAccountId,
       setSelectedAccountId,
       selectedAccount,
+      updateEthereumWallet,
     ]
   );
 

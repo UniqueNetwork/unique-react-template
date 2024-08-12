@@ -42,23 +42,24 @@ export const TransferAmountModal = ({
     setIsLoading(true);
 
     if (sender.signerType === SignerTypeEnum.Ethereum) {
-      const from = Address.extract.ethCrossAccountId(sender.address);
-      const to = Address.extract.ethCrossAccountId(receiverAddress);
-      //@ts-ignore
-      const uniqueFungible = await UniqueFungibleFactory(0, signer);
-      const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
 
       try {
+        const from = Address.extract.ethCrossAccountId(sender.address);
+        const to = Address.extract.ethCrossAccountId(receiverAddress);
+        //@ts-ignore
+        const uniqueFungible = await UniqueFungibleFactory(0, signer);
+        const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
+  
         await(
           await uniqueFungible.transferFromCross(from, to, amountRaw, {
             from: sender.address,
           })
         ).wait();
       } catch (err) {
-        console.log("ERROR CATCHED");
+        console.log("ERROR CATCHED", err);
         console.error(err);
         setIsLoading(false);
-        setError(err.name);
+        setError((err as Error).name || 'Unknown Error');
         return;
       }
     } else {
@@ -77,6 +78,7 @@ export const TransferAmountModal = ({
       fetchPolkadotAccounts();
     } catch (err) {
       setIsLoading(false);
+      setError((err as Error).name || 'Unknown Error');
     }
   }
 
@@ -106,6 +108,11 @@ export const TransferAmountModal = ({
       {isLoading && (
         <div className="form-item">
           <div>Transferring...</div>
+        </div>
+      )}
+      {error && (
+        <div className="form-item">
+          <div>{error}</div>
         </div>
       )}
       <div className="form-item">

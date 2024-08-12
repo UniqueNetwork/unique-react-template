@@ -76,7 +76,7 @@ export const AccountsPage = () => {
           );
         })}
       </List>
-      <Button onClick={() => open()}>ETHEREUM Wallets 2</Button>
+      <Button onClick={() => open()}>ETHEREUM Wallets</Button>
       <TransferAmountModal
         isVisible={transferAmountIsVisible}
         sender={currentAccount}

@@ -56,7 +56,7 @@ const InfoList = styled.div`
 `;
 
 const InfoItem = styled.div`
-  font-size: 24px;
+  font-size: 14px;
   margin-bottom: 20px;
   display: flex;
   width: 80%;
@@ -133,6 +133,15 @@ interface Limits {
   transfersEnabled: boolean;
 }
 
+interface Permissions {
+  access: string;
+  mintMode: boolean;
+  nesting: {
+    tokenOwner: boolean;
+    collectionAdmin: boolean;
+  };
+}
+
 interface NFTCollection {
   collectionId: number;
   collectionAddress: string;
@@ -150,6 +159,7 @@ interface NFTCollection {
   tokenPropertyPermissions: TokenPropertyPermission[];
   info: Info;
   infoDecodingError: any | null;
+  permissions: Permissions;
 }
 
 const CollectionPage = () => {
@@ -168,7 +178,6 @@ const CollectionPage = () => {
         const collection = await sdk.collection.get({
           idOrAddress: collectionId,
           withLimits: true,
-          // withLastTokenId: true,
         });
         setCollectionData(collection);
       } catch (error) {
@@ -216,7 +225,6 @@ const CollectionPage = () => {
         <InfoItem>
           <span>Owner:</span> <span>{collectionData.owner}</span>
         </InfoItem>
-        <InfoItem>{/* <span>Created at:</span> <span>{'-'}</span> */}</InfoItem>
         <InfoItem>
           <span>Collection EVM address:</span>{" "}
           <span>{collectionData.collectionAddress}</span>
@@ -260,7 +268,13 @@ const CollectionPage = () => {
             </span>
           </InfoItem>
           <InfoItem>
-            <span>Nesting permission:</span> <span>{}</span>
+            {/* <span>Permissions:</span> */}
+            <span>
+              {/* <div>Access: {collectionData.permissions.access}</div>
+              <div>Mint Mode: {collectionData.permissions.mintMode ? "Enabled" : "Disabled"}</div> */}
+              <div>Token Owner: {collectionData.permissions.nesting.tokenOwner ? "Yes" : "No"}</div>
+              <div>Collection Admin: {collectionData.permissions.nesting.collectionAdmin ? "Yes" : "No"}</div>
+            </span>
           </InfoItem>
           <InfoItem>
             <span>Sponsor:</span>{" "}
