@@ -4,6 +4,7 @@ import { AccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
 import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
+import { ContentWrapper } from "./NestModal";
 
 type SignMessageModalProps = {
   isVisible: boolean;
@@ -52,22 +53,21 @@ export const UnnestTModal = ({ isVisible, onClose }: SignMessageModalProps) => {
   };
 
   return (
-    <Modal
-      title="Confirm unnest this token"
-      isVisible={isVisible}
-      onClose={onClose}
-    >
-      {isLoading && (
+    <Modal isVisible={isVisible} onClose={onClose}>
+      <ContentWrapper>
+        <h3>Confirm unnest this token</h3>
+        {isLoading && (
+          <div className="form-item">
+            <div>Transferring...</div>
+          </div>
+        )}
         <div className="form-item">
-          <div>Transferring...</div>
+          <button onClick={onSign} disabled={isLoading}>
+            Submit
+          </button>
+          <button onClick={onClose}>Cancel</button>
         </div>
-      )}
-      <div className="form-item">
-        <button onClick={onSign} disabled={isLoading}>
-          Submit
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
+      </ContentWrapper>
     </Modal>
   );
 };

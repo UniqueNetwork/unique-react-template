@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { AccountsContext } from "../accounts/AccountsContext";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -39,24 +38,7 @@ const ButtonsWrapper = styled.div`
   gap: 10px;
 `;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const Header: React.FC = () => {
-  const { fetchPolkadotAccounts } = useContext(AccountsContext);
-  const [hasFetched, setHasFetched] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await sleep(1000);
-      await fetchPolkadotAccounts();
-      setHasFetched(true);
-    };
-
-    if (!hasFetched) {
-      fetchData();
-    }
-  }, [fetchPolkadotAccounts, hasFetched]);
-
   return (
     <HeaderContainer>
       <ConnectedAccountsButton to="/">

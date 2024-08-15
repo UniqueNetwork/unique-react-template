@@ -7,6 +7,7 @@ import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
 import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
+import { ContentWrapper } from "./NestModal";
 
 type SignMessageModalProps = {
   isVisible: boolean;
@@ -77,33 +78,36 @@ export const TransferNFTModal = ({
   };
 
   return (
-    <Modal title="Transfer NFT" isVisible={isVisible} onClose={onClose}>
-      <div className="form-item">
-        <input
-          type="text"
-          placeholder="Enter address to transfer"
-          value={receiver}
-          onChange={onMessageChange}
-        />
-      </div>
-
-      {errorMessage && (
+    <Modal isVisible={isVisible} onClose={onClose}>
+      <ContentWrapper>
+        <h3>Transfer NFT</h3>
         <div className="form-item">
-          <div className="error-message">{errorMessage}</div>
+          <input
+            type="text"
+            placeholder="Enter address to transfer"
+            value={receiver}
+            onChange={onMessageChange}
+          />
         </div>
-      )}
 
-      {isLoading && (
+        {errorMessage && (
+          <div className="form-item">
+            <div className="error-message">{errorMessage}</div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="form-item">
+            <div>Transferring...</div>
+          </div>
+        )}
         <div className="form-item">
-          <div>Transferring...</div>
+          <button onClick={onSign} disabled={isLoading}>
+            Transfer
+          </button>
+          <button onClick={onClose}>Cancel</button>
         </div>
-      )}
-      <div className="form-item">
-        <button onClick={onSign} disabled={isLoading}>
-          Transfer
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
+      </ContentWrapper>
     </Modal>
   );
 };

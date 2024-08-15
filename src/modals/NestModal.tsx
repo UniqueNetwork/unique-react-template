@@ -7,12 +7,19 @@ import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
 import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
+import styled from "styled-components";
 
 type SignMessageModalProps = {
   isVisible: boolean;
   account?: Account;
   onClose(): void;
 };
+
+export const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
 
 export const NestTModal = ({ isVisible, onClose }: SignMessageModalProps) => {
   const { selectedAccount } = useContext(AccountsContext);
@@ -76,47 +83,52 @@ export const NestTModal = ({ isVisible, onClose }: SignMessageModalProps) => {
       window.location.reload();
     } catch (error) {
       console.error("Transfer failed:", error);
-      setErrorMessage("An error occurred during the transfer. Please try again.");
+      setErrorMessage(
+        "An error occurred during the transfer. Please try again."
+      );
       setIsLoading(false);
     }
   };
 
   return (
-    <Modal title="Nest token" isVisible={isVisible} onClose={onClose}>
-      <div className="form-item">
-        <input
-          type="text"
-          placeholder="Enter parent collection Id"
-          value={collectionParentId}
-          onChange={(e) => setCollectionParentId(e.target.value)}
-        />
-      </div>
-      <div className="form-item">
-        <input
-          type="text"
-          placeholder="Enter parent token Id"
-          value={tokenParentId}
-          onChange={(e) => setTokenParentId(e.target.value)}
-        />
-      </div>
-
-      {errorMessage && (
+    <Modal isVisible={isVisible} onClose={onClose}>
+      <ContentWrapper>
+        <h3>Nest token</h3>
         <div className="form-item">
-          <div className="error-message">{errorMessage}</div>
+          <input
+            type="text"
+            placeholder="Enter parent collection Id"
+            value={collectionParentId}
+            onChange={(e) => setCollectionParentId(e.target.value)}
+          />
         </div>
-      )}
-
-      {isLoading && (
         <div className="form-item">
-          <div>Transferring...</div>
+          <input
+            type="text"
+            placeholder="Enter parent token Id"
+            value={tokenParentId}
+            onChange={(e) => setTokenParentId(e.target.value)}
+          />
         </div>
-      )}
-      <div className="form-item">
-        <button onClick={onSign} disabled={isLoading}>
-          Submit
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
+
+        {errorMessage && (
+          <div className="form-item">
+            <div className="error-message">{errorMessage}</div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="form-item">
+            <div>Transferring...</div>
+          </div>
+        )}
+        <div className="form-item">
+          <button onClick={onSign} disabled={isLoading}>
+            Submit
+          </button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      </ContentWrapper>
     </Modal>
   );
 };

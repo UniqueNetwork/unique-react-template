@@ -7,6 +7,7 @@ import { TransferAmountModal } from "../modals/TransferAmountModal";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 
 export const AccountsPage = () => {
   const { accounts, setSelectedAccountId, selectedAccountId } =
@@ -52,6 +53,8 @@ export const AccountsPage = () => {
     [setSelectedAccountId]
   );
 
+  const [isOpenChoseWalletModal, setIsOpenChoseWalletModal] = useState(false);
+
   return (
     <div className="page">
       <List>
@@ -76,7 +79,14 @@ export const AccountsPage = () => {
           );
         })}
       </List>
-      <Button onClick={() => open()}>ETHEREUM Wallets</Button>
+      <ButtonBlock>
+        <Button onClick={() => setIsOpenChoseWalletModal(true)}>POLKADOT Wallets</Button>
+        <Button onClick={() => open()}>ETHEREUM Wallets</Button>
+      </ButtonBlock>
+      <ConnectWallets 
+        isOpenConnectWalletModal={isOpenChoseWalletModal}
+        setIsOpenConnectWalletModal={(e) =>  setIsOpenChoseWalletModal(e)}
+      />
       <TransferAmountModal
         isVisible={transferAmountIsVisible}
         sender={currentAccount}
@@ -117,4 +127,10 @@ const ButtonLink = styled(NavLink)`
   &:hover {
     opacity: 0.8;
   }
+`;
+
+const ButtonBlock = styled.div`
+  display: flex;
+  gap: 10px;
+  padding: 0 30px;
 `;
