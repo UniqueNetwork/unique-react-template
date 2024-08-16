@@ -45,6 +45,7 @@ export class PolkadotWallet
                 name: account.meta.name || "",
                 normalizedAddress,
                 address,
+                walletType: this.wallet,
                 walletMetaInformation: account,
                 signerType: SignerTypeEnum.Polkadot,
                 sign: account.signer.sign,

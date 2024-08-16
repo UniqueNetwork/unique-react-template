@@ -25,7 +25,7 @@ export const useWalletCenter = (chainProperties?: any) => {
   const connectWallet = useCallback(
     async (typeWallet: ConnectedWalletsName) => {
       try {
-        const wallet = new (wallets.get(typeWallet)!)(chainProperties, typeWallet as PolkadotWalletName);
+        const wallet = new (wallets.get(typeWallet)!)(typeWallet as PolkadotWalletName);
         const currentWallets = await wallet.getAccounts();
         const connectedWallets =
           localStorage.getItem(CONNECTED_WALLET_TYPE)?.split(';') || [];
