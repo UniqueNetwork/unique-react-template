@@ -106,8 +106,8 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
         try {
           const polkadotWallet = new PolkadotWallet(account.walletType);
           const walletAccounts = await polkadotWallet.getAccounts();
-          const walletAccount = walletAccounts.get(address);
-  
+          console.log(account, 'Reinit works')
+          const walletAccount = walletAccounts.get(account.normalizedAddress);
           if (walletAccount) {
             account.signer = walletAccount.signer;
             const balanceResponse = await sdk.balance.get({ address });
@@ -129,7 +129,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!reinitializePolkadotAccountsWithBalance) return;
     reinitializePolkadotAccountsWithBalance();
-  }, []);
+  }, [sdk]);
 
   const { connectWallet } = useWalletCenter();
 
