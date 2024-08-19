@@ -38,8 +38,8 @@ const Container = styled.div`
   box-sizing: border-box;
 `;
 
-const Title = styled.h2`
-  margin-bottom: 35px;
+const Title = styled.h3`
+  margin: 16px 0;
   text-align: left;
 `;
 
@@ -75,7 +75,7 @@ const TokenInfoWrap = styled.div`
 
 const InfoItem = styled.div`
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   display: flex;
   width: 80%;
   justify-content: space-between;
@@ -320,20 +320,15 @@ const TokenPage: React.FC = () => {
       <InfoItem>
         <span>Description:</span> <span>{tokenData.description || "-"}</span>
       </InfoItem>
-      <InfoItem>
-        <span>Attributes</span>
-        <span>
-          {attributes && attributes.length > 0 ? (
-            attributes.map((attr, index) => (
-              <div key={index}>
-                <div>{attr.trait_type || "-"}: {attr.value || "-"}</div>
-              </div>
-            ))
-          ) : (
-            <div>No attributes available</div>
-          )}
-        </span>
-      </InfoItem>
+
+      {attributes &&
+        attributes.length > 0 &&
+        attributes.map((attr, index) => (
+          <InfoItem key={index}>
+            <span>{attr.trait_type}</span>
+            <span>{attr.value}</span>
+          </InfoItem>
+        ))}
 
       <Title>More info</Title>
       <InfoItem>
@@ -372,7 +367,7 @@ const TokenPage: React.FC = () => {
           {`${collectionId}-${tokenId}`}
         </a>
       </InfoItem>
-
+      <Title>Actions</Title>
       {!isOwner && <>You are not NFT's owner</>}
       <ActionsContainer>
         <Button

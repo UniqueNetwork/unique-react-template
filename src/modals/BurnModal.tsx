@@ -59,7 +59,8 @@ export const BurnModal = ({ isVisible, onClose }: SignMessageModalProps) => {
   };
 
   return (
-    <Modal title="Burn token" isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} onClose={onClose}>
+      <h3>Burn token</h3>
       {errorMessage && (
         <div className="form-item">
           <div className="error-message">{errorMessage}</div>

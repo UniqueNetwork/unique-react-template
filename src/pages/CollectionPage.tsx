@@ -33,8 +33,8 @@ const Container = styled.div`
   box-sizing: border-box;
 `;
 
-const Title = styled.h2`
-  margin-bottom: 35px;
+const Title = styled.h3`
+  margin-bottom: 0 16px;
   text-align: left;
 `;
 
@@ -57,7 +57,7 @@ const InfoList = styled.div`
 
 const InfoItem = styled.div`
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   display: flex;
   width: 80%;
   justify-content: space-between;
@@ -268,10 +268,8 @@ const CollectionPage = () => {
             </span>
           </InfoItem>
           <InfoItem>
-            {/* <span>Permissions:</span> */}
+            <span>Nesting Permissions:</span>
             <span>
-              {/* <div>Access: {collectionData.permissions.access}</div>
-              <div>Mint Mode: {collectionData.permissions.mintMode ? "Enabled" : "Disabled"}</div> */}
               <div>Token Owner: {collectionData.permissions.nesting.tokenOwner ? "Yes" : "No"}</div>
               <div>Collection Admin: {collectionData.permissions.nesting.collectionAdmin ? "Yes" : "No"}</div>
             </span>
@@ -286,6 +284,7 @@ const CollectionPage = () => {
         isVisible={transferModalIsVisible}
         onClose={() => setTransferModalIsVisible(false)}
       />
+      <Title>Actions</Title>
       {!isOwner && <>You are not collection's owner</>}
       <TransferButton
         onClick={() => setTransferModalIsVisible(true)}
