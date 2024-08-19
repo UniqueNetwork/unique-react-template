@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { AccountsContext } from "../accounts/AccountsContext";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -17,8 +18,18 @@ const Button = styled(NavLink)`
   }
 `;
 
-const ConnectedAccountsButton = styled(Button)`
+const ConnectedAccountsButton = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
   background-color: #007bff;
+  font-size: 16px;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const HeaderContainer = styled.div`
@@ -38,12 +49,75 @@ const ButtonsWrapper = styled.div`
   gap: 10px;
 `;
 
+const AccountSelectorWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const AccountDropdown = styled.div`
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 10px;
+  min-width: 200px;
+`;
+
+const AccountItem = styled.div`
+  padding: 8px 12px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const NavLinkWrapper = styled.div`
+  margin-top: 20px;
+`;
+
 export const Header: React.FC = () => {
+  const { accounts, setSelectedAccountId, selectedAccountId } = useContext(AccountsContext);
+  const accountsArray = Array.from(accounts.values());
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+
+  const onAccountSelect = (accountId: number) => {
+    setSelectedAccountId(accountId);
+    setIsDropdownOpen(false);
+  };
+
   return (
     <HeaderContainer>
-      <ConnectedAccountsButton to="/">
-        Connected accounts
-      </ConnectedAccountsButton>
+      <AccountSelectorWrapper>
+        <ConnectedAccountsButton onClick={toggleDropdown}>
+          Connected account
+        </ConnectedAccountsButton>
+        {isDropdownOpen && (
+          <AccountDropdown>
+            {accountsArray.map((account, index) => (
+              <AccountItem
+                key={account.address}
+                onClick={() => onAccountSelect(index)}
+                style={{
+                  backgroundColor: index === selectedAccountId ? "#f0f0f0" : "white",
+                }}
+              >
+                <span>{account.name} ({account.address})</span>
+              </AccountItem>
+            ))}
+            <NavLinkWrapper>
+              <NavLink to="/">Go to Accounts Page</NavLink>
+            </NavLinkWrapper>
+          </AccountDropdown>
+        )}
+      </AccountSelectorWrapper>
       <ButtonsWrapper>
         <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu">
           Test account
