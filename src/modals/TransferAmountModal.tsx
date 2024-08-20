@@ -60,6 +60,7 @@ export const TransferAmountModal = ({
   };
 
   const sendEthereumTransaction = async () => {
+    if (!signer) return;
     const from = Address.extract.ethCrossAccountId(sender!.address);
     const to = Address.extract.ethCrossAccountId(receiverAddress);
     const uniqueFungible = await UniqueFungibleFactory(0, signer);

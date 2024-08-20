@@ -106,8 +106,10 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
         try {
           const polkadotWallet = new PolkadotWallet(account.walletType);
           const walletAccounts = await polkadotWallet.getAccounts();
+          console.log(walletAccounts, 'walletAccounts')
           console.log(account, 'Reinit works')
           const walletAccount = walletAccounts.get(account.normalizedAddress);
+          console.log(walletAccount, 'walletAccount')
           if (walletAccount) {
             account.signer = walletAccount.signer;
             const balanceResponse = await sdk.balance.get({ address });
@@ -138,6 +140,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
     const polkadotAccounts = await connectWallet(walletName);
     if (polkadotAccounts.size === 0) {
+      alert(`No ${walletName} accounts found or access denied for this domain`);
       throw new Error(`No ${walletName} accounts found or access denied for this domain`);
     }
 

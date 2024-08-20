@@ -53,8 +53,9 @@ const InfoContainer = styled.div`
   }
 
   .picture {
-    width: 500px;
-    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 `;
 
@@ -342,7 +343,7 @@ const TokenPage: React.FC = () => {
         <span>
           {tokenData.parentToken ? (
             <a
-              href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${collectionId}-${tokenId}`}
+              href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${tokenData.parentToken.collectionId}-${tokenData.parentToken.tokenId}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -356,11 +357,25 @@ const TokenPage: React.FC = () => {
       <InfoItem>
         <span>Royalty:</span> <span>{royaltiesString}</span>
       </InfoItem>
+      
+      <InfoItem>
+        <span>NFT EVM address:</span>
+        <span>{tokenData.collectionAddress}</span>
+      </InfoItem>
       <InfoItem>
         <span>SubScan UI link:</span>
-
         <a
           href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${collectionId}-${tokenId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {`${collectionId}-${tokenId}`}
+        </a>
+      </InfoItem>
+      <InfoItem>
+        <span>Uniquescan UI link:</span>
+        <a
+          href={`${process.env.REACT_APP_UNIQUESCAN_LINK}tokens/${collectionId}/${tokenId}`}
           target="_blank"
           rel="noopener noreferrer"
         >

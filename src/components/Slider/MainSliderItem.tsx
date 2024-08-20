@@ -42,11 +42,11 @@ const SliderItem = styled.div`
   }
 
   @media (max-width: ${BREAKPOINTS.tablet}px) {
-    height: calc(100vw - var(--prop-gap) * 3);
+    height: calc(100vw - 16px * 3);
   }
 
   @media (max-width: ${BREAKPOINTS.mobile}px) {
-    height: calc(100vw - var(--prop-gap) * 2);
+    height: calc(100vw - 16px * 2);
   }
 
   > div {

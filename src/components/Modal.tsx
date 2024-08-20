@@ -75,12 +75,12 @@ const ModalWrapper = styled.div<{
   overflow-y: auto;
   align-items: ${({ align }) => (align === "top" ? "flex-start" : "center")};
   flex-flow: wrap;
-  padding: calc(var(--prop-gap) * 6) 0;
+  padding: calc(16px * 6) 0;
 
   .unique-modal {
     position: relative;
     width: ${({ isFlexible }) =>
-      isFlexible ? "unset" : "calc(840px - var(--prop-gap) * 3)"};
+      isFlexible ? "unset" : "calc(840px - 16px * 3)"};
     background-color: white;
     border-radius: 8px;
     padding: 16px;
@@ -105,7 +105,7 @@ const ModalWrapper = styled.div<{
       }
     }
     @media (max-width: 568px) {
-      width: calc(100% - var(--prop-gap) * 5);
+      width: calc(100% - 16px * 5);
       .unique-font-heading.size-2 {
         font-size: 24px;
       }

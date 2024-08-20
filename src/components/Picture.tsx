@@ -134,7 +134,7 @@ const BadgesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--prop-gap);
+  gap: 16px;
   z-index: 2;
 `;
 

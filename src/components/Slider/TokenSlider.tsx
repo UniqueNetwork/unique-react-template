@@ -148,10 +148,10 @@ const SliderItem = styled.div`
 `;
 
 const SliderContainer = styled.div<{previewMode: boolean}>`
-  display: relative;
+  position: relative;
   width: ${({previewMode}) => previewMode ? '440px !important' : '536px'};
-  margin-right: calc(var(--prop-gap) * 2);
-  margin-left: calc(var(--prop-gap) * 2);
+  margin-right: 32px;
+  margin-left: 32px;
 
   @media (max-width: ${BREAKPOINTS.desktop}px) {
     width: 536px;
@@ -166,12 +166,12 @@ const SliderContainer = styled.div<{previewMode: boolean}>`
   }
 
   @media (max-width: ${BREAKPOINTS.tablet}px) {
-    width: calc(100vw - var(--prop-gap) * 3);
+    width: calc(100vw - 16px * 3);
     margin-left: 0;
   }
 
   @media (max-width: ${BREAKPOINTS.mobile}px) {
-    width: calc(100vw - var(--prop-gap) * 2);
+    width: calc(100vw - 16px * 2);
     margin-left: 0;
   }
 

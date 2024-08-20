@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
@@ -83,6 +83,7 @@ export const Header: React.FC = () => {
   const { accounts, setSelectedAccountId, selectedAccountId } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -93,6 +94,24 @@ export const Header: React.FC = () => {
     setIsDropdownOpen(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      setTimeout(() => {
+        document.addEventListener("click", handleClickOutside);
+      }, 0);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   return (
     <HeaderContainer>
       <AccountSelectorWrapper>
@@ -100,7 +119,7 @@ export const Header: React.FC = () => {
           Connected account
         </ConnectedAccountsButton>
         {isDropdownOpen && (
-          <AccountDropdown>
+          <AccountDropdown ref={dropdownRef}>
             {accountsArray.map((account, index) => (
               <AccountItem
                 key={account.address}

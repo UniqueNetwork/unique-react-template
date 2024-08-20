@@ -10,8 +10,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 
 export const AccountsPage = () => {
-  const { accounts, setSelectedAccountId, selectedAccountId } =
-    useContext(AccountsContext);
+  const { accounts } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);
@@ -44,14 +43,6 @@ export const AccountsPage = () => {
     setSignMessageIsVisible(false);
   }, []);
 
-  const onCheckboxChange = useCallback(
-    (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.checked) {
-        setSelectedAccountId(index);
-      }
-    },
-    [setSelectedAccountId]
-  );
 
   const [isOpenChoseWalletModal, setIsOpenChoseWalletModal] = useState(false);
 
@@ -61,11 +52,6 @@ export const AccountsPage = () => {
         {accountsArray.map((account, index) => {
           return (
             <List.Item key={account.address}>
-              <input
-                type="checkbox"
-                onChange={onCheckboxChange(index)}
-                checked={index === selectedAccountId}
-              />
               <span>{account.signerType}</span>
               <span>{account.name}</span>
               <span>{account.address}</span>

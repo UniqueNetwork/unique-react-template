@@ -54,8 +54,8 @@ const ModalContent = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: calc(var(--prop-gap) * 1.5);
-  padding: 0 calc(var(--prop-gap) * 1.5) calc(var(--prop-gap) * 2);
+  gap: 24px;
+  padding: 0 24px 32px;
   .unique-text {
     text-align: center;
   }
