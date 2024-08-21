@@ -15,7 +15,7 @@ const CustomNextArrowVertical: React.FC<ArrowProps> = (props) => {
   useEffect(() => {
     const style2 = document.createElement('style');
     style2.innerHTML = `
-          .slick-prev:before {
+          .slick-next:before {
             display: none !important;
           }
         `;

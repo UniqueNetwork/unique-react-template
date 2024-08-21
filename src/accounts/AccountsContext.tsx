@@ -106,10 +106,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
         try {
           const polkadotWallet = new PolkadotWallet(account.walletType);
           const walletAccounts = await polkadotWallet.getAccounts();
-          console.log(walletAccounts, 'walletAccounts')
-          console.log(account, 'Reinit works')
           const walletAccount = walletAccounts.get(account.normalizedAddress);
-          console.log(walletAccount, 'walletAccount')
           if (walletAccount) {
             account.signer = walletAccount.signer;
             const balanceResponse = await sdk.balance.get({ address });

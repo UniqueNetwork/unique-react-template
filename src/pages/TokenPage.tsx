@@ -9,6 +9,7 @@ import { BurnModal } from "../modals/BurnModal";
 import { NestTModal } from "../modals/NestModal";
 import { UnnestTModal } from "../modals/UnnestModal";
 import useIsOwner from "../hooks/useIsOwner";
+import NestedNftItems from "../components/NestedNFTItems";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -71,6 +72,7 @@ const TokenInfoWrap = styled.div`
   @media (max-width: 1260px) {
     width: 80%;
     margin-left: 0;
+    margin-top: 20px;
   }
 `;
 
@@ -97,17 +99,16 @@ const ErrorMessage = styled.div`
   margin-top: 20px;
 `;
 
-const NestedNftContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-`;
-
-const NestedNft = styled.div`
+const NestedWrapper = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-`;
+  margin-top: 16px;
+
+  h3 {
+    text-align: left;
+  }
+`
 
 const ActionsContainer = styled.div`
   display: flex;
@@ -141,7 +142,7 @@ interface Property {
   valueHex: string;
 }
 
-interface TokenData {
+export interface TokenData {
   name: string;
   description: string;
   schemaName?: string;
@@ -160,6 +161,7 @@ interface TokenData {
   youtube_url?: string;
   animation_url?: string;
   tokenPrefix?: string;
+  children?: TokenData[];
 }
 
 enum TokenModalEnum {
@@ -186,6 +188,7 @@ const TokenPage: React.FC = () => {
         const token = await sdk.token.get({
           collectionIdOrAddress: collectionId,
           tokenId,
+          withChildren: true,
         });
         setTokenData(token);
       } catch (error) {
@@ -314,6 +317,11 @@ const TokenPage: React.FC = () => {
         </TokenInfoWrap>
       </InfoContainer>
 
+      {tokenData.children && <NestedWrapper>
+        <h3>Nested NFTs</h3>
+        <NestedNftItems children={tokenData.children} />
+      </NestedWrapper>}
+
       <Title>Attributes</Title>
       <InfoItem>
         <span>Name:</span> <span>{tokenData.name || "-"}</span>
@@ -336,19 +344,14 @@ const TokenPage: React.FC = () => {
         <span>Media types:</span> <span>{mediaTypes || "-"}</span>
       </InfoItem>
       <InfoItem>
-        <span>Nested NFTs:</span> <span>{"-"}</span>
-      </InfoItem>
-      <InfoItem>
         <span>Nested to:</span>{" "}
         <span>
           {tokenData.parentToken ? (
-            <a
-              href={`${process.env.REACT_APP_SUBSCAN_LINK}unique_item/${tokenData.parentToken.collectionId}-${tokenData.parentToken.tokenId}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <NavLink
+              to={`/token/${tokenData.parentToken.collectionId}/${tokenData.parentToken.tokenId}`}
             >
               {`${tokenData.parentToken.collectionId}-${tokenData.parentToken.tokenId}`}
-            </a>
+            </NavLink>
           ) : (
             "-"
           )}
