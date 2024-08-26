@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { TransferModal } from "../modals/TransferModal";
 import useIsOwner from "../hooks/useIsOwner";
+import { Hint } from "./TokenPage";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -207,6 +208,9 @@ const CollectionPage = () => {
 
   return (
     <Container>
+      <Hint>
+        Change URL manually to see the other Collections
+      </Hint>
       <Title>Collection information</Title>
       <Avatar imageUrl={coverImageUrl} />
       <InfoList>

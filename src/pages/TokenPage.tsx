@@ -116,6 +116,12 @@ const ActionsContainer = styled.div`
   margin-top: 20px;
 `;
 
+export const Hint = styled.div`
+  padding: 10px;
+  background: #7bd2c1;
+  margin-bottom: 10px;
+`;
+
 interface Attribute {
   trait_type: string;
   value: string;
@@ -275,6 +281,9 @@ const TokenPage: React.FC = () => {
 
   return (
     <Container>
+      <Hint>
+        Change URL manually to see the other NFT
+      </Hint>
       <Title>NFT info - Change URL manually to see the other NFT</Title>
       <InfoContainer>
         {sliderItems.length > 1 ? (
