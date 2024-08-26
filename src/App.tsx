@@ -60,6 +60,8 @@ createWeb3Modal({
   ],
   enableSwaps: false,
   enableOnramp: false,
+  enableAnalytics: false,
+  allowUnsupportedChain: true,
 });
 
 function App() {

@@ -6,21 +6,19 @@ import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
 import { ContentWrapper } from "./NestModal";
 
-type SignMessageModalProps = {
+type UnnestTModalProps = {
   isVisible: boolean;
   account?: Account;
   onClose(): void;
 };
 
-export const UnnestTModal = ({ isVisible, onClose }: SignMessageModalProps) => {
-  const { selectedAccount, selectedAccountId } = useContext(AccountsContext);
+export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
+  const { selectedAccount } = useContext(AccountsContext);
 
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
   }>();
-  const [tokenParentId, setTokenParentId] = useState<string>("");
-  const [collectionParentId, setCollectionParentId] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(false);
 

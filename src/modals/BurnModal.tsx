@@ -7,13 +7,13 @@ import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 
-type SignMessageModalProps = {
+type BurnModalProps = {
   isVisible: boolean;
   account?: Account;
   onClose(): void;
 };
 
-export const BurnModal = ({ isVisible, onClose }: SignMessageModalProps) => {
+export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
   const { selectedAccount } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;

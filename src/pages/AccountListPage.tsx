@@ -2,7 +2,6 @@ import { useCallback, useContext, useState } from "react";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
 import { List } from "../components/List";
-import { SignMessageModal } from "../modals/SignMessageModal";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
@@ -12,8 +11,7 @@ export const AccountsPage = () => {
   const accountsArray = Array.from(accounts.values());
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);
-  const [signMessageIsVisible, setSignMessageIsVisible] = useState(false);
-
+  
   const onSend = useCallback(
     (account: Account) => () => {
       setCurrentAccount(account);
@@ -27,19 +25,6 @@ export const AccountsPage = () => {
     setTransferAmountIsVisible(false);
   }, []);
 
-  const onSignMessage = useCallback(
-    (account: Account) => () => {
-      setCurrentAccount(account);
-      setSignMessageIsVisible(true);
-    },
-    []
-  );
-
-  const onCloseSignMessage = useCallback(() => {
-    setCurrentAccount(undefined);
-    setSignMessageIsVisible(false);
-  }, []);
-
   return (
     <div className="page">
       <List>
@@ -51,7 +36,6 @@ export const AccountsPage = () => {
               <span>{account.address}</span>
               <span>{account.balance?.toFixed(2) || "0"} UNQ</span>
               <Button onClick={onSend(account)}>Send amount</Button>
-              <Button onClick={onSignMessage(account)}>Sign message</Button>
               <ButtonLink to={`/account/${account.address}`}>
                 Account data
               </ButtonLink>
@@ -64,11 +48,6 @@ export const AccountsPage = () => {
         isVisible={transferAmountIsVisible}
         sender={currentAccount}
         onClose={onCloseTransferAmount}
-      />
-      <SignMessageModal
-        isVisible={signMessageIsVisible}
-        account={currentAccount}
-        onClose={onCloseSignMessage}
       />
     </div>
   );

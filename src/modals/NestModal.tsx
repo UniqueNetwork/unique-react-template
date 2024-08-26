@@ -9,7 +9,7 @@ import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import styled from "styled-components";
 
-type SignMessageModalProps = {
+type NestTModalProps = {
   isVisible: boolean;
   account?: Account;
   onClose(): void;
@@ -21,7 +21,7 @@ export const ContentWrapper = styled.div`
   gap: 10px;
 `;
 
-export const NestTModal = ({ isVisible, onClose }: SignMessageModalProps) => {
+export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
   const { selectedAccount } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;

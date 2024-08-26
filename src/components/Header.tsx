@@ -97,8 +97,15 @@ const ButtonConnect = styled.button`
 
 const ButtonBlock = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 0 30px;
+`;
+
+const ButtonBlockHeader = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 0;
 `;
 
 export const Header: React.FC = () => {
@@ -154,7 +161,7 @@ export const Header: React.FC = () => {
     <HeaderContainer>
       <AccountSelectorWrapper>
         <ConnectedAccountsButton onClick={toggleDropdown}>
-          Connected account
+          Active account
         </ConnectedAccountsButton>
         {isDropdownOpen && (
           <AccountDropdown ref={dropdownRef}>
@@ -174,6 +181,7 @@ export const Header: React.FC = () => {
             ))}
 
             <ButtonBlock>
+              <ButtonBlockHeader>Connect new accounts: </ButtonBlockHeader>
               <ButtonConnect onClick={handlePolkadotClick}>
                 POLKADOT Wallets
               </ButtonConnect>
@@ -181,18 +189,22 @@ export const Header: React.FC = () => {
                 ETHEREUM Wallets
               </ButtonConnect>
             </ButtonBlock>
-            <NavLinkWrapper>
+            <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
               <NavLink to="/">Go to Accounts Page</NavLink>
             </NavLinkWrapper>
           </AccountDropdown>
         )}
       </AccountSelectorWrapper>
       <ButtonsWrapper>
-        <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu">
+        <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu" onClick={() => setIsDropdownOpen(false)}>
           Test account
         </Button>
-        <Button to="/collection/665">Test Collection</Button>
-        <Button to="/token/665/14">Test NFT</Button>
+        <Button to="/collection/665" onClick={() => setIsDropdownOpen(false)}>
+          Test Collection
+        </Button>
+        <Button to="/token/665/14" onClick={() => setIsDropdownOpen(false)}>
+          Test NFT
+        </Button>
       </ButtonsWrapper>
 
       <ConnectWallets

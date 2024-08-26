@@ -9,7 +9,7 @@ import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 
-type SignMessageModalProps = {
+type TransferModalProps = {
   isVisible: boolean;
   onClose(): void;
 };
@@ -17,7 +17,7 @@ type SignMessageModalProps = {
 export const TransferModal = ({
   isVisible,
   onClose,
-}: SignMessageModalProps) => {
+}: TransferModalProps) => {
   const { selectedAccount } = useContext(AccountsContext);
   const [receiver, setReceiver] = useState<string>("");
   const { collectionId } = useParams<{ collectionId: string }>();
