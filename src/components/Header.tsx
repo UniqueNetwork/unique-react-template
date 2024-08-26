@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -79,11 +81,44 @@ const NavLinkWrapper = styled.div`
   margin-top: 20px;
 `;
 
+const ButtonConnect = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  background-color: #007bff;
+  font-size: 16px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const ButtonBlock = styled.div`
+  display: flex;
+  gap: 10px;
+  padding: 0 30px;
+`;
+
 export const Header: React.FC = () => {
-  const { accounts, setSelectedAccountId, selectedAccountId } = useContext(AccountsContext);
+  const { accounts, setSelectedAccountId, selectedAccountId } =
+    useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { open } = useWeb3Modal();
+  const [isOpenChoseWalletModal, setIsOpenChoseWalletModal] = useState(false);
+
+  const handlePolkadotClick = () => {
+    setIsDropdownOpen(false);
+    setIsOpenChoseWalletModal(true);
+  };
+
+  const handleWalletConnectClick = () => {
+    setIsDropdownOpen(false);
+    open();
+  };
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -96,7 +131,10 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -125,12 +163,24 @@ export const Header: React.FC = () => {
                 key={account.address}
                 onClick={() => onAccountSelect(index)}
                 style={{
-                  backgroundColor: index === selectedAccountId ? "#f0f0f0" : "white",
+                  backgroundColor:
+                    index === selectedAccountId ? "#f0f0f0" : "white",
                 }}
               >
-                <span>{account.name} ({account.address})</span>
+                <span>
+                  {account.name} ({account.address})
+                </span>
               </AccountItem>
             ))}
+
+            <ButtonBlock>
+              <ButtonConnect onClick={handlePolkadotClick}>
+                POLKADOT Wallets
+              </ButtonConnect>
+              <ButtonConnect onClick={handleWalletConnectClick}>
+                ETHEREUM Wallets
+              </ButtonConnect>
+            </ButtonBlock>
             <NavLinkWrapper>
               <NavLink to="/">Go to Accounts Page</NavLink>
             </NavLinkWrapper>
@@ -144,6 +194,11 @@ export const Header: React.FC = () => {
         <Button to="/collection/665">Test Collection</Button>
         <Button to="/token/665/14">Test NFT</Button>
       </ButtonsWrapper>
+
+      <ConnectWallets
+        isOpenConnectWalletModal={isOpenChoseWalletModal}
+        setIsOpenConnectWalletModal={(e) => setIsOpenChoseWalletModal(e)}
+      />
     </HeaderContainer>
   );
 };

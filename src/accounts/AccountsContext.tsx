@@ -124,7 +124,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   
     setAccounts(updatedAccounts);
   }, [sdk, accounts]);
-  
+
   useEffect(() => {
     if (!reinitializePolkadotAccountsWithBalance) return;
     reinitializePolkadotAccountsWithBalance();
@@ -155,6 +155,33 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       return accountsToUpdate;
     });
   }, [sdk]);
+
+  useEffect(() => {
+    if (!address) {
+      setAccounts((prevAccounts) => {
+        const newAccounts = new Map(prevAccounts);
+        for (let [key, account] of newAccounts) {
+          if (account.signerType === SignerTypeEnum.Ethereum) {
+            newAccounts.delete(key);
+          }
+        }
+        return newAccounts;
+      });
+
+      const savedAccounts = localStorage.getItem("accounts");
+      if (savedAccounts) {
+        try {
+          const parsedAccounts: [string, Account][] = JSON.parse(savedAccounts);
+          const filteredAccounts = parsedAccounts.filter(
+            ([, account]) => account.signerType !== SignerTypeEnum.Ethereum
+          );
+          localStorage.setItem("accounts", JSON.stringify(filteredAccounts));
+        } catch (error) {
+          console.error("Failed to filter Ethereum accounts from localStorage", error);
+        }
+      }
+    }
+  }, [address]);
 
   const contextValue = useMemo(
     () => ({
