@@ -94,7 +94,7 @@ export const TransferAmountModal = ({
   if (!sender) return null;
 
   return (
-    <Modal isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} onClose={onClose} isFlexible={true}>
       <ContentWrapper>
         <h3>Transfer Amount</h3>
         <div className="form-item">

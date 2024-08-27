@@ -158,59 +158,63 @@ export const Header: React.FC = () => {
   }, [isDropdownOpen]);
 
   return (
-    <HeaderContainer>
-      <AccountSelectorWrapper>
-        <ConnectedAccountsButton onClick={toggleDropdown}>
-          Active account
-        </ConnectedAccountsButton>
-        {isDropdownOpen && (
-          <AccountDropdown ref={dropdownRef}>
-            {accountsArray.map((account, index) => (
-              <AccountItem
-                key={account.address}
-                onClick={() => onAccountSelect(index)}
-                style={{
-                  backgroundColor:
-                    index === selectedAccountId ? "#f0f0f0" : "white",
-                }}
-              >
-                <span>
-                  {account.name} ({account.address})
-                </span>
-              </AccountItem>
-            ))}
+    <>
+      <HeaderContainer>
+        <AccountSelectorWrapper>
+          <ConnectedAccountsButton onClick={toggleDropdown}>
+            Active account
+          </ConnectedAccountsButton>
+          {isDropdownOpen && (
+            <AccountDropdown ref={dropdownRef}>
+              {accountsArray.map((account, index) => (
+                <AccountItem
+                  key={account.address}
+                  onClick={() => onAccountSelect(index)}
+                  style={{
+                    backgroundColor:
+                      index === selectedAccountId ? "#f0f0f0" : "white",
+                  }}
+                >
+                  <span>
+                    {account.name} ({account.address})
+                  </span>
+                </AccountItem>
+              ))}
 
-            <ButtonBlock>
-              <ButtonBlockHeader>Connect new accounts: </ButtonBlockHeader>
-              <ButtonConnect onClick={handlePolkadotClick}>
-                POLKADOT Wallets
-              </ButtonConnect>
-              <ButtonConnect onClick={handleWalletConnectClick}>
-                ETHEREUM Wallets
-              </ButtonConnect>
-            </ButtonBlock>
-            <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
-              <NavLink to="/">Go to Accounts Page</NavLink>
-            </NavLinkWrapper>
-          </AccountDropdown>
-        )}
-      </AccountSelectorWrapper>
-      <ButtonsWrapper>
-        <Button to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu" onClick={() => setIsDropdownOpen(false)}>
-          Test account
-        </Button>
-        <Button to="/collection/665" onClick={() => setIsDropdownOpen(false)}>
-          Test Collection
-        </Button>
-        <Button to="/token/665/14" onClick={() => setIsDropdownOpen(false)}>
-          Test NFT
-        </Button>
-      </ButtonsWrapper>
-
+              <ButtonBlock>
+                <ButtonBlockHeader>Connect new accounts: </ButtonBlockHeader>
+                <ButtonConnect onClick={handlePolkadotClick}>
+                  POLKADOT Wallets
+                </ButtonConnect>
+                <ButtonConnect onClick={handleWalletConnectClick}>
+                  ETHEREUM Wallets
+                </ButtonConnect>
+              </ButtonBlock>
+              <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
+                <NavLink to="/">Go to Accounts Page</NavLink>
+              </NavLinkWrapper>
+            </AccountDropdown>
+          )}
+        </AccountSelectorWrapper>
+        <ButtonsWrapper>
+          <Button
+            to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu"
+            onClick={() => setIsDropdownOpen(false)}
+          >
+            Test account
+          </Button>
+          <Button to="/collection/665" onClick={() => setIsDropdownOpen(false)}>
+            Test Collection
+          </Button>
+          <Button to="/token/665/14" onClick={() => setIsDropdownOpen(false)}>
+            Test NFT
+          </Button>
+        </ButtonsWrapper>
+      </HeaderContainer>
       <ConnectWallets
         isOpenConnectWalletModal={isOpenChoseWalletModal}
         setIsOpenConnectWalletModal={(e) => setIsOpenChoseWalletModal(e)}
       />
-    </HeaderContainer>
+    </>
   );
 };

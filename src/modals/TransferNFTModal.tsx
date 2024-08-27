@@ -78,7 +78,7 @@ export const TransferNFTModal = ({
   };
 
   return (
-    <Modal isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} onClose={onClose} isFlexible={true}>
       <ContentWrapper>
         <h3>Transfer NFT</h3>
         <div className="form-item">

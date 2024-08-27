@@ -168,6 +168,7 @@ export interface TokenData {
   animation_url?: string;
   tokenPrefix?: string;
   children?: TokenData[];
+  topmostOwner?: string;
 }
 
 enum TokenModalEnum {
@@ -186,7 +187,7 @@ const TokenPage: React.FC = () => {
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState<TokenModalEnum | null>(null);
-  const isOwner = useIsOwner(tokenData?.owner);
+  const isOwner = useIsOwner(tokenData?.topmostOwner || tokenData?.owner);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -405,13 +406,13 @@ const TokenPage: React.FC = () => {
         </Button>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.NEST)}
-          disabled={!isOwner}
+          disabled={!(isOwner && !tokenData.parentToken)}
         >
           Nest
         </Button>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.UNNEST)}
-          disabled={!isOwner}
+          disabled={!(isOwner && tokenData.parentToken)}
         >
           Unnest
         </Button>

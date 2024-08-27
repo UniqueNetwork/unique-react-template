@@ -31,8 +31,6 @@ export const ConnectWallets = ({ isOpenConnectWalletModal, setIsOpenConnectWalle
     }
   };
 
-  const isMobile = DeviceSize.sm >= useDeviceSize();
-
   useEffect(() => {
     (async () => {
       setIsFetching(true);
@@ -44,46 +42,6 @@ export const ConnectWallets = ({ isOpenConnectWalletModal, setIsOpenConnectWalle
 
   const noAvailableWallets = availableWallets.length === 0;
 
-  if (isMobile) {
-    return (
-      <ModalWrapper>
-        <Modal
-          isVisible={isOpenConnectWalletModal}
-          onClose={() => setIsOpenConnectWalletModal(false)}
-          isClosable
-        >
-          <ModalHeader>Connect wallet</ModalHeader>
-          <ModalParagraph>Choose how you want to connect. If you don't have a wallet, you can select a provider and create one.</ModalParagraph>
-          <Wallets>
-            {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
-              <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-            </WalletItem>}
-            {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
-              <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-            </WalletItem>}
-            {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem
-              onClick={handleConnectToPolkadotExtension('subwallet-js')}
-            >
-              <Icon file={SubWalletIcon} size={40} />
-              <span>SubWallet</span>
-            </WalletItem>}
-            {availableWallets.includes('enkrypt') && <WalletItem
-              onClick={handleConnectToPolkadotExtension('enkrypt')}
-            >
-              <Icon file={EnkriptIcon} size={40} />
-              <span>Enkrypt</span>
-            </WalletItem>}
-          </Wallets>
-        </Modal>
-        <ExtensionMissingModal
-          isVisible={currentModal === AccountModal.EXTENSION_MISSING}
-          missingExtension={missingExtension}
-          onFinish={() => setCurrentModal(undefined)}
-        />
-      </ModalWrapper>
-    );
-  }
-
   return (
     <ModalWrapper>
       <Modal
@@ -92,22 +50,26 @@ export const ConnectWallets = ({ isOpenConnectWalletModal, setIsOpenConnectWalle
         isClosable
       >
         <ModalHeader>Connect wallet</ModalHeader>
-        <ModalParagraph>Choose how you want to connect. If you don't have a wallet, you can select a provider and create one.</ModalParagraph>
+        <ModalParagraph>Choose available polkadot extension</ModalParagraph>
         <Wallets>
-          <WalletItem onClick={handleConnectToPolkadotExtension()}>
+          {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
             <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
+          </WalletItem>}
+          {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
             <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToPolkadotExtension('subwallet-js')}>
+          </WalletItem>}
+          {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem
+            onClick={handleConnectToPolkadotExtension('subwallet-js')}
+          >
             <Icon file={SubWalletIcon} size={40} />
             <span>SubWallet</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToPolkadotExtension('enkrypt')}>
+          </WalletItem>}
+          {availableWallets.includes('enkrypt') && <WalletItem
+            onClick={handleConnectToPolkadotExtension('enkrypt')}
+          >
             <Icon file={EnkriptIcon} size={40} />
             <span>Enkrypt</span>
-          </WalletItem>
+          </WalletItem>}
         </Wallets>
       </Modal>
       <ExtensionMissingModal

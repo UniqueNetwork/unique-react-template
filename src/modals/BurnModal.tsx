@@ -6,6 +6,7 @@ import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
+import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 
 type BurnModalProps = {
   isVisible: boolean;
@@ -59,7 +60,7 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
   };
 
   return (
-    <Modal isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} onClose={onClose} isFlexible={true}>
       <h3>Burn token</h3>
       {errorMessage && (
         <div className="form-item">
@@ -67,17 +68,13 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
         </div>
       )}
 
-      {isLoading && (
-        <div className="form-item">
-          <div>Burn in progress...</div>
-        </div>
-      )}
-      <div className="form-item">
-        <button onClick={onSign} disabled={isLoading}>
-          Burn
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
+      {isLoading && <Loading>Transferring...</Loading>}
+      <ButtonWrapper>
+        <Button onClick={onSign} disabled={isLoading}>
+          Submit
+        </Button>
+        <Button onClick={onClose}>Cancel</Button>
+      </ButtonWrapper>
     </Modal>
   );
 };

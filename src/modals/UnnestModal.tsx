@@ -5,6 +5,8 @@ import { Account } from "../accounts/types";
 import { Modal } from "../components/Modal";
 import { connectSdk } from "../sdk/connect";
 import { ContentWrapper } from "./NestModal";
+import { baseUrl } from "../sdk/SdkContext";
+import styled from "styled-components";
 
 type UnnestTModalProps = {
   isVisible: boolean;
@@ -28,18 +30,14 @@ export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
 
     try {
       //@ts-ignore
-      const sdk = await connectSdk(process.env.REACT_APP_REST_URL, account);
+      const sdk = await connectSdk(baseUrl, selectedAccount);
 
-      // await sdk?.token.unnest({
-      //   parent: {
-      //     collectionId: collectionParentId,
-      //     tokenId: +tokenParentId,
-      //   },
-      //   nested: {
-      //     collectionId,
-      //     tokenId: +tokenId,
-      //   },
-      // });
+      await sdk?.token.unnest({
+        nested: {
+          collectionId,
+          tokenId: +tokenId,
+        },
+      });
 
       setIsLoading(false);
       window.location.reload();
@@ -51,21 +49,48 @@ export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
   };
 
   return (
-    <Modal isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} isFlexible={true} onClose={onClose}>
       <ContentWrapper>
         <h3>Confirm unnest this token</h3>
-        {isLoading && (
-          <div className="form-item">
-            <div>Transferring...</div>
-          </div>
-        )}
-        <div className="form-item">
-          <button onClick={onSign} disabled={isLoading}>
+        {isLoading && <Loading>Transferring...</Loading>}
+        <ButtonWrapper>
+          <Button onClick={onSign} disabled={isLoading}>
             Submit
-          </button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </ButtonWrapper>
       </ContentWrapper>
     </Modal>
   );
 };
+
+export const ButtonWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+export const Loading = styled.div`
+  min-width: 320px;
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const Button = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  background-color: #007bff;
+  font-size: 16px;
+  width: 160px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+`;

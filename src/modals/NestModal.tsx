@@ -8,6 +8,7 @@ import { baseUrl } from "../sdk/SdkContext";
 import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import styled from "styled-components";
+import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 
 type NestTModalProps = {
   isVisible: boolean;
@@ -91,7 +92,7 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
   };
 
   return (
-    <Modal isVisible={isVisible} onClose={onClose}>
+    <Modal isVisible={isVisible} onClose={onClose} isFlexible={true}>
       <ContentWrapper>
         <h3>Nest token</h3>
         <div className="form-item">
@@ -117,17 +118,13 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
           </div>
         )}
 
-        {isLoading && (
-          <div className="form-item">
-            <div>Transferring...</div>
-          </div>
-        )}
-        <div className="form-item">
-          <button onClick={onSign} disabled={isLoading}>
+        {isLoading && <Loading>Transferring...</Loading>}
+        <ButtonWrapper>
+          <Button onClick={onSign} disabled={isLoading}>
             Submit
-          </button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </ButtonWrapper>
       </ContentWrapper>
     </Modal>
   );
