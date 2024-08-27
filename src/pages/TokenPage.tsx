@@ -120,6 +120,7 @@ export const Hint = styled.div`
   padding: 10px;
   background: #7bd2c1;
   margin-bottom: 10px;
+  width: 80%;
 `;
 
 interface Attribute {

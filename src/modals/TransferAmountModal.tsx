@@ -8,6 +8,7 @@ import { useEthersSigner } from "../hooks/useSigner";
 import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { ContentWrapper } from "./NestModal";
+import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 
 type TransferAmountModalProps = {
   isVisible: boolean;
@@ -113,14 +114,15 @@ export const TransferAmountModal = ({
             onChange={handleAmountChange}
           />
         </div>
-        {isLoading && <div className="form-item">Transferring...</div>}
+  
         {error && <div className="form-item">{error}</div>}
-        <div className="form-item">
-          <button onClick={handleSend} disabled={isLoading}>
-            Send
-          </button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
+        {isLoading && <Loading>Processing...</Loading>}
+        <ButtonWrapper>
+          <Button onClick={handleSend} disabled={isLoading}>
+            Submit
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </ButtonWrapper>
       </ContentWrapper>
     </Modal>
   );

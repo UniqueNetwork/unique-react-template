@@ -68,7 +68,7 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
         </div>
       )}
 
-      {isLoading && <Loading>Transferring...</Loading>}
+      {isLoading && <Loading>Processing...</Loading>}
       <ButtonWrapper>
         <Button onClick={onSign} disabled={isLoading}>
           Submit

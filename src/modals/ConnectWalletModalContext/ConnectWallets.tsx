@@ -1,46 +1,71 @@
-import { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { web3Enable } from '@polkadot/extension-dapp';
-import SubWalletIcon from '../../static/icons/subwallet.svg';
-import EnkriptIcon from '../../static/icons/enkrypt.svg';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { ConnectedWalletsName } from '../../accounts/useWalletCenter';
-import { Modal } from '../../components/Modal';
-import { Icon } from '../../components/UI/Icon';
-import { ExtensionMissingModal } from './ExtensionMissing';
-import { AccountsContext } from '../../accounts/AccountsContext';
+import { useContext, useEffect, useState } from "react";
+import styled from "styled-components";
+import { web3Enable } from "@polkadot/extension-dapp";
+import PolkadotJsIcon from "../../static/icons/polkadot-wallet.svg";
+import TalismanIcon from "../../static/icons/talisman-wallet.svg";
+import SubWalletIcon from "../../static/icons/subwallet.svg";
+import EnkriptIcon from "../../static/icons/enkrypt.svg";
+import { ConnectedWalletsName } from "../../accounts/useWalletCenter";
+import { Modal } from "../../components/Modal";
+import { Icon } from "../../components/UI/Icon";
+import { AccountsContext } from "../../accounts/AccountsContext";
 
-enum AccountModal {
-  EXTENSION_MISSING = 'extensionMissing',
-}
+const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
+  "polkadot-js": "https://polkadot.js.org/extension/",
+  "subwallet-js": "https://www.subwallet.app/download.html",
+  talisman: "https://www.talisman.xyz/",
+  metamask: "https://metamask.io/download/",
+  novawallet: "https://novawallet.io",
+  enkrypt: "https://www.enkrypt.com",
+  keyring: "",
+};
 
-export const ConnectWallets = ({ isOpenConnectWalletModal, setIsOpenConnectWalletModal }: { isOpenConnectWalletModal: boolean, setIsOpenConnectWalletModal: (e: boolean) => void }) => {
-  const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
-  const [missingExtension, setMissingExtension] = useState<ConnectedWalletsName>();
+const walletOptions: {
+  name: ConnectedWalletsName;
+  icon: string;
+  label: string;
+}[] = [
+  { name: "polkadot-js", icon: PolkadotJsIcon, label: "Polkadot.js" },
+  { name: "talisman", icon: TalismanIcon, label: "Talisman" },
+  { name: "subwallet-js", icon: SubWalletIcon, label: "SubWallet" },
+  { name: "enkrypt", icon: EnkriptIcon, label: "Enkrypt" },
+];
+
+export const ConnectWallets = ({
+  isOpenConnectWalletModal,
+  setIsOpenConnectWalletModal,
+}: {
+  isOpenConnectWalletModal: boolean;
+  setIsOpenConnectWalletModal: (e: boolean) => void;
+}) => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [availableWallets, setAvailableWallets] = useState<string[]>([]);
   const { setPolkadotAccountsWithBalance } = useContext(AccountsContext);
 
-  const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
-    try {
-      await setPolkadotAccountsWithBalance(walletName);
-    } catch (e: any) {
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
-    } finally {
-      setIsOpenConnectWalletModal(false);
-    }
-  };
+  const handleConnectToPolkadotExtension =
+    (walletName: ConnectedWalletsName) => async () => {
+      try {
+        await setPolkadotAccountsWithBalance(walletName);
+      } finally {
+        setIsOpenConnectWalletModal(false);
+      }
+    };
 
   useEffect(() => {
     (async () => {
       setIsFetching(true);
-      const extensions = await web3Enable('Account React Example');
-      setAvailableWallets(extensions.map(ext => ext.name));
+      const extensions = await web3Enable("Account React Example");
+      setAvailableWallets(extensions.map((ext) => ext.name));
       setIsFetching(false);
     })();
   }, []);
 
-  const noAvailableWallets = availableWallets.length === 0;
+  const goToInstallExtension = (walletName: ConnectedWalletsName) => {
+    const url = extensionSourceLinks[walletName];
+    if (url) {
+      window.open(url, "_blank");
+    }
+  };
 
   return (
     <ModalWrapper>
@@ -52,31 +77,27 @@ export const ConnectWallets = ({ isOpenConnectWalletModal, setIsOpenConnectWalle
         <ModalHeader>Connect wallet</ModalHeader>
         <ModalParagraph>Choose available polkadot extension</ModalParagraph>
         <Wallets>
-          {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
-            <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-          </WalletItem>}
-          {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
-            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-          </WalletItem>}
-          {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem
-            onClick={handleConnectToPolkadotExtension('subwallet-js')}
-          >
-            <Icon file={SubWalletIcon} size={40} />
-            <span>SubWallet</span>
-          </WalletItem>}
-          {availableWallets.includes('enkrypt') && <WalletItem
-            onClick={handleConnectToPolkadotExtension('enkrypt')}
-          >
-            <Icon file={EnkriptIcon} size={40} />
-            <span>Enkrypt</span>
-          </WalletItem>}
+          {walletOptions.map((wallet) =>
+            availableWallets.includes(wallet.name) ? (
+              <WalletItem
+                key={wallet.name}
+                onClick={handleConnectToPolkadotExtension(wallet.name)}
+              >
+                <Icon size={40} file={wallet.icon} />{" "}
+                <span>{wallet.label}</span>
+              </WalletItem>
+            ) : (
+              <WalletItem
+                key={wallet.name}
+                onClick={() => goToInstallExtension(wallet.name)}
+              >
+                <Icon size={40} file={wallet.icon} />{" "}
+                <span>Install {wallet.label}</span>
+              </WalletItem>
+            )
+          )}
         </Wallets>
       </Modal>
-      <ExtensionMissingModal
-        isVisible={currentModal === AccountModal.EXTENSION_MISSING}
-        missingExtension={missingExtension}
-        onFinish={() => setCurrentModal(undefined)}
-      />
     </ModalWrapper>
   );
 };
@@ -85,7 +106,7 @@ const ModalWrapper = styled.div`
   .unique-modal {
     width: 360px;
     border-radius: 34px;
-    background-color: color-mix( in srgb, #fff 0%, #121313 );
+    background-color: color-mix(in srgb, #fff 0%, #121313);
   }
 
   .close-button {
@@ -135,7 +156,8 @@ const WalletItem = styled.div`
     color: #ffffff;
   }
 
-  svg, img {
+  svg,
+  img {
     width: 40px;
     height: 40px;
   }

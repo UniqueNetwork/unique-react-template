@@ -8,6 +8,7 @@ import { baseUrl } from "../sdk/SdkContext";
 import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
+import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 
 type TransferNFTModalProps = {
   isVisible: boolean;
@@ -72,7 +73,7 @@ export const TransferNFTModal = ({
       window.location.reload();
     } catch (error) {
       console.error("Transfer failed:", error);
-      setErrorMessage("An error occurred during the transfer. Please try again.");
+      setErrorMessage("An error occurred");
       setIsLoading(false);
     }
   };
@@ -96,17 +97,13 @@ export const TransferNFTModal = ({
           </div>
         )}
 
-        {isLoading && (
-          <div className="form-item">
-            <div>Transferring...</div>
-          </div>
-        )}
-        <div className="form-item">
-          <button onClick={onSign} disabled={isLoading}>
-            Transfer
-          </button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
+        {isLoading && <Loading>Processing...</Loading>}
+        <ButtonWrapper>
+          <Button onClick={onSign} disabled={isLoading}>
+            Submit
+          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </ButtonWrapper>
       </ContentWrapper>
     </Modal>
   );

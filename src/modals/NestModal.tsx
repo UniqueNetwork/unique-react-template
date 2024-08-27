@@ -83,10 +83,9 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
       setIsLoading(false);
       window.location.reload();
     } catch (error) {
+
       console.error("Transfer failed:", error);
-      setErrorMessage(
-        "An error occurred during the transfer. Please try again."
-      );
+      setErrorMessage("An error occurred");
       setIsLoading(false);
     }
   };
