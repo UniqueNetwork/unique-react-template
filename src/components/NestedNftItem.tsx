@@ -86,9 +86,10 @@ const Icon = styled.img`
 
 interface NestedNftItemProps {
   child: TokenData;
+  isNested?: boolean;
 }
 
-const NestedNftItem: React.FC<NestedNftItemProps> = ({ child }) => {
+const NestedNftItem: React.FC<NestedNftItemProps> = ({ child, isNested }) => {
   // const mediaIcons = Object.values(child.media || {}).map((mediaItem, index) => (
   //   <Icon key={index} src={mediaItem.url} alt="media icon" />
   // ));
@@ -97,7 +98,8 @@ const NestedNftItem: React.FC<NestedNftItemProps> = ({ child }) => {
     <NestedNftContainer to={`/token/${child.collectionId}/${child.tokenId}`}>
       <ImageWrapper>
         <NftImage src={child.image || ''} alt={child.name || 'NFT Image'} />
-        <Badge>NESTED</Badge>
+        {isNested && <Badge>NESTED</Badge>}
+        {child.isBundle && <Badge>BUNDLE</Badge>}
         {/* {mediaIcons.length > 0 && <MediaBadge>{mediaIcons}</MediaBadge>} */}
       </ImageWrapper>
       <ContentWrapper>

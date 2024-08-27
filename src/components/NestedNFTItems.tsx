@@ -23,7 +23,7 @@ const NestedNftItems: React.FC<NestedNftItemsProps> = ({ children }) => {
   return (
     <NestedNftGrid>
       {children.map((child, index) => (
-        <NestedNftItem key={index} child={child} />
+        <NestedNftItem key={index} child={child} isNested={true} />
       ))}
     </NestedNftGrid>
   );

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
+import TokenList from "../components/TokenList/TokenList";
 
 const Container = styled.div`
   display: flex;
@@ -13,8 +14,8 @@ const Container = styled.div`
   box-sizing: border-box;
 `;
 
-const Title = styled.h2`
-  margin-bottom: 35px;
+const Title = styled.h3`
+  margin-bottom: 16px;
   text-align: left;
 `;
 
@@ -60,6 +61,8 @@ const SingleAccountPage = () => {
         
 
         const balance = await sdk.balance.get({ address });
+
+        // const tokens = await sdk.account.
         setAccountBalance(balance);
       } catch (error) {
         setError("Failed to fetch account data. Please try again later.");
@@ -80,15 +83,6 @@ const SingleAccountPage = () => {
     [accountId]
   );
 
-  const mirroredAddress = useMemo(
-    () =>
-      accountId
-        ? !Address.is.ethereumAddress(accountId)
-          ? Address.mirror.substrateToEthereum(accountId)
-          : Address.mirror.ethereumToSubstrate(accountId)
-        : null,
-    [accountId]
-  );
 
   if (error) {
     return (
@@ -153,10 +147,7 @@ const SingleAccountPage = () => {
           </InfoItem>
         )}
       </InfoList>
-      {/* <ButtonContainer>
-        <Button>Owned collections</Button>
-        <Button>Owned NFTs</Button>
-      </ButtonContainer> */}
+      <TokenList />
     </Container>
   );
 };

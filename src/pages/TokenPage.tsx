@@ -170,6 +170,7 @@ export interface TokenData {
   tokenPrefix?: string;
   children?: TokenData[];
   topmostOwner?: string;
+  isBundle?: boolean;
 }
 
 enum TokenModalEnum {
