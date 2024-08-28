@@ -147,6 +147,7 @@ const SingleAccountPage = () => {
           </InfoItem>
         )}
       </InfoList>
+      <Title>Account NFTs</Title>
       <TokenList />
     </Container>
   );

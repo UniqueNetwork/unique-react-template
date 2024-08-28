@@ -19,7 +19,7 @@ const TokenListContainer = styled.div`
 `;
 
 const TokenList = () => {
-  const { accountId } = useParams<{ accountId: string }>();
+  const { accountId, collectionId } = useParams<{ accountId: string, collectionId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,14 +39,20 @@ const TokenList = () => {
     const fetchTokens = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          //Local - using cors anywhere
-          //`http://localhost:7654/https://rest.uniquenetwork.dev/scan/v2/unique/nfts?topmostOwnerIn=${accountId}&offset=${offset}&limit=${limit}`,
-          `https://rest.uniquenetwork.dev/scan/v2/unique/nfts?topmostOwnerIn=${accountId}&offset=${offset}&limit=${limit}`,
-          {
-            headers: { accept: "application/json" },
-          }
-        );
+        //let apiUrl = `http://localhost:7654/https://rest.uniquenetwork.dev/scan/v2/unique/nfts?offset=${offset}&limit=${limit}`;
+        let apiUrl = `https://rest.uniquenetwork.dev/scan/v2/unique/nfts?offset=${offset}&limit=${limit}`;
+
+        if (collectionId) {
+          apiUrl += `&collectionIdIn=${collectionId}`;
+        }
+
+        if (accountId) {
+          apiUrl += `&topmostOwnerIn=${accountId}`;
+        }
+
+        const response = await fetch(apiUrl, {
+          headers: { accept: "application/json" },
+        });
         const data = await response.json();
         setTokens(data.items);
         setTotalTokens(data.count);
@@ -56,29 +62,28 @@ const TokenList = () => {
       setLoading(false);
     };
 
-    if (accountId) {
+    if (accountId || collectionId) {
       fetchTokens();
     }
-  }, [accountId, page]);
+  }, [accountId, collectionId, page]);
 
   const handlePageChange = (newPage: number) => {
     queryParams.set("page", newPage.toString());
     navigate({ search: queryParams.toString() });
   };
 
-  if (loading) return <div>Loading tokens...</div>;
+  if (loading) return <div>Loading NFTs...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <Container>
-      <h3>User NFTs:</h3>
       <TokenListContainer>
         {tokens?.length > 0 ? (
           tokens.map((child, index) => (
             <NestedNftItem key={index} child={child} isNested={false} />
           ))
         ) : (
-          <div>No NFTs found for this account.</div>
+          <div>No NFTs found.</div>
         )}
       </TokenListContainer>
       <PaginationComponent

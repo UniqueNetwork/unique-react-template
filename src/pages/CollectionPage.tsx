@@ -5,6 +5,7 @@ import { SdkContext } from "../sdk/SdkContext";
 import { TransferModal } from "../modals/TransferModal";
 import useIsOwner from "../hooks/useIsOwner";
 import { Hint } from "./TokenPage";
+import TokenList from "../components/TokenList/TokenList";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -81,6 +82,8 @@ const ErrorMessage = styled.div`
 
 const SettingsContainer = styled.div`
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
 `;
 
 const TransferButton = styled(Button)`
@@ -284,18 +287,26 @@ const CollectionPage = () => {
           </InfoItem>
         </InfoList>
       </SettingsContainer>
+      <SettingsContainer>
+        <Title>Collection NFTs</Title>
+        <TokenList />
+      </SettingsContainer>
+      <SettingsContainer>
+        
+        <Title>Actions</Title>
+        {!isOwner && <>You are not collection's owner</>}
+        <TransferButton
+          onClick={() => setTransferModalIsVisible(true)}
+          disabled={!isOwner}
+        >
+          Transfer
+        </TransferButton>
+      </SettingsContainer>
+
       <TransferModal
         isVisible={transferModalIsVisible}
         onClose={() => setTransferModalIsVisible(false)}
       />
-      <Title>Actions</Title>
-      {!isOwner && <>You are not collection's owner</>}
-      <TransferButton
-        onClick={() => setTransferModalIsVisible(true)}
-        disabled={!isOwner}
-      >
-        Transfer
-      </TransferButton>
     </Container>
   );
 };
