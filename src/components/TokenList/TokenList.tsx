@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import PaginationComponent from "./Pagination";
 import NestedNftItem from "../NestedNftItem";
+import { useChainAndScan } from "../../hooks/useChainAndScan";
 
 const Container = styled.div`
   display: flex;
@@ -19,10 +20,11 @@ const TokenListContainer = styled.div`
 `;
 
 const TokenList = () => {
-  const { accountId, collectionId } = useParams<{ accountId: string, collectionId: string }>();
+  const { accountId, collectionId } = useParams<{ accountId: string; collectionId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { scan, loading: scanLoading } = useChainAndScan("unique");
   const [tokens, setTokens] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,42 +39,40 @@ const TokenList = () => {
 
   useEffect(() => {
     const fetchTokens = async () => {
+      if (!scan) return;
       setLoading(true);
       try {
-        //let apiUrl = `http://localhost:7654/https://rest.uniquenetwork.dev/scan/v2/unique/nfts?offset=${offset}&limit=${limit}`;
-        let apiUrl = `https://rest.uniquenetwork.dev/scan/v2/unique/nfts?offset=${offset}&limit=${limit}`;
+        const params: Record<string, any> = { offset, limit };
 
         if (collectionId) {
-          apiUrl += `&collectionIdIn=${collectionId}`;
+          params.collectionIdIn = [collectionId];
         }
 
         if (accountId) {
-          apiUrl += `&topmostOwnerIn=${accountId}`;
+          params.topmostOwnerIn = [accountId];
         }
 
-        const response = await fetch(apiUrl, {
-          headers: { accept: "application/json" },
-        });
-        const data = await response.json();
+        const data = await scan.nfts(params);
         setTokens(data.items);
         setTotalTokens(data.count);
       } catch (error) {
         setError("Failed to fetch tokens. Please try again later.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     if (accountId || collectionId) {
       fetchTokens();
     }
-  }, [accountId, collectionId, page]);
+  }, [accountId, collectionId, page, scan]);
 
   const handlePageChange = (newPage: number) => {
     queryParams.set("page", newPage.toString());
     navigate({ search: queryParams.toString() });
   };
 
-  if (loading) return <div>Loading NFTs...</div>;
+  if (loading || scanLoading) return <div>Loading NFTs...</div>;
   if (error) return <div>{error}</div>;
 
   return (
