@@ -3537,16 +3537,17 @@
     zod "^3.22.4"
     zod-openapi "^2.18.0"
 
-"@unique-nft/sdk@1.0.0-alpha.16":
-  version "1.0.0-alpha.16"
-  resolved "https://registry.yarnpkg.com/@unique-nft/sdk/-/sdk-1.0.0-alpha.16.tgz#9228bcf436a1a2ddb0ed70d43a0eba6515fb4595"
-  integrity sha512-9ebw0RRdYRt6dqtlMk4pJUOUjh3AGfuxmZrErvQuEVm7Mm8wtcAmM9FSDpnSQVJ/c3lT6Oyy89RK/BsSQbhx6w==
+"@unique-nft/sdk@1.0.0-alpha.17":
+  version "1.0.0-alpha.17"
+  resolved "https://registry.yarnpkg.com/@unique-nft/sdk/-/sdk-1.0.0-alpha.17.tgz#60e118b77120523b3f1dd21c9de67f89ee2e2cfd"
+  integrity sha512-lQV0awUa4SV097jPs3SRtNycgQjC4zH2QZ8TzjuWQF+g5ssncaFjVsChvrfHtzXMrSQYUYi18uZwVxQ0K8MdUw==
   dependencies:
     "@unique-nft/schemas" "^2.1.7"
     "@unique-nft/solidity-interfaces" "0.70.1"
     "@unique-nft/sr25519" "^0.0.2"
     "@unique-nft/utils" "^0.3.20"
     axios "^1.6.8"
+    qs "^6.13.0"
     zod "^3.22.4"
 
 "@unique-nft/solidity-interfaces@0.70.1":
@@ -10580,6 +10581,13 @@ qs@6.11.0:
   integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
   dependencies:
     side-channel "^1.0.4"
+
+qs@^6.13.0:
+  version "6.13.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.13.0.tgz#6ca3bd58439f7e245655798997787b0d88a51906"
+  integrity sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==
+  dependencies:
+    side-channel "^1.0.6"
 
 query-string@7.1.3:
   version "7.1.3"
