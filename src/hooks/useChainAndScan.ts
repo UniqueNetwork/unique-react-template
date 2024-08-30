@@ -22,6 +22,20 @@ const endpointsByNetwork = {
   },
 };
 
+/**
+ * Custom hook to initialize and access `UniqueChain` and `UniqueScan` instances for a specified network.
+ * 
+ * @param {keyof typeof endpointsByNetwork} network - The name of the network to connect to (e.g., 'unique', 'opal').
+ * 
+ * @example
+ * ```typescript
+ * const { chain, scan, loading } = useChainAndScan('unique');
+ * 
+ * if (!loading) {
+ *   // Interact with the chain and scan instances
+ * }
+ * ```
+ */
 export const useChainAndScan = (network: keyof typeof endpointsByNetwork) => {
   const [data, setData] = useState<ChainAndScan>({ chain: null, scan: null });
   const [loading, setLoading] = useState(true);
