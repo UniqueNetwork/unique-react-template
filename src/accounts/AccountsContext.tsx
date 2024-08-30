@@ -16,6 +16,12 @@ import { ConnectedWalletsName } from "./useWalletCenter";
 import { useWalletCenter } from "./useWalletCenter";
 import { PolkadotWallet } from "./PolkadotWallet";
 
+/**
+ * React context for managing blockchain accounts, including Polkadot and Ethereum wallets.
+ * 
+ * @remarks
+ * This context is responsible for initializing, updating, and clearing accounts, as well as managing account balances.
+ */
 export const AccountsContext = createContext<AccountsContextValue>({
   accounts: new Map(),
   setAccounts: noop,
@@ -28,6 +34,18 @@ export const AccountsContext = createContext<AccountsContextValue>({
   clearAccounts: noop,
 });
 
+/**
+ * Provider component for the AccountsContext, which manages blockchain accounts and their states.
+ * 
+ * @param {PropsWithChildren} children - The child components that will consume the AccountsContext.
+ * 
+ * @example
+ * ```tsx
+ * <AccountsContextProvider>
+ *   <App />
+ * </AccountsContextProvider>
+ * ```
+ */
 export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const { address } = useAccount();
   const [accounts, setAccounts] = useState<Map<string, Account>>(new Map());

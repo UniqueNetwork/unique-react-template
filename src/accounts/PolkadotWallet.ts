@@ -7,6 +7,9 @@ import {
   SignerTypeEnum,
 } from "./types";
 
+/**
+ * Represents the names of the supported Polkadot-based wallets.
+ */
 export type PolkadotWalletName =
   | "polkadot-js"
   | "subwallet-js"
@@ -14,16 +17,37 @@ export type PolkadotWalletName =
   | "enkrypt"
   | "novawallet";
 
+/**
+ * Class representing a Polkadot wallet integration.
+ * 
+ * @implements {BaseWalletEntity<InjectedAccountWithMeta>}
+ */
 export class PolkadotWallet
   implements BaseWalletEntity<InjectedAccountWithMeta>
 {
+  /**
+   * A map that holds the accounts associated with this wallet.
+   * 
+   * @private
+   */
   _accounts = new Map<string, BaseWalletType<InjectedAccountWithMeta>>();
+
+  /**
+   * The name of the wallet being used.
+   * 
+   * @type {PolkadotWalletName}
+   */
   wallet: PolkadotWalletName;
 
   constructor(defaultWallet: PolkadotWalletName = "polkadot-js") {
     this.wallet = defaultWallet;
   }
 
+  /**
+   * Loads and returns the accounts associated with the connected wallet.
+   * 
+   * @throws Will throw an error if the account processing fails.
+   */
   async getAccounts() {
     const wallets = await Polkadot.loadWalletByName(this.wallet);
     const accountEntries = wallets.accounts
