@@ -66,3 +66,22 @@ export const compareEncodedAddresses = (subAddress1: string, subAddress2: string
 
   return encodeAddress(subAddress1) === encodeAddress(subAddress2);
 };
+
+export const truncateMiddle = (word: string, tooLongChars: number) => {
+  if (typeof word !== "string") {
+    return;
+  }
+
+  if (word.length < tooLongChars) {
+    return word;
+  }
+
+  const ellipsis = "...";
+  const charsOnEitherSide = Math.floor(tooLongChars / 2) - ellipsis.length;
+
+  return (
+    word?.slice(0, charsOnEitherSide) +
+    ellipsis +
+    word?.slice(-charsOnEitherSide)
+  );
+};

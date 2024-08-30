@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
+import { truncateMiddle } from "../utils/common";
+import { disableElementInShadowDom } from "../utils/disableShadowDomButton";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -109,7 +111,7 @@ const ButtonBlockHeader = styled.div`
 `;
 
 export const Header: React.FC = () => {
-  const { accounts, setSelectedAccountId, selectedAccountId } =
+  const { accounts, setSelectedAccountId, selectedAccountId, selectedAccount } =
     useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -125,6 +127,14 @@ export const Header: React.FC = () => {
   const handleWalletConnectClick = () => {
     setIsDropdownOpen(false);
     open();
+    const timeoutId = setTimeout(() => {
+      const modalElement = document.querySelector('w3m-modal');
+      if (modalElement) {
+        disableElementInShadowDom(modalElement, 'wui-profile-button-v2', 'copy-address');
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   };
 
   const toggleDropdown = () => {
@@ -162,7 +172,7 @@ export const Header: React.FC = () => {
       <HeaderContainer>
         <AccountSelectorWrapper>
           <ConnectedAccountsButton onClick={toggleDropdown}>
-            Active account
+            {selectedAccount ? truncateMiddle(selectedAccount.address, 22) : 'Connect Account'}
           </ConnectedAccountsButton>
           {isDropdownOpen && (
             <AccountDropdown ref={dropdownRef}>
