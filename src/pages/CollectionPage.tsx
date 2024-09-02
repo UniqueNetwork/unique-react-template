@@ -207,7 +207,7 @@ const CollectionPage = () => {
     return <div>Loading...</div>;
   }
 
-  const coverImageUrl = collectionData.info.cover_image.url;
+  const coverImageUrl = collectionData.info?.cover_image?.url;
 
   return (
     <Container>

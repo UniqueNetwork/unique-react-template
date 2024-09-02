@@ -24,7 +24,7 @@ const TokenList = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { scan, loading: scanLoading } = useChainAndScan("unique");
+  const { scan, loading: scanLoading } = useChainAndScan();
   const [tokens, setTokens] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
