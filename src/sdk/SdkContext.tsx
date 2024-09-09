@@ -1,37 +1,55 @@
-import { createContext, PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { ChainPropertiesResponse } from "@unique-nft/sdk";
-import { Sdk } from '@unique-nft/sdk/full';
+import {
+  createContext,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { connectSdk } from "./connect";
 
 export type SdkContextValueType = {
-  sdk: Sdk | undefined
-  chainProperties: ChainPropertiesResponse | undefined
-}
+  sdk: any | undefined;
+};
 
+/**
+ * React context for providing the Unique SDK instance throughout the application.
+ * 
+ * @remarks
+ * This context allows any component in the application to access the initialized
+ * Unique SDK, enabling interaction with the Unique Network.
+ */
 export const SdkContext = createContext<SdkContextValueType>({
   sdk: undefined,
-  chainProperties: undefined
 });
 
-const baseUrl = "https://rest.unique.network/opal/v1/";
+export const baseUrl = process.env.REACT_APP_REST_URL || "";
 
+/**
+ * A provider component that initializes the Unique SDK and supplies it via context to child components.
+ * 
+ * @param children - The child components that will have access to the Unique SDK through the context.
+ * @returns A React component that provides the initialized Unique SDK to its children.
+ * 
+ * @example
+ * ```tsx
+ * <SdkProvider>
+ *   <App />
+ * </SdkProvider>
+ * ```
+ */
 export const SdkProvider = ({ children }: PropsWithChildren) => {
-  const [sdk, setSdk] = useState<Sdk>();
-  const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
+  const [sdk, setSdk] = useState<any>();
 
   useEffect(() => {
-
-    const sdk = new Sdk({
-      baseUrl,
-    });
-    setSdk(sdk);
-
     void (async () => {
-      const chainProperties = await sdk?.common.chainProperties();
-      setChainProperties(chainProperties);
+      const sdk = await connectSdk(baseUrl);
+      setSdk(sdk);
     })();
-  }, []);   
+  }, []);
 
-  return <SdkContext.Provider value={useMemo(() => ({ sdk, chainProperties }), [sdk, chainProperties])}>
+  return (
+    <SdkContext.Provider value={useMemo(() => ({ sdk }), [sdk])}>
       {children}
-    </SdkContext.Provider>;
+    </SdkContext.Provider>
+  );
 };
