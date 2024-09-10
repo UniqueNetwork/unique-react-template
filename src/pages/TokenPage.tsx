@@ -195,7 +195,7 @@ const TokenPage: React.FC = () => {
     const fetchTokenData = async () => {
       try {
         const token = await sdk.token.get({
-          collectionIdOrAddress: collectionId,
+          collectionId: collectionId,
           tokenId,
           withChildren: true,
         });
