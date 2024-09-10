@@ -180,7 +180,7 @@ const CollectionPage = () => {
     const fetchCollectionData = async () => {
       try {
         const collection = await sdk.collection.get({
-          idOrAddress: collectionId,
+          collectionId: collectionId,
           withLimits: true,
         });
         setCollectionData(collection);
