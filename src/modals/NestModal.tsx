@@ -65,7 +65,6 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
           )
         ).wait();
       } else {
-        //@ts-ignore
         const sdk = await connectSdk(baseUrl, selectedAccount);
 
         await sdk?.token.nest({

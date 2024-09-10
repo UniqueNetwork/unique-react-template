@@ -1,5 +1,6 @@
 import { UniqueChain } from "@unique-nft/sdk";
 import { ISr25519Account } from "@unique-nft/sr25519";
+import { Account, WalletsType } from "../accounts/types";
 
 /**
  * Connects to the Unique SDK using the provided SDK endpoint.
@@ -27,12 +28,15 @@ import { ISr25519Account } from "@unique-nft/sr25519";
  */
 export const connectSdk = async (
   sdkEndpoint: string,
-  account?: ISr25519Account
+  account?: Account<WalletsType> 
 ) => {
   const uniqueChain = UniqueChain({
     baseUrl: sdkEndpoint,
+    //@ts-ignore
     account,
   });
 
   return uniqueChain;
 };
+
+export type UniqueChainType = ReturnType<typeof UniqueChain>;

@@ -10,6 +10,7 @@ import { NestTModal } from "../modals/NestModal";
 import { UnnestTModal } from "../modals/UnnestModal";
 import useIsOwner from "../hooks/useIsOwner";
 import NestedNftItems from "../components/NestedNFTItems";
+import { UniqueChainType } from "../sdk/connect";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -122,56 +123,7 @@ export const Hint = styled.div`
   margin-bottom: 10px;
   width: 80%;
 `;
-
-interface Attribute {
-  trait_type: string;
-  value: string;
-}
-
-interface Media {
-  type: string;
-  url: string;
-}
-
-interface Royalty {
-  address: string;
-  percent: number;
-}
-
-interface ParentToken {
-  collectionId: number;
-  tokenId: number;
-}
-
-interface Property {
-  key: string;
-  value: string;
-  valueHex: string;
-}
-
-export interface TokenData {
-  name: string;
-  description: string;
-  schemaName?: string;
-  schemaVersion?: string;
-  image?: string;
-  attributes?: Attribute[];
-  media?: Record<string, Media>;
-  royalties?: Royalty[];
-  tokenId?: number;
-  collectionId?: number;
-  collectionAddress?: string;
-  owner?: string;
-  parentToken?: ParentToken;
-  properties?: Property[];
-  decodingError?: string | null;
-  youtube_url?: string;
-  animation_url?: string;
-  tokenPrefix?: string;
-  children?: TokenData[];
-  topmostOwner?: string;
-  isBundle?: boolean;
-}
+export type TokenData = Awaited<ReturnType<UniqueChainType['token']['get']>>;
 
 enum TokenModalEnum {
   TRANSFER = "TRANSFER",
@@ -193,10 +145,11 @@ const TokenPage: React.FC = () => {
 
   useEffect(() => {
     const fetchTokenData = async () => {
+      if (!sdk || !tokenId || !collectionId) return;
       try {
         const token = await sdk.token.get({
           collectionId: collectionId,
-          tokenId,
+          tokenId: +tokenId,
           withChildren: true,
         });
         setTokenData(token);
@@ -205,10 +158,7 @@ const TokenPage: React.FC = () => {
       }
     };
 
-    if (!sdk) return;
-    if (tokenId) {
       fetchTokenData();
-    }
   }, [tokenId, sdk, collectionId]);
 
   const { sliderItems, mediaTypes, attributes, royaltiesString } =

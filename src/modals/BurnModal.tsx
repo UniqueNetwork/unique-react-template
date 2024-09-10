@@ -42,7 +42,6 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
 
         await (await collection.burn(tokenId)).wait();
       } else {
-        //@ts-ignore
         const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.burn({
           collectionId,

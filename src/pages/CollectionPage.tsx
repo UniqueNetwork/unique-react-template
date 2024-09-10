@@ -6,6 +6,7 @@ import { TransferModal } from "../modals/TransferModal";
 import useIsOwner from "../hooks/useIsOwner";
 import { Hint } from "./TokenPage";
 import TokenList from "../components/TokenList/TokenList";
+import { UniqueChainType } from "../sdk/connect";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -90,81 +91,8 @@ const TransferButton = styled(Button)`
   margin-top: 20px;
   width: 200px;
 `;
+export type NFTCollection = Awaited<ReturnType<UniqueChainType['collection']['get']>>;
 
-interface Sponsorship {
-  isEnabled: boolean;
-  isConfirmed: boolean;
-  sponsor: string | null;
-}
-
-interface Property {
-  key: string;
-  value: string;
-  valueHex: string;
-}
-
-interface Permission {
-  mutable: boolean;
-  collectionAdmin: boolean;
-  tokenOwner: boolean;
-}
-
-interface TokenPropertyPermission {
-  key: string;
-  permission: Permission;
-}
-
-interface CoverImage {
-  url: string;
-}
-
-interface Info {
-  schemaName: string;
-  schemaVersion: string;
-  cover_image: CoverImage;
-  potential_attributes: any[];
-}
-
-interface Limits {
-  accountTokenOwnershipLimit: number;
-  ownerCanDestroy: boolean;
-  ownerCanTransfer: boolean;
-  sponsorApproveTimeout: number;
-  sponsorTransferTimeout: number;
-  sponsoredDataRateLimit: string;
-  sponsoredDataSize: number;
-  tokenLimit: number;
-  transfersEnabled: boolean;
-}
-
-interface Permissions {
-  access: string;
-  mintMode: boolean;
-  nesting: {
-    tokenOwner: boolean;
-    collectionAdmin: boolean;
-  };
-}
-
-interface NFTCollection {
-  collectionId: number;
-  collectionAddress: string;
-  owner: string;
-  mode: string;
-  name: string;
-  description: string;
-  tokenPrefix: string;
-  properties: Property[];
-  limits?: Limits;
-  admins: any | null;
-  lastTokenId: any | null;
-  sponsorship: Sponsorship;
-  readOnly: boolean;
-  tokenPropertyPermissions: TokenPropertyPermission[];
-  info: Info;
-  infoDecodingError: any | null;
-  permissions: Permissions;
-}
 
 const CollectionPage = () => {
   const { sdk } = useContext(SdkContext);
@@ -178,6 +106,7 @@ const CollectionPage = () => {
 
   useEffect(() => {
     const fetchCollectionData = async () => {
+      if (!sdk || !collectionId) return;
       try {
         const collection = await sdk.collection.get({
           collectionId: collectionId,
@@ -189,10 +118,7 @@ const CollectionPage = () => {
       }
     };
 
-    if (!sdk) return;
-    if (collectionId) {
-      fetchCollectionData();
-    }
+    fetchCollectionData();
   }, [collectionId, sdk]);
 
   if (error) {
@@ -207,7 +133,7 @@ const CollectionPage = () => {
     return <div>Loading...</div>;
   }
 
-  const coverImageUrl = collectionData.info?.cover_image?.url;
+  const coverImageUrl = collectionData.info?.cover_image?.url || '';
 
   return (
     <Container>

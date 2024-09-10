@@ -51,7 +51,6 @@ export const TransferModal = ({
           await collection.changeCollectionOwnerCross(toCross)
         ).wait();
       } else {
-        //@ts-ignore
         const sdk = await connectSdk(baseUrl, selectedAccount);
 
         await sdk?.collection.transferCollection(

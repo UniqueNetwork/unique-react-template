@@ -53,6 +53,7 @@ const SingleAccountPage = () => {
 
   useEffect(() => {
     const fetchAccountBalance = async () => {
+      if (!sdk || !accountId) return;
       try {
         const address = !Address.is.ethereumAddress(accountId || '')
           ? accountId
@@ -69,10 +70,7 @@ const SingleAccountPage = () => {
       }
     };
 
-    if (!sdk) return;
-    if (accountId) {
       fetchAccountBalance();
-    }
   }, [accountId, sdk]);
 
   const uniqueAddress = useMemo(

@@ -100,9 +100,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     const account: Account = { address, signerType: SignerTypeEnum.Ethereum, name: '', signer: undefined, normalizedAddress: '', sign: undefined };
 
     const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
-    account.balance = Number(
-      balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
-    );
+    account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
 
     setAccounts((prevAccounts) => {
       const newAccounts = new Map(prevAccounts);
@@ -128,10 +126,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
           if (walletAccount) {
             account.signer = walletAccount.signer;
             const balanceResponse = await sdk.balance.get({ address });
-            account.balance = Number(
-              balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
-            );
-            
+            account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
             updatedAccounts.set(address, account);
           }
         } catch (e) {
@@ -162,9 +157,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     for (let [address, account] of polkadotAccounts) {
       account.signerType = SignerTypeEnum.Polkadot;
       const balanceResponse = await sdk.balance.get({ address });
-      account.balance = Number(
-        balanceResponse.available / Math.pow(10, Number(balanceResponse.decimals))
-      );
+      account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
       polkadotAccounts.set(address, account);
     }
 

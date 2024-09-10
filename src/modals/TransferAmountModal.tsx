@@ -76,7 +76,6 @@ export const TransferAmountModal = ({
   };
 
   const sendPolkadotTransaction = async () => {
-    //@ts-ignore
     const sdk = await connectSdk(baseUrl, sender);
     await sdk?.balance.transfer({
       to: receiverAddress.trim(),

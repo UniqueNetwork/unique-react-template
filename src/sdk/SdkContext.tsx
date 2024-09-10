@@ -5,10 +5,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { connectSdk } from "./connect";
+import { connectSdk, UniqueChainType } from "./connect";
 
 export type SdkContextValueType = {
-  sdk: any | undefined;
+  sdk?: UniqueChainType;
 };
 
 /**

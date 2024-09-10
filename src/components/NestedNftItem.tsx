@@ -99,7 +99,7 @@ const NestedNftItem: React.FC<NestedNftItemProps> = ({ child, isNested }) => {
       <ImageWrapper>
         <NftImage src={child.image || ''} alt={child.name || 'NFT Image'} />
         {isNested && <Badge>NESTED</Badge>}
-        {child.isBundle && <Badge>BUNDLE</Badge>}
+        {/* {child.isBundle && <Badge>BUNDLE</Badge>} */}
         {/* {mediaIcons.length > 0 && <MediaBadge>{mediaIcons}</MediaBadge>} */}
       </ImageWrapper>
       <ContentWrapper>

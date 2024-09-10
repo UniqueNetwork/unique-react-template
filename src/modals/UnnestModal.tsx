@@ -29,7 +29,6 @@ export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
     setIsLoading(true);
 
     try {
-      //@ts-ignore
       const sdk = await connectSdk(baseUrl, selectedAccount);
 
       await sdk?.token.unnest({

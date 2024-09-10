@@ -60,7 +60,6 @@ export const TransferNFTModal = ({
           await collection.transferFromCross(fromCross, toCross, +tokenId)
         ).wait();
       } else {
-        //@ts-ignore
         const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.transfer({
           to: receiver.trim(),
