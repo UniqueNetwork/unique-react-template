@@ -16,7 +16,7 @@ RUN rm -rf /usr/share/nginx/html/*
 
 COPY --from=build /app/build /usr/share/nginx/html
 
-RUN echo "server { \
+RUN echo 'server { \
     listen 80; \
     location / { \
         expires -1; \
