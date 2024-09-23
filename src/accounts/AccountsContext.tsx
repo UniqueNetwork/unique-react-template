@@ -104,7 +104,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
     setAccounts((prevAccounts) => {
       const newAccounts = new Map(prevAccounts);
-      newAccounts.set(ethereumAddress, account);
+      newAccounts.set(ethereumAddress, { ...account, balance: account.balance });
       return newAccounts;
     });
   }, [sdk, address]);
@@ -115,9 +115,9 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
   const reinitializePolkadotAccountsWithBalance = useCallback(async () => {
     if (!sdk || accounts.size === 0) return;
-    const updatedAccounts = new Map(accounts);
   
-    for (let [address, account] of updatedAccounts) {
+    const updatedPolkadotAccounts = new Map();
+    for (let [address, account] of accounts) {
       if (account.signerType === SignerTypeEnum.Polkadot) {
         try {
           const polkadotWallet = new PolkadotWallet(account.walletType);
@@ -127,17 +127,24 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
             account.signer = walletAccount.signer;
             const balanceResponse = await sdk.balance.get({ address });
             account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
-            updatedAccounts.set(address, account);
+            updatedPolkadotAccounts.set(address, account);
           }
         } catch (e) {
-          console.error(`Failed to reinitialize account ${address}:`, e);
+          console.error(`Failed to reinitialize Polkadot account ${address}:`, e);
         }
       }
     }
-  
-    setAccounts(updatedAccounts);
-  }, [sdk, accounts]);
 
+    setAccounts((prevAccounts) => {
+      const newAccounts = new Map(prevAccounts);
+      updatedPolkadotAccounts.forEach((account, address) => {
+        newAccounts.set(address, account);
+      });
+  
+      return newAccounts;
+    });
+  }, [sdk, accounts]);
+  
   useEffect(() => {
     if (!reinitializePolkadotAccountsWithBalance) return;
     reinitializePolkadotAccountsWithBalance();
