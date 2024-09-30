@@ -208,6 +208,12 @@ export const Header: React.FC = () => {
         </AccountSelectorWrapper>
         <ButtonsWrapper>
           <Button
+            to="/evm-test"
+            onClick={() => setIsDropdownOpen(false)}
+          >
+            EVM Test
+          </Button>
+          <Button
             to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu"
             onClick={() => setIsDropdownOpen(false)}
           >

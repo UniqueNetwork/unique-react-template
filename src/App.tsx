@@ -9,6 +9,7 @@ import SingleAccountPage from "./pages/SingleAccountPage";
 import TokenPage from "./pages/TokenPage";
 import styled from "styled-components";
 import { WalletConnectProviders } from "./components/WalletConnectProviders";
+import { EvmTest } from "./pages/EvmTest";
 
 const ContentLayout = styled.div`
   width: 90vw;
@@ -39,6 +40,10 @@ function App() {
                   <Route
                     path="/token/:collectionId/:tokenId"
                     element={<TokenPage />}
+                  />
+                  <Route
+                    path="/evm-test"
+                    element={<EvmTest />}
                   />
                   <Route path="*" element={<>NOT FOUND</>} />
                 </Routes>

@@ -3547,10 +3547,10 @@
     zod "^3.22.4"
     zod-openapi "^2.18.0"
 
-"@unique-nft/sdk@1.0.0-alpha.22":
-  version "1.0.0-alpha.22"
-  resolved "https://registry.yarnpkg.com/@unique-nft/sdk/-/sdk-1.0.0-alpha.22.tgz#88b8104c739e9ff3aa81a287fa88883a3fa0e36d"
-  integrity sha512-qi6ZQ8AJSIlff3qm4Hv9vdu8NEEgy13yZj0tG4EG1+nL+gn2hGAh6KGA0Rcvy9pw0vmY7FAgxgvGM5+Whn5krg==
+"@unique-nft/sdk@1.0.0-alpha.25":
+  version "1.0.0-alpha.25"
+  resolved "https://registry.yarnpkg.com/@unique-nft/sdk/-/sdk-1.0.0-alpha.25.tgz#f09db0d7f79f6ceae2e8ece14720bc390cb0348c"
+  integrity sha512-v3Fk5efbOhRzj0hKLuZrrKiTPJaqbFfFFk23Hb8kCPOkgYK2WFUD1rI9Xa7IOODYg9F+XgJKfCO092vns8CkgA==
   dependencies:
     "@unique-nft/schemas" "^2.1.7"
     "@unique-nft/solidity-interfaces" "0.70.1"
