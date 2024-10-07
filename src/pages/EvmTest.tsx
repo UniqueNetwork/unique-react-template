@@ -1,11 +1,12 @@
 import React, { useContext, useState } from 'react';
+import { ethers } from 'ethers';
 import { connectSdk } from '../sdk/connect';
 import { baseUrl } from '../sdk/SdkContext';
 import { AccountsContext } from '../accounts/AccountsContext';
 import styled from 'styled-components';
 import { SignerTypeEnum } from '../accounts/types';
-import { Address } from '@unique-nft/utils';
 import storageArtifacts from '../data/storage-artifacts.json';
+import { useEthersSigner } from '../hooks/useSigner';
 
 export const EvmTest = () => {
   const [contractAddress, setContractAddress] = useState('');
@@ -17,6 +18,7 @@ export const EvmTest = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { selectedAccount } = useContext(AccountsContext);
+  const signer = useEthersSigner();
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContractAddress(e.target.value);
@@ -27,35 +29,40 @@ export const EvmTest = () => {
       setErrorMessage('Bytecode is required for deployment');
       return;
     }
+
+    if (!selectedAccount) {
+      setErrorMessage('You need account');
+      return;
+    }
+
     try {
-      console.log(selectedAccount, 'selectedAccount');
-      let sdk;
-      if (selectedAccount && selectedAccount.signerType !== SignerTypeEnum.Ethereum) {
-        sdk = await connectSdk(baseUrl, selectedAccount);
-      } else if (selectedAccount && selectedAccount.signerType === SignerTypeEnum.Ethereum) {
-        console.log(Address.mirror.ethereumToSubstrate(selectedAccount.address), 'AFFEE');
-        sdk = await connectSdk(baseUrl, {
-          ...selectedAccount,
-          address: Address.mirror.ethereumToSubstrate(selectedAccount.address),
-        });
-      }
-
-      if (!sdk) return;
-
       setDeploying(true);
-			console.log('deploy')
-      const result = await sdk.evm.deploy(
-        {
-          bytecode: storageArtifacts.bytecode,
-        },
-				{ signerAddress: (selectedAccount && (selectedAccount.signerType !== SignerTypeEnum.Ethereum)) ? selectedAccount.address : Address.mirror.ethereumToSubstrate((selectedAccount && selectedAccount.address) || '') }
-      );
 
-      console.log(sdk, 'SDK');
-      const deployedContractAddress = result.result.contractAddress;
-      setContractAddress(deployedContractAddress);
-      setErrorMessage(null);
-      console.log(`Contract deployed at address: ${deployedContractAddress}`);
+      if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
+        const sdk = await connectSdk(baseUrl, selectedAccount);
+        if (!sdk) return;
+
+        const result = await sdk.evm.deploy(
+          { bytecode: storageArtifacts.bytecode },
+          { signerAddress: selectedAccount.address }
+        );
+        const deployedContractAddress = result.result.contractAddress;
+        setContractAddress(deployedContractAddress);
+        setErrorMessage(null);
+        console.log(`Contract deployed at address: ${deployedContractAddress}`);
+      } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const factory = new ethers.ContractFactory(storageArtifacts.abi, storageArtifacts.bytecode, signer);
+
+        const contract = await factory.deploy();
+        await contract.waitForDeployment();
+        const deployedContractAddress = await contract.getAddress();
+
+        setContractAddress(deployedContractAddress);
+        setErrorMessage(null);
+        console.log(`Contract deployed via ethers at address: ${deployedContractAddress}`);
+      }
     } catch (error) {
       console.error('Error deploying contract:', error);
       setErrorMessage('Error deploying contract');
@@ -73,21 +80,30 @@ export const EvmTest = () => {
       setErrorMessage('Contract address, ABI, and value are required');
       return;
     }
+
     try {
-      const sdk = await connectSdk(baseUrl, selectedAccount);
       setStoringValue(true);
 
-      const storeTx = await sdk.evm.send({
-        functionName: 'store',
-        functionArgs: [BigInt(storeValue)],
-        contract: {
-          address: contractAddress,
-          abi: storageArtifacts.abi,
-        },
-      });
+      if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
+        const sdk = await connectSdk(baseUrl, selectedAccount);
+        const storeTx = await sdk.evm.send({
+          functionName: 'store',
+          functionArgs: [BigInt(storeValue)],
+          contract: {
+            address: contractAddress,
+            abi: storageArtifacts.abi,
+          },
+        });
 
-      if (storeTx.result.isSuccessful) {
-        console.log('Store transaction successful!');
+        if (storeTx.result.isSuccessful) {
+          setErrorMessage(null);
+          console.log('Store transaction successful!');
+        }
+      } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        const contract = new ethers.Contract(contractAddress, storageArtifacts.abi, signer);
+
+        const tx = await contract.store(BigInt(storeValue));
+        await tx.wait();
         setErrorMessage(null);
       }
     } catch (error) {
@@ -105,21 +121,28 @@ export const EvmTest = () => {
     }
 
     try {
-      const sdk = await connectSdk(baseUrl, selectedAccount);
       setCheckingValue(true);
 
-      const result = await sdk.evm.call({
-        functionName: 'retrieve',
-        functionArgs: [],
-        contract: {
-          address: contractAddress,
-          abi: storageArtifacts.abi,
-        },
-      });
+      if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
+        const sdk = await connectSdk(baseUrl, selectedAccount);
+        const result = await sdk.evm.call({
+          functionName: 'retrieve',
+          functionArgs: [],
+          contract: {
+            address: contractAddress,
+            abi: storageArtifacts.abi,
+          },
+        });
 
-      setRetrievedValue(result[0]?.toString() || 'No value returned');
-      setErrorMessage(null);
-      console.log('Retrieved value:', result[0]?.toString());
+        setRetrievedValue(result[0]?.toString() || 'No value returned');
+        setErrorMessage(null);
+      } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        const contract = new ethers.Contract(contractAddress, storageArtifacts.abi, signer);
+
+        const result = await contract.retrieve();
+        setRetrievedValue(result?.toString() || 'No value returned');
+        setErrorMessage(null);
+      }
     } catch (error) {
       console.error('Error retrieving value from contract:', error);
       setErrorMessage('Error retrieving value from contract');
@@ -133,14 +156,6 @@ export const EvmTest = () => {
       <h2>EVM TEST</h2>
 
       {errorMessage && <StyledError>{errorMessage}</StyledError>}
-
-      {/* Remove the textarea since we're importing the JSON data */}
-      {/* <StyledTextArea
-        placeholder="Paste storage JSON (bytecode and abi)"
-        value={storageJson}
-        onChange={handleStorageJsonChange}
-        rows={10}
-      /> */}
 
       <StyledButton onClick={handleDeployContract} disabled={deploying}>
         {deploying ? 'Deploying...' : 'Deploy Contract'}
