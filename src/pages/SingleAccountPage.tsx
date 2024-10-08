@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { SdkContext } from "../sdk/SdkContext";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
-import TokenList from "../components/TokenList/TokenList";
 
 const Container = styled.div`
   display: flex;
@@ -146,7 +145,6 @@ const SingleAccountPage = () => {
         )}
       </InfoList>
       <Title>Account NFTs</Title>
-      <TokenList />
     </Container>
   );
 };

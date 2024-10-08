@@ -3,13 +3,10 @@ import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AccountsPage } from "./pages/AccountListPage";
 import { SdkProvider } from "./sdk/SdkContext";
-import CollectionPage from "./pages/CollectionPage";
 import { Header } from "./components/Header";
-import SingleAccountPage from "./pages/SingleAccountPage";
-import TokenPage from "./pages/TokenPage";
 import styled from "styled-components";
 import { WalletConnectProviders } from "./components/WalletConnectProviders";
-import { EvmTest } from "./pages/EvmTest";
+import BreedingPage from "./pages/BreedingPage";
 
 const ContentLayout = styled.div`
   width: 90vw;
@@ -28,22 +25,10 @@ function App() {
               <Header />
               <ContentLayout>
                 <Routes>
-                  <Route path="/" element={<AccountsPage />} />
+                  <Route path="/" element={<BreedingPage />} />
                   <Route
-                    path="/collection/:collectionId"
-                    element={<CollectionPage />}
-                  />
-                  <Route
-                    path="/account/:accountId"
-                    element={<SingleAccountPage />}
-                  />
-                  <Route
-                    path="/token/:collectionId/:tokenId"
-                    element={<TokenPage />}
-                  />
-                  <Route
-                    path="/evm-test"
-                    element={<EvmTest />}
+                    path="/accounts"
+                    element={<AccountsPage />}
                   />
                   <Route path="*" element={<>NOT FOUND</>} />
                 </Routes>

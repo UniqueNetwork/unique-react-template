@@ -61,7 +61,7 @@ const AccountSelectorWrapper = styled.div`
 const AccountDropdown = styled.div`
   position: absolute;
   top: 40px;
-  left: 0;
+  right: 1px;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -170,6 +170,14 @@ export const Header: React.FC = () => {
   return (
     <>
       <HeaderContainer>
+        <ButtonsWrapper>
+          <Button
+            to="/"
+            onClick={() => setIsDropdownOpen(false)}
+          >
+            Evolved
+          </Button>
+        </ButtonsWrapper>
         <AccountSelectorWrapper>
           <ConnectedAccountsButton onClick={toggleDropdown}>
             {selectedAccount ? truncateMiddle(selectedAccount.address, 22) : 'Connect Account'}
@@ -206,26 +214,6 @@ export const Header: React.FC = () => {
             </AccountDropdown>
           )}
         </AccountSelectorWrapper>
-        <ButtonsWrapper>
-          <Button
-            to="/evm-test"
-            onClick={() => setIsDropdownOpen(false)}
-          >
-            EVM Test
-          </Button>
-          <Button
-            to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu"
-            onClick={() => setIsDropdownOpen(false)}
-          >
-            Test account
-          </Button>
-          <Button to="/collection/665" onClick={() => setIsDropdownOpen(false)}>
-            Test Collection
-          </Button>
-          <Button to="/token/665/14" onClick={() => setIsDropdownOpen(false)}>
-            Test NFT
-          </Button>
-        </ButtonsWrapper>
       </HeaderContainer>
       <ConnectWallets
         isOpenConnectWalletModal={isOpenChoseWalletModal}

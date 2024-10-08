@@ -5,7 +5,6 @@ import { SdkContext } from "../sdk/SdkContext";
 import { TransferModal } from "../modals/TransferModal";
 import useIsOwner from "../hooks/useIsOwner";
 import { Hint } from "./TokenPage";
-import TokenList from "../components/TokenList/TokenList";
 import { UniqueChainType } from "../sdk/connect";
 
 const Button = styled.button`
@@ -215,7 +214,6 @@ const CollectionPage = () => {
       </SettingsContainer>
       <SettingsContainer>
         <Title>Collection NFTs</Title>
-        <TokenList />
       </SettingsContainer>
       <SettingsContainer>
         
