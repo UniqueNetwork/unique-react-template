@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import {
   UniqueChain,
   UniqueChainInstance,
-  UniqueScan,
-  UniqueScanInstance,
+  UniqueIndexer,
+  UniqueIndexerInstance
 } from "@unique-nft/sdk";
 
 type ChainAndScan = {
   chain: UniqueChainInstance | null;
-  scan: UniqueScanInstance | null;
+  scan: UniqueIndexerInstance | null;
 };
 
 /**
@@ -30,7 +30,7 @@ export const useChainAndScan = () => {
           baseUrl: chainUrl,
         });
 
-        const uniqueScan = UniqueScan({
+        const uniqueScan = UniqueIndexer({
           baseUrl: scanUrl,
         });
 

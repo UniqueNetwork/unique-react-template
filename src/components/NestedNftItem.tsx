@@ -105,7 +105,7 @@ const NestedNftItem: React.FC<NestedNftItemProps> = ({ child, isNested }) => {
       <ContentWrapper>
         <InfoItem>
           <span>Symbol:</span>
-          <span>{child.tokenPrefix || '-'}</span>
+          <span>{child.symbol || '-'}</span>
         </InfoItem>
         <InfoItem>
           <span>ID:</span>

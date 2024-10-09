@@ -259,7 +259,7 @@ const TokenPage: React.FC = () => {
 
         <TokenInfoWrap>
           <InfoItem>
-            <span>Symbol:</span> <span>{tokenData.tokenPrefix || "-"}</span>
+            <span>Symbol:</span> <span>{tokenData.symbol || "-"}</span>
           </InfoItem>
           <InfoItem>
             <span>ID:</span>{" "}
