@@ -149,7 +149,7 @@ const CollectionPage = () => {
           <span>Name:</span> <span>{collectionData.name}</span>
         </InfoItem>
         <InfoItem>
-          <span>Symbol:</span> <span>{collectionData.tokenPrefix}</span>
+          <span>Symbol:</span> <span>{collectionData.symbol}</span>
         </InfoItem>
         <InfoItem>
           <span>Description:</span> <span>{collectionData.description}</span>
