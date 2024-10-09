@@ -8,6 +8,8 @@ import { TokenCard } from "../components/TokenCard";
 import { Address } from "@unique-nft/utils";
 import { StyledTitle } from "../components/Header";
 import Loader from "../components/Loader";
+import { SignerTypeEnum } from "../accounts/types";
+import { ethers } from "ethers";
 
 const Container = styled.div`
   padding: 20px;
@@ -50,24 +52,69 @@ const TokensGrid = styled.div`
 `;
 
 const BreedingPage = () => {
-  // const CONTRACT_ADDRESS = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
-  const CONTRACT_ADDRESS = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6f";
-  // const COLLECTION_ID = 3997;
-  const COLLECTION_ID = 3968;
+  const CONTRACT_ADDRESS = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
+  // const CONTRACT_ADDRESS = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6qf";
+  const COLLECTION_ID = 3997;
+  // const COLLECTION_ID = 3968;
   const EVOLVE_EXPERIENCE = 150;
 
   const [loading, setLoading] = useState(false);
-  const [gladiatorToken, setGladiatorToken] = useState<Token | undefined>(undefined);
+  const [gladiatorToken, setGladiatorToken] = useState<Token | undefined>(
+    undefined
+  );
   const [userTokens, setUserTokens] = useState<Token[]>([]);
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
 
   const { chain, scan } = useChainAndScan();
   const { selectedAccount } = useContext(AccountsContext);
 
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleSelectToken = (tokenId: number) => {
-    setSelectedTokenId((prevTokenId) => (prevTokenId === tokenId ? null : tokenId));
+    setSelectedTokenId((prevTokenId) =>
+      prevTokenId === tokenId ? null : tokenId
+    );
+  };
+
+  // Helper function to send transactions
+  const sendContractTransaction = async (
+    functionName: string,
+    functionArgs: any[] = []
+  ) => {
+    if (!selectedAccount || !chain) return;
+
+    try {
+      if (selectedAccount.signerType === SignerTypeEnum.Polkadot) {
+        await chain.evm.send(
+          {
+            functionName,
+            functionArgs,
+            contract: {
+              address: CONTRACT_ADDRESS,
+              abi: artifacts.abi,
+            },
+          },
+          { signerAddress: selectedAccount.address },
+          { signer: selectedAccount.signer }
+        );
+      } else if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+
+        const contract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          artifacts.abi,
+          await provider.getSigner()
+        );
+        const tx = await contract[functionName](...functionArgs);
+        await tx.wait();
+      } else {
+        throw new Error("Unsupported signer type");
+      }
+    } catch (error) {
+      console.error(`Error during ${functionName}:`, error);
+      throw error;
+    }
   };
 
   const handleBreed = async () => {
@@ -75,56 +122,34 @@ const BreedingPage = () => {
 
     setLoading(true);
     try {
-      const crossAddress = Address.extract.ethCrossAccountId(selectedAccount.address);
-
-      await chain.evm.send(
-        {
-          functionName: "breed",
-          functionArgs: [crossAddress],
-          contract: {
-            address: CONTRACT_ADDRESS,
-            abi: artifacts.abi,
-          },
-        },
-        { signerAddress: selectedAccount.address },
-        { signer: selectedAccount.signer }
+      let crossAddress = Address.extract.ethCrossAccountId(
+        selectedAccount.address
       );
+
+      await sendContractTransaction("breed", [crossAddress]);
 
       await sleep(3000);
 
       await fetchGladiatorToken();
       await fetchUserTokens();
     } catch (error) {
-      console.error("Error during breed:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleEnterArena = async () => {
-    if (!chain || !selectedAccount || !selectedTokenId) return;
+    if (!selectedAccount || !chain || !selectedTokenId) return;
 
     setLoading(true);
     try {
-      await chain.evm.send(
-        {
-          functionName: "enterArena",
-          functionArgs: [selectedTokenId],
-          contract: {
-            address: CONTRACT_ADDRESS,
-            abi: artifacts.abi,
-          },
-        },
-        {
-          signerAddress: selectedAccount.address,
-        },
-        { signer: selectedAccount.signer }
-      );
+      await sendContractTransaction("enterArena", [selectedTokenId]);
 
       await sleep(3000);
+
       await fetchGladiatorToken();
     } catch (error) {
-      console.error("Error during enterArena:", error);
+      // Error is already logged
     } finally {
       setSelectedTokenId(null);
       setLoading(false);
@@ -132,29 +157,16 @@ const BreedingPage = () => {
   };
 
   const handleEvolve = async () => {
-    if (!chain || !selectedAccount || !selectedTokenId) return;
+    if (!selectedAccount || !chain || !selectedTokenId) return;
 
     setLoading(true);
     try {
-      await chain.evm.send(
-        {
-          functionName: "evolve",
-          functionArgs: [selectedTokenId],
-          contract: {
-            address: CONTRACT_ADDRESS,
-            abi: artifacts.abi,
-          },
-        },
-        {
-          signerAddress: selectedAccount.address,
-        },
-        { signer: selectedAccount.signer }
-      );
+      await sendContractTransaction("evolve", [selectedTokenId]);
 
       await sleep(3000);
+
       await fetchUserTokens();
     } catch (error) {
-      console.error("Error during evolve:", error);
     } finally {
       setSelectedTokenId(null);
       setLoading(false);
@@ -165,7 +177,10 @@ const BreedingPage = () => {
     async (tokenId: number): Promise<Token | undefined> => {
       if (!chain) return undefined;
       try {
-        const token = await chain.token.get({ collectionId: COLLECTION_ID, tokenId });
+        const token = await chain.token.get({
+          collectionId: COLLECTION_ID,
+          tokenId,
+        });
         return token;
       } catch (error) {
         console.error(`Error fetching token ${tokenId}:`, error);
@@ -218,7 +233,9 @@ const BreedingPage = () => {
   }, [scan, selectedAccount]);
 
   const canEvolve = useCallback(() => {
-    const selectedToken = userTokens.find((nft) => nft.tokenId === selectedTokenId);
+    const selectedToken = userTokens.find(
+      (nft) => nft.tokenId === selectedTokenId
+    );
     if (!selectedToken) return false;
 
     const experienceAttr = selectedToken.attributes?.find(
@@ -281,9 +298,7 @@ const BreedingPage = () => {
         isActive={!!selectedAccount}
         onClick={handleBreed}
       />
-      {canEvolve() && (
-        <UnicornButton onClick={handleEvolve}>🦄</UnicornButton>
-      )}
+      {canEvolve() && <UnicornButton onClick={handleEvolve}>🦄</UnicornButton>}
       {loading && <Loader />}
     </Container>
   );
