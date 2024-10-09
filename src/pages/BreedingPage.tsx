@@ -7,6 +7,7 @@ import { Token } from "../utils/types";
 import { TokenCard } from "../components/TokenCard";
 import { Address } from "@unique-nft/utils";
 import { StyledTitle } from "../components/Header";
+import Loader from "../components/Loader";
 
 const Container = styled.div`
   padding: 20px;
@@ -49,11 +50,11 @@ const TokensGrid = styled.div`
 `;
 
 const BreedingPage = () => {
-  const contractAddress = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
-  // const contractAddress = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6f";
+  // const contractAddress = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
+  const contractAddress = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6f";
   
-  const collectionId = 3997;
-  // const collectionId = 3968;
+  // const collectionId = 3997;
+  const collectionId = 3968;
   const evolveExperience = 150;
 
   const [loading, setLoading] = useState(false);
@@ -109,6 +110,7 @@ const BreedingPage = () => {
     if (!chain || !selectedAccount || !selectedTokenId) return;
 
     try {
+      setLoading(true);
       await chain.evm.send(
         {
           functionName: "enterArena",
@@ -129,6 +131,7 @@ const BreedingPage = () => {
     } catch (error) {
     } finally {
       setSelectedTokenId(null);
+      setLoading(false);
     }
   };
 
@@ -273,6 +276,7 @@ const BreedingPage = () => {
           🦄
         </UnicornButton>
       )}
+      {loading && <Loader />}
     </Container>
   );
 };
