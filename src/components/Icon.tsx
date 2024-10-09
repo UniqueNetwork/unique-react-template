@@ -1,4 +1,4 @@
-import Icons from '../../static/icons/icons.svg';
+import Icons from '../static/icons/icons.svg';
 import { ForwardedRef, forwardRef, isValidElement, ReactNode, MouseEvent } from 'react';
 
 export interface IconProps {

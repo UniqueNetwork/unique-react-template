@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
+import { ConnectWallets } from "../modals/ConnectWallets";
 import { truncateMiddle } from "../utils/common";
 import { disableElementInShadowDom } from "../utils/disableShadowDomButton";
 

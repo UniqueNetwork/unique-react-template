@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { web3Enable } from "@polkadot/extension-dapp";
-import PolkadotJsIcon from "../../static/icons/polkadot-wallet.svg";
-import TalismanIcon from "../../static/icons/talisman-wallet.svg";
-import SubWalletIcon from "../../static/icons/subwallet.svg";
-import EnkriptIcon from "../../static/icons/enkrypt.svg";
-import { ConnectedWalletsName } from "../../accounts/useWalletCenter";
-import { Modal } from "../../components/Modal";
-import { Icon } from "../../components/UI/Icon";
-import { AccountsContext } from "../../accounts/AccountsContext";
+import PolkadotJsIcon from "../static/icons/polkadot-wallet.svg";
+import TalismanIcon from "../static/icons/talisman-wallet.svg";
+import SubWalletIcon from "../static/icons/subwallet.svg";
+import EnkriptIcon from "../static/icons/enkrypt.svg";
+import { ConnectedWalletsName } from "../accounts/useWalletCenter";
+import { Modal } from "../components/Modal";
+import { Icon } from "../components/Icon";
+import { AccountsContext } from "../accounts/AccountsContext";
 
 const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
   "polkadot-js": "https://polkadot.js.org/extension/",

@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import artifacts from "../data/breeding-game.json";
+import artifacts from "../static/abi/breeding-game.json";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { useChainAndScan } from "../hooks/useChainAndScan";
 import styled from "styled-components";
@@ -50,16 +50,15 @@ const TokensGrid = styled.div`
 `;
 
 const BreedingPage = () => {
-  // const contractAddress = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
-  const contractAddress = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6f";
-  
-  // const collectionId = 3997;
-  const collectionId = 3968;
-  const evolveExperience = 150;
+  // const CONTRACT_ADDRESS = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
+  const CONTRACT_ADDRESS = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6f";
+  // const COLLECTION_ID = 3997;
+  const COLLECTION_ID = 3968;
+  const EVOLVE_EXPERIENCE = 150;
 
   const [loading, setLoading] = useState(false);
-  const [gladiator, setGladiator] = useState<Token | undefined>(undefined);
-  const [nfts, setNfts] = useState<Token[]>([]);
+  const [gladiatorToken, setGladiatorToken] = useState<Token | undefined>(undefined);
+  const [userTokens, setUserTokens] = useState<Token[]>([]);
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
 
   const { chain, scan } = useChainAndScan();
@@ -67,26 +66,23 @@ const BreedingPage = () => {
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const selectToken = (tokenId: number) => {
-    console.log(tokenId);
-    if (selectedTokenId === tokenId) setSelectedTokenId(null);
-    else setSelectedTokenId(tokenId);
+  const handleSelectToken = (tokenId: number) => {
+    setSelectedTokenId((prevTokenId) => (prevTokenId === tokenId ? null : tokenId));
   };
 
-  const breed = async () => {
+  const handleBreed = async () => {
     if (!selectedAccount || !chain) return;
 
+    setLoading(true);
     try {
-      const crossAddress = Address.extract.ethCrossAccountId(
-        selectedAccount.address
-      );
+      const crossAddress = Address.extract.ethCrossAccountId(selectedAccount.address);
 
       await chain.evm.send(
         {
           functionName: "breed",
           functionArgs: [crossAddress],
           contract: {
-            address: contractAddress,
+            address: CONTRACT_ADDRESS,
             abi: artifacts.abi,
           },
         },
@@ -96,27 +92,26 @@ const BreedingPage = () => {
 
       await sleep(3000);
 
-      await Promise.all([
-        requestGladiator(),
-        requestUserTokens()
-      ]);
+      await fetchGladiatorToken();
+      await fetchUserTokens();
     } catch (error) {
       console.error("Error during breed:", error);
     } finally {
+      setLoading(false);
     }
   };
 
-  const enterArena = async () => {
+  const handleEnterArena = async () => {
     if (!chain || !selectedAccount || !selectedTokenId) return;
 
+    setLoading(true);
     try {
-      setLoading(true);
       await chain.evm.send(
         {
           functionName: "enterArena",
           functionArgs: [selectedTokenId],
           contract: {
-            address: contractAddress,
+            address: CONTRACT_ADDRESS,
             abi: artifacts.abi,
           },
         },
@@ -127,49 +122,103 @@ const BreedingPage = () => {
       );
 
       await sleep(3000);
-      await requestGladiator();
+      await fetchGladiatorToken();
     } catch (error) {
+      console.error("Error during enterArena:", error);
     } finally {
       setSelectedTokenId(null);
       setLoading(false);
     }
   };
 
-  const requestToken = useCallback(
+  const handleEvolve = async () => {
+    if (!chain || !selectedAccount || !selectedTokenId) return;
+
+    setLoading(true);
+    try {
+      await chain.evm.send(
+        {
+          functionName: "evolve",
+          functionArgs: [selectedTokenId],
+          contract: {
+            address: CONTRACT_ADDRESS,
+            abi: artifacts.abi,
+          },
+        },
+        {
+          signerAddress: selectedAccount.address,
+        },
+        { signer: selectedAccount.signer }
+      );
+
+      await sleep(3000);
+      await fetchUserTokens();
+    } catch (error) {
+      console.error("Error during evolve:", error);
+    } finally {
+      setSelectedTokenId(null);
+      setLoading(false);
+    }
+  };
+
+  const fetchToken = useCallback(
     async (tokenId: number): Promise<Token | undefined> => {
-      if (!chain) return;
-      const token = await chain.token.get({ collectionId, tokenId });
-      return token;
+      if (!chain) return undefined;
+      try {
+        const token = await chain.token.get({ collectionId: COLLECTION_ID, tokenId });
+        return token;
+      } catch (error) {
+        console.error(`Error fetching token ${tokenId}:`, error);
+        return undefined;
+      }
     },
-    [chain, collectionId]
+    [chain]
   );
 
-  const requestGladiator = useCallback(async () => {
+  const fetchGladiatorToken = useCallback(async () => {
     if (!chain) return;
     try {
       const [gladiator] = await chain.evm.call({
         functionName: "getGladiator",
         functionArgs: [],
         contract: {
-          address: contractAddress,
+          address: CONTRACT_ADDRESS,
           abi: artifacts.abi,
         },
       });
 
-      const gladiatorId = parseInt(gladiator);
+      const gladiatorId = parseInt(gladiator, 10);
 
-      if (gladiator === 0) setGladiator(undefined);
-      else {
-        const token = await requestToken(gladiatorId);
-        setGladiator(token);
+      if (gladiatorId === 0 || isNaN(gladiatorId)) {
+        setGladiatorToken(undefined);
+      } else {
+        const token = await fetchToken(gladiatorId);
+        setGladiatorToken(token);
       }
     } catch (error) {
-    } finally {
+      console.error("Error fetching gladiator token:", error);
+      setGladiatorToken(undefined);
     }
-  }, [chain, requestToken]);
+  }, [chain, fetchToken]);
+
+  const fetchUserTokens = useCallback(async () => {
+    if (!scan || !selectedAccount) return;
+
+    try {
+      const params = {
+        collectionIdIn: [COLLECTION_ID.toString()],
+        topmostOwnerIn: [selectedAccount.address],
+      };
+
+      const data = await scan.nfts(params);
+      setUserTokens(data.items);
+    } catch (error) {
+      console.error("Error fetching user tokens:", error);
+    }
+  }, [scan, selectedAccount]);
 
   const canEvolve = useCallback(() => {
-    const selectedToken = nfts.find((nft) => nft.tokenId === selectedTokenId);
+    const selectedToken = userTokens.find((nft) => nft.tokenId === selectedTokenId);
     if (!selectedToken) return false;
 
     const experienceAttr = selectedToken.attributes?.find(
@@ -179,89 +228,50 @@ const BreedingPage = () => {
       (attr) => attr.trait_type === "Generation"
     );
 
+    const experienceValue = experienceAttr?.value?.toString() || "0";
+    const generationValue = generationAttr?.value?.toString() || "0";
+
     return (
-      generationAttr?.value === "0" &&
-      experienceAttr &&
-      parseInt(experienceAttr.value.toString()) >= evolveExperience
+      generationValue === "0" &&
+      parseInt(experienceValue, 10) >= EVOLVE_EXPERIENCE
     );
-  }, [selectedTokenId, nfts, evolveExperience]);
-
-  const evolve = async () => {
-    if (!chain || !selectedAccount || !selectedTokenId) return;
-
-    try {
-      await chain.evm.send(
-        {
-          functionName: "evolve",
-          functionArgs: [selectedTokenId],
-          contract: {
-            address: contractAddress,
-            abi: artifacts.abi,
-          },
-        },
-        {
-          signerAddress: selectedAccount.address,
-        },
-        { signer: selectedAccount.signer }
-      );
-
-      await sleep(3000);
-      await requestUserTokens();
-    } catch (error) {
-    } finally {
-      setSelectedTokenId(null);
-    }
-  }
-
-  const requestUserTokens = useCallback(async () => {
-    if (!scan || !selectedAccount) return;
-
-    try {
-      const params = {
-        collectionIdIn: [collectionId.toString()],
-        topmostOwnerIn: [selectedAccount.address],
-      };
-
-      const data = await scan.nfts(params);
-      setNfts(data.items);
-    } catch (error) {
-    } finally {
-    }
-  }, [scan, selectedAccount, collectionId]);
+  }, [selectedTokenId, userTokens]);
 
   useEffect(() => {
-    requestGladiator();
-    requestUserTokens();
-  }, [requestGladiator, requestUserTokens]);
+    fetchGladiatorToken();
+    fetchUserTokens();
+  }, [fetchGladiatorToken, fetchUserTokens]);
 
   return (
     <Container>
-      <StyledTitle>Arena</StyledTitle>
+      {userTokens.length > 0 && (
+        <>
+          <StyledTitle>Arena</StyledTitle>
 
-        <TokenCard
-          token={gladiator}
-          fallbackImage={
-            "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmWHKByMH65R75zQLkHtMv26Nifc9euYGAxngWTw9w17xy"
-          }
-          isActive={selectedTokenId !== null}
-          onClick={() => enterArena()}
-        />
-      
-      <StyledTitle>Squad</StyledTitle>
+          <TokenCard
+            token={gladiatorToken}
+            fallbackImage={
+              "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmWHKByMH65R75zQLkHtMv26Nifc9euYGAxngWTw9w17xy"
+            }
+            isActive={selectedTokenId !== null}
+            onClick={handleEnterArena}
+          />
+          <StyledTitle>Squad</StyledTitle>
+        </>
+      )}
 
       <TokensGrid>
-        {nfts.map(
-          (nft) =>
-            nft.tokenId !== gladiator?.tokenId && (
-              <TokenCard
-                key={nft.tokenId}
-                token={nft}
-                fallbackImage={""}
-                isActive={nft.tokenId === selectedTokenId}
-                onClick={() => selectToken(nft.tokenId)}
-              />
-            )
-        )}
+        {userTokens
+          .filter((nft) => nft.tokenId !== gladiatorToken?.tokenId)
+          .map((nft) => (
+            <TokenCard
+              key={nft.tokenId}
+              token={nft}
+              fallbackImage={""}
+              isActive={nft.tokenId === selectedTokenId}
+              onClick={() => handleSelectToken(nft.tokenId)}
+            />
+          ))}
       </TokensGrid>
       <TokenCard
         token={null}
@@ -269,12 +279,10 @@ const BreedingPage = () => {
           "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmTysVr68jiW857ZmGHuZ5WGpYQ8YSeV5FPp2DYsTCeduP"
         }
         isActive={!!selectedAccount}
-        onClick={() => breed()}
+        onClick={handleBreed}
       />
       {canEvolve() && (
-        <UnicornButton onClick={() => evolve()}>
-          🦄
-        </UnicornButton>
+        <UnicornButton onClick={handleEvolve}>🦄</UnicornButton>
       )}
       {loading && <Loader />}
     </Container>

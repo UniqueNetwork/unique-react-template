@@ -1,5 +1,4 @@
 import { UniqueChain } from "@unique-nft/sdk";
-import { ISr25519Account } from "@unique-nft/sr25519";
 import { Account, WalletsType } from "../accounts/types";
 
 /**

@@ -1,6 +1,6 @@
 import { useState, PropsWithChildren } from "react";
 import styled from "styled-components";
-import { Icon } from "./UI/Icon";
+import { Icon } from "./Icon";
 
 export type ModalProps = PropsWithChildren<{
   align?: "top" | "middle";

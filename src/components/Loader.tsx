@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components";
-import image from "../data/fight.png";
+import image from "../static/images/fight.png";
 import { useEffect } from "react";
 
 const rotate = keyframes`
@@ -25,8 +25,8 @@ const Overlay = styled.div`
 `;
 
 const LoaderImage = styled.img`
-  width: 500px;
-  height: 500px;
+  width: 400px;
+  height: 400px;
   animation: ${rotate} 5s linear infinite;
 `;
 
