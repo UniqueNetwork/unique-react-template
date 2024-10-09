@@ -7,19 +7,15 @@ import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWalle
 import { truncateMiddle } from "../utils/common";
 import { disableElementInShadowDom } from "../utils/disableShadowDomButton";
 
-const Button = styled(NavLink)`
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  background-color: #f0ad4e;
-  text-decoration: none;
-  font-size: 16px;
-
-  &:hover {
-    opacity: 0.8;
-  }
+export const StyledTitle = styled.h1`
+  font-family: "Honk", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "MORF" <morph>,
+    "SHLN" <shadow length>;
+  font-size: 48px;
 `;
 
 const ConnectedAccountsButton = styled.button`
@@ -48,10 +44,6 @@ const HeaderContainer = styled.div`
   box-sizing: border-box;
 `;
 
-const ButtonsWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-`;
 
 const AccountSelectorWrapper = styled.div`
   position: relative;
@@ -128,9 +120,13 @@ export const Header: React.FC = () => {
     setIsDropdownOpen(false);
     open();
     const timeoutId = setTimeout(() => {
-      const modalElement = document.querySelector('w3m-modal');
+      const modalElement = document.querySelector("w3m-modal");
       if (modalElement) {
-        disableElementInShadowDom(modalElement, 'wui-profile-button-v2', 'copy-address');
+        disableElementInShadowDom(
+          modalElement,
+          "wui-profile-button-v2",
+          "copy-address"
+        );
       }
     }, 100);
 
@@ -170,17 +166,14 @@ export const Header: React.FC = () => {
   return (
     <>
       <HeaderContainer>
-        <ButtonsWrapper>
-          <Button
-            to="/"
-            onClick={() => setIsDropdownOpen(false)}
-          >
-            Evolved
-          </Button>
-        </ButtonsWrapper>
+        <StyledTitle>
+          Evolved
+        </StyledTitle>
         <AccountSelectorWrapper>
           <ConnectedAccountsButton onClick={toggleDropdown}>
-            {selectedAccount ? truncateMiddle(selectedAccount.address, 22) : 'Connect Account'}
+            {selectedAccount
+              ? truncateMiddle(selectedAccount.address, 22)
+              : "Connect Account"}
           </ConnectedAccountsButton>
           {isDropdownOpen && (
             <AccountDropdown ref={dropdownRef}>
@@ -208,9 +201,6 @@ export const Header: React.FC = () => {
                   ETHEREUM Wallets
                 </ButtonConnect>
               </ButtonBlock>
-              <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
-                <NavLink to="/">Go to Accounts Page</NavLink>
-              </NavLinkWrapper>
             </AccountDropdown>
           )}
         </AccountSelectorWrapper>
