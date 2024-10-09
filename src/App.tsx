@@ -1,7 +1,6 @@
 import { AccountsContextProvider } from "./accounts/AccountsContext";
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { AccountsPage } from "./pages/AccountListPage";
 import { SdkProvider } from "./sdk/SdkContext";
 import { Header } from "./components/Header";
 import styled from "styled-components";
@@ -26,10 +25,6 @@ function App() {
               <ContentLayout>
                 <Routes>
                   <Route path="/" element={<BreedingPage />} />
-                  <Route
-                    path="/accounts"
-                    element={<AccountsPage />}
-                  />
                   <Route path="*" element={<>NOT FOUND</>} />
                 </Routes>
               </ContentLayout>

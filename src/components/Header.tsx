@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
