@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import artifacts from "../static/abi/breeding-game.json";
+import artifacts from "../static/artifacts/contracts/BreedingGame.sol/BreedingGame.json";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { useChainAndScan } from "../hooks/useChainAndScan";
 import styled from "styled-components";
@@ -9,7 +9,7 @@ import { Address } from "@unique-nft/utils";
 import { StyledTitle } from "../components/Header";
 import Loader from "../components/Loader";
 import { SignerTypeEnum } from "../accounts/types";
-import { ethers } from "ethers";
+import { ethers, TransactionReceipt } from "ethers";
 
 const Container = styled.div`
   padding: 20px;
@@ -53,9 +53,7 @@ const TokensGrid = styled.div`
 
 const BreedingPage = () => {
   const CONTRACT_ADDRESS = "0x8Cdff9BCC8d9Edd503D584488E2de5E9744CD049";
-  // const CONTRACT_ADDRESS = "0x00A34e85c5dB3F80B3Af710667a7D8Ce7211CA6qf";
   const COLLECTION_ID = 3997;
-  // const COLLECTION_ID = 3968;
   const EVOLVE_EXPERIENCE = 150;
 
   const [loading, setLoading] = useState(false);
@@ -80,13 +78,14 @@ const BreedingPage = () => {
   // Helper function to send transactions
   const sendContractTransaction = async (
     functionName: string,
-    functionArgs: any[] = []
+    functionArgs: any[] = [],
+    gasLimit: bigint
   ) => {
     if (!selectedAccount || !chain) return;
 
     try {
       if (selectedAccount.signerType === SignerTypeEnum.Polkadot) {
-        await chain.evm.send(
+        const result = await chain.evm.send(
           {
             functionName,
             functionArgs,
@@ -94,10 +93,13 @@ const BreedingPage = () => {
               address: CONTRACT_ADDRESS,
               abi: artifacts.abi,
             },
+            gasLimit,
           },
           { signerAddress: selectedAccount.address },
           { signer: selectedAccount.signer }
         );
+
+        return result.extrinsicOutput.hash;
       } else if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
 
@@ -106,8 +108,10 @@ const BreedingPage = () => {
           artifacts.abi,
           await provider.getSigner()
         );
-        const tx = await contract[functionName](...functionArgs);
-        await tx.wait();
+        const tx = await contract[functionName](...functionArgs, {gasLimit});
+        const receipt: TransactionReceipt = await tx.wait();
+
+        return receipt.hash;
       } else {
         throw new Error("Unsupported signer type");
       }
@@ -126,9 +130,9 @@ const BreedingPage = () => {
         selectedAccount.address
       );
 
-      await sendContractTransaction("breed", [crossAddress]);
+      await sendContractTransaction("breed", [crossAddress], 1_000_000n);
 
-      await sleep(3000);
+      await sleep(6000);
 
       await fetchGladiatorToken();
       await fetchUserTokens();
@@ -143,11 +147,14 @@ const BreedingPage = () => {
 
     setLoading(true);
     try {
-      await sendContractTransaction("enterArena", [selectedTokenId]);
+      await sendContractTransaction("enterArena", [selectedTokenId], 1000_000n);
 
-      await sleep(3000);
+      await sleep(6000);
 
-      await fetchGladiatorToken();
+      await Promise.all([
+        fetchGladiatorToken(),
+        fetchUserTokens(),
+      ])
     } catch (error) {
       // Error is already logged
     } finally {
@@ -161,9 +168,9 @@ const BreedingPage = () => {
 
     setLoading(true);
     try {
-      await sendContractTransaction("evolve", [selectedTokenId]);
+      await sendContractTransaction("evolve", [selectedTokenId], 1000_000n);
 
-      await sleep(3000);
+      await sleep(6000);
 
       await fetchUserTokens();
     } catch (error) {
