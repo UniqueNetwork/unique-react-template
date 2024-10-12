@@ -173,7 +173,7 @@ Connect your Substrate or Ethereum wallet (better both). Breed a couple of creat
 
 Let's return to the contract and check how it works in detail.
 
-But first, let's quickly explore how Unique Netwrok NFTs work in a nutshell.
+But first, let's quickly explore how Unique Network NFTs work in a nutshell.
 
 Unique Network is a Substrate-first, NFT-specific blockchain. Special RPCs handle creating collections and NFTs, so you don't need to deploy contracts.
 
@@ -200,7 +200,7 @@ In Unique Network, NFTs have unique identifiers that increment with every minted
 
 To make this architecture compatible with the EVM interface a set of precompiles are provided. You may check them in the [documentation](https://docs.unique.network/build/evm/smart-contracts/)
 
-However, it is not enough to mint an NFT; to make this NFT visible for applications such as wallets, you need to stick to the particular metadata format. This could be a tricky task to implement using only low-level precompile interfaces. To solve this, we provide a contracts library that allow the minting of collections and tokens in the correct metadata format. Check available contracts and their functions at https://github.com/UniqueNetwork/unique-contracts
+However, it is not enough to mint an NFT; to make this NFT visible for applications such as wallets, you need to stick to the particular metadata format. This could be a tricky task to implement using only low-level precompile interfaces. To solve this, we provide a contracts library that allows the minting of collections and tokens in the correct metadata format. Check available contracts and their functions at https://github.com/UniqueNetwork/unique-contracts
 
 This boilerplate already has unique-contracts installed, but if you decide to create your project from scratch, here is the command:
 
@@ -223,7 +223,7 @@ constructor() payable CollectionMinter(true, true, false) {
     ] = "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmPqsyQRozG1vs2ZpgbPWQDbySqibaG6Q3sV7PGmSCxrBH/";
 
     // The contract mints a collection and becomes the collection owner,
-    // so it has permissions to mutate its tokens' attributes.
+    // so it has permission to mutate its tokens' attributes.
     COLLECTION_ADDRESS = _mintCollection(
         "Evolved",
         "Breeding simulator",
@@ -244,7 +244,7 @@ Make notice:
 
 You may check the collection we already created in the [Unique Scan](https://uniquescan.io/OPAL/collections/3997)
 
-Or you can deploy your contract by executing `yarn deploy:contracts`. Do not forget to set your private key to the hardhat.config.ts
+You can also deploy your contract by executing `yarn deploy:contracts`. Do not forget to set your private key to the hardhat.config.ts
 
 ### Creating NFTs
 

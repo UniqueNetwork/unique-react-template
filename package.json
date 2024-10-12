@@ -39,7 +39,6 @@
     "compile:contracts": "cd ./contracts && yarn compile",
     "deploy:contracts": "cd ./contracts && yarn deploy",
     "start": "react-scripts start",
-    "compile:contracts": "cd contracts && yarn compile",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
