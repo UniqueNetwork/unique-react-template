@@ -7,6 +7,12 @@ yarn
 yarn start
 ```
 
+> [!IMPORTANT]
+> There are specific versions of this template:
+> - For the EVM workshop, use https://github.com/UniqueNetwork/unique-react-template/tree/workshop-evm
+> - For the legacy version of Unique SDK-1.0, use https://github.com/UniqueNetwork/unique-react-template/tree/sdk-1
+
+
 ### Connect to Unique SDK
 
 This boilerplate utilizes `@unique-nft/sdk` which allows an easy and efficient way to interact with substrate-based networks. Read more about SDK in [documentation](https://docs.unique.network/build/sdk/getting-started.html)
@@ -30,7 +36,6 @@ Learn how to:
 - Integrate with EVM wallets via WalletConnect: [`/src/components/WalletConnectProviders.tsx`](./src/components/WalletConnectProviders.tsx) This file contains all the logic related to connecting and managing EVM wallets using WalletConnect, providing a convenient and modular structure for handling connections and interactions with Ethereum wallets.
 - Manage multiple wallet connections and interactions: [`src/accounts/useWalletCenter.tsx`](./src/accounts/useWalletCenter.tsx). This custom React hook is designed to manage the connection and state of multiple blockchain wallets, including Polkadot and Ethereum wallets. It provides functionality for connecting to wallets, storing connected wallets in local storage, and updating the state of connected accounts.
 - Centralize account management and state: [`src/accounts/AccountsContext.tsx`](./src/accounts/AccountsContext.tsx). This file sets up a React context for managing blockchain accounts, including both Polkadot and Ethereum wallets. It provides a unified interface for interacting with accounts, updating balances, and handling account selection across the application.
-- Modal window to connect Polkadot wallets
 
 ### Make transactions
 
