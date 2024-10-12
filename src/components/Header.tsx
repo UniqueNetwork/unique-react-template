@@ -70,10 +70,6 @@ const AccountItem = styled.div`
   }
 `;
 
-const NavLinkWrapper = styled.div`
-  margin-top: 20px;
-`;
-
 const ButtonConnect = styled.button`
   padding: 10px 20px;
   border: none;
