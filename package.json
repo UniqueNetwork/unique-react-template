@@ -34,9 +34,10 @@
     "web-vitals": "^4.2.2"
   },
   "scripts": {
-    "install:all": "yarn && yarn install:contracts && compile:contracts",
+    "install:all": "yarn && yarn install:contracts && yarn compile:contracts",
     "install:contracts": "cd ./contracts && yarn",
     "compile:contracts": "cd ./contracts && yarn compile",
+    "deploy:contracts": "cd ./contracts && yarn deploy",
     "start": "react-scripts start",
     "compile:contracts": "cd contracts && yarn compile",
     "build": "react-scripts build",

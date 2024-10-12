@@ -56,15 +56,15 @@ const BreedingPage = () => {
   const COLLECTION_ID = 3997;
   const EVOLVE_EXPERIENCE = 150;
 
+  const {chain, scan} = useChainAndScan();
+  const {selectedAccount} = useContext(AccountsContext);
+
   const [loading, setLoading] = useState(false);
   const [gladiatorToken, setGladiatorToken] = useState<Token | undefined>(
     undefined
   );
   const [userTokens, setUserTokens] = useState<Token[]>([]);
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
-
-  const { chain, scan } = useChainAndScan();
-  const { selectedAccount } = useContext(AccountsContext);
 
   const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -108,7 +108,7 @@ const BreedingPage = () => {
           artifacts.abi,
           await provider.getSigner()
         );
-        const tx = await contract[functionName](...functionArgs, {gasLimit});
+        const tx = await contract[functionName](...functionArgs, { gasLimit });
         const receipt: TransactionReceipt = await tx.wait();
 
         return receipt.hash;
@@ -151,10 +151,7 @@ const BreedingPage = () => {
 
       await sleep(6000);
 
-      await Promise.all([
-        fetchGladiatorToken(),
-        fetchUserTokens(),
-      ])
+      await Promise.all([fetchGladiatorToken(), fetchUserTokens()]);
     } catch (error) {
       // Error is already logged
     } finally {

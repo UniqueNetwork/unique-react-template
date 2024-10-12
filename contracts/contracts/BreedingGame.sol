@@ -48,6 +48,7 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
     /// @dev This contract mints a fighting collection in the constructor.
     ///      CollectionMinter(true, true, false) means token attributes will be:
     ///      mutable (true) by the collection admin (true), but not by the token owner (false).
+    ///      To mint a collection you need to provide 2 OPL tokens
     constructor() payable CollectionMinter(true, true, false) {
         // Monsters can be of generation 0 or 1. Each generation has its own IPFS base URL.
         s_generationIpfs[
@@ -73,7 +74,7 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
      * @notice Breeds a new token for the given owner.
      * @param _owner CrossAddress representing the owner of the new token.
      */
-    function breed(CrossAddress memory _owner) external {
+    function breed(CrossAddress memory _owner) onlyMessageSender(_owner) external {
         // For simplicity, we have only 2 predefined images, type 1 or type 2.
         // Each player receives a pseudo-random token breed.
         uint32 randomTokenBreed = _getPseudoRandom(BREEDS, 1);
@@ -87,7 +88,7 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
         );
 
         Attribute[] memory attributes = new Attribute[](4);
-        // Each NFT has 3 traits. These traits are mutated when the `_fight` method is invoked.
+        // Each NFT has 4 traits. These traits are mutated when the `_fight` method is invoked.
         attributes[0] = Attribute({trait_type: "Experience", value: "0"});
         attributes[1] = Attribute({trait_type: "Victories", value: "0"});
         attributes[2] = Attribute({trait_type: "Defeats", value: "0"});
@@ -245,33 +246,5 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
         uint256 randomHash = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender)));
 
         return uint32((randomHash % _modulo) + startFrom);
-    }
-}
-contract Lock {
-    uint public unlockTime;
-    address payable public owner;
-
-    event Withdrawal(uint amount, uint when);
-
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
-
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
-    }
-
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
-
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
-
-        emit Withdrawal(address(this).balance, block.timestamp);
-
-        owner.transfer(address(this).balance);
     }
 }

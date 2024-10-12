@@ -11,7 +11,8 @@ const config: HardhatUserConfig = {
   },
   networks: {
     opal: {
-      url: "https://ws-opal.unique.network"
+      url: "https://rpc-opal.unique.network",
+      accounts: ["e197ab7d719274355103327edc0218e739444570dd7992a4159b24461aab6677"]
     }
   }
 };
