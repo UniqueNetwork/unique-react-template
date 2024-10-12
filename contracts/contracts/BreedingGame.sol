@@ -69,7 +69,6 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
     }
 
     receive() external payable {}
-
     /**
      * @notice Breeds a new token for the given owner.
      * @param _owner CrossAddress representing the owner of the new token.

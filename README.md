@@ -396,7 +396,7 @@ let crossAddress = Address.extract.ethCrossAccountId(
 
 The `Address.extract.ethCrossAccountId` function takes the account received from the AccountContext and converts it to a CrossAddress-compatible type.
 
-> [IMPORTANT]
+> [!IMPORTANT]
 >
 > Currently, `gasLimit` must be provided explicitly to avoid runtime errors. This will be fixed with future runtime upgrades.
 
