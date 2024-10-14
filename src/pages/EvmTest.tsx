@@ -51,8 +51,6 @@ export const EvmTest = () => {
         setErrorMessage(null);
         console.log(`Contract deployed at address: ${deployedContractAddress}`);
       } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
         const factory = new ethers.ContractFactory(storageArtifacts.abi, storageArtifacts.bytecode, signer);
 
         const contract = await factory.deploy();
