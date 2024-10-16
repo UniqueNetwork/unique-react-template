@@ -13,6 +13,7 @@ import { Address } from "@unique-nft/utils";
 import { useChainAndScan } from "../hooks/useChainAndScan";
 // The ABI of the BreedingGame contract. Run `yarn compile:contracts` to compile it
 import artifacts from "../static/artifacts/contracts/BreedingGame.sol/BreedingGame.json";
+import { useEthersSigner } from "../hooks/useSigner";
 
 const BreedingPage = () => {
   // Constants defining the contract address, collection ID, and experience required to evolve
@@ -24,6 +25,8 @@ const BreedingPage = () => {
   const { chain, scan } = useChainAndScan();
   // AccountsContext to access user's account details
   const { selectedAccount } = useContext(AccountsContext);
+  // Signer for the Ethereum wallets
+  const signer = useEthersSigner();
 
   const [loading, setLoading] = useState(false);
   // State to store the gladiator token (special NFT used in the arena). Check BreedingGame.sol => `s_gladiator`
@@ -83,14 +86,11 @@ const BreedingPage = () => {
         return result.extrinsicOutput.hash;
         // If the signer is an Ethereum account:
       } else if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
-        // Create a new ethers.js provider using the browser's Ethereum provider (e.g., MetaMask)
-        const provider = new ethers.BrowserProvider(window.ethereum);
-
         // Instantiate the contract with the provider's signer
         const contract = new ethers.Contract(
           CONTRACT_ADDRESS,
           artifacts.abi,
-          await provider.getSigner()
+          signer
         );
         // Call the specified function on the contract with provided arguments and gas limit
         const tx = await contract[functionName](...functionArgs, { gasLimit });

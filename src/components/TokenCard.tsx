@@ -10,8 +10,8 @@ const swing = keyframes`
 `;
 
 const TokenCardWrapper = styled.div<{ $isActive: boolean }>`
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
