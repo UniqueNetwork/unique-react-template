@@ -34,7 +34,7 @@ export const AccountsPage = () => {
               <span>{account.signerType}</span>
               <span>{account.name}</span>
               <span>{account.address}</span>
-              <span>{account.balance?.toFixed(2) || "0"} UNQ</span>
+              <span>{account.balance?.toFixed(2) || "0"} {process.env.REACT_APP_CHAIN_NATIVE_CURRENCY_SYMBOL}</span>
               <Button onClick={onSend(account)}>Send amount</Button>
               <ButtonLink to={`/account/${account.address}`}>
                 Account data
