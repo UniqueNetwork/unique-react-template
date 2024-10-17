@@ -9,6 +9,7 @@ import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
+import { switchNetwork } from "../utils/swithChain";
 
 type TransferNFTModalProps = {
   isVisible: boolean;
@@ -45,6 +46,7 @@ export const TransferNFTModal = ({
 
     try {
       if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const collection = await getUniqueNFTFactory();
         if (!collection) {
           setErrorMessage("Failed to initialize NFT collection.");

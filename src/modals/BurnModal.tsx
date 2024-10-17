@@ -7,6 +7,7 @@ import { connectSdk } from "../sdk/connect";
 import { baseUrl } from "../sdk/SdkContext";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
+import { switchNetwork } from "../utils/swithChain";
 
 type BurnModalProps = {
   isVisible: boolean;
@@ -35,6 +36,7 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
 
     try {
       if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const collection = await getUniqueNFTFactory();
         if (!collection) {
           throw new Error("Failed to initialize the collection helper.");
