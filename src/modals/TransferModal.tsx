@@ -9,6 +9,7 @@ import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
+import { switchNetwork } from "../utils/swithChain";
 
 type TransferModalProps = {
   isVisible: boolean;
@@ -40,6 +41,7 @@ export const TransferModal = ({
 
     try {
       if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const collection = await getUniqueNFTFactory();
         if (!collection) {
           throw new Error("Failed to initialize the collection helper.");

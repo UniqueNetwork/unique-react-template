@@ -214,15 +214,15 @@ export const Header: React.FC = () => {
             EVM Test
           </Button>
           <Button
-            to="/account/5CtN6sPY3WLKQT2nHejpKmfw6paqRGWYgRbngGpiYZimU9Cu"
+            to="/account/5CMgqJntEgV87wpXsDKTGii2BdcndDqnsNMVNxDsHmiTybGg"
             onClick={() => setIsDropdownOpen(false)}
           >
             Test account
           </Button>
-          <Button to="/collection/665" onClick={() => setIsDropdownOpen(false)}>
+          <Button to="/collection/4091" onClick={() => setIsDropdownOpen(false)}>
             Test Collection
           </Button>
-          <Button to="/token/665/14" onClick={() => setIsDropdownOpen(false)}>
+          <Button to="/token/4091/3" onClick={() => setIsDropdownOpen(false)}>
             Test NFT
           </Button>
         </ButtonsWrapper>

@@ -191,8 +191,8 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
   >
     <div
       className={classNames('arrow', appearance, {
-          [arrow.x]: !![arrow.x],
-          [arrow.y]: !![arrow.y]
+          [arrow.x]: arrow.x,
+          [arrow.y]: arrow.y
         })}
     >
       <div className='icon' />

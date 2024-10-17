@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { SignerTypeEnum } from '../accounts/types';
 import storageArtifacts from '../data/storage-artifacts.json';
 import { useEthersSigner } from '../hooks/useSigner';
+import { switchNetwork } from '../utils/swithChain';
 
 export const EvmTest = () => {
   const [contractAddress, setContractAddress] = useState('');
@@ -51,6 +52,7 @@ export const EvmTest = () => {
         setErrorMessage(null);
         console.log(`Contract deployed at address: ${deployedContractAddress}`);
       } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const factory = new ethers.ContractFactory(storageArtifacts.abi, storageArtifacts.bytecode, signer);
 
         const contract = await factory.deploy();
@@ -98,6 +100,7 @@ export const EvmTest = () => {
           console.log('Store transaction successful!');
         }
       } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const contract = new ethers.Contract(contractAddress, storageArtifacts.abi, signer);
 
         const tx = await contract.store(BigInt(storeValue));
@@ -135,6 +138,7 @@ export const EvmTest = () => {
         setRetrievedValue(result[0]?.toString() || 'No value returned');
         setErrorMessage(null);
       } else if (selectedAccount?.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         const contract = new ethers.Contract(contractAddress, storageArtifacts.abi, signer);
 
         const result = await contract.retrieve();

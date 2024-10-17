@@ -9,6 +9,7 @@ import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces";
 import { AccountsContext } from "../accounts/AccountsContext";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
+import { switchNetwork } from "../utils/swithChain";
 
 type TransferAmountModalProps = {
   isVisible: boolean;
@@ -62,6 +63,7 @@ export const TransferAmountModal = ({
 
   const sendEthereumTransaction = async () => {
     if (!signer) return;
+    await switchNetwork();
     const from = Address.extract.ethCrossAccountId(sender!.address);
     const to = Address.extract.ethCrossAccountId(receiverAddress);
     const uniqueFungible = await UniqueFungibleFactory(0, signer);
