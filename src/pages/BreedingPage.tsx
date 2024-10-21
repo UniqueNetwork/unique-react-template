@@ -129,7 +129,7 @@ const BreedingPage = () => {
       await sleep(6000);
 
       await fetchGladiatorToken();
-      await fetchUserTokens();
+      await fetchUserTokensFromChain();
     } catch (error) {
     } finally {
       setLoading(false);
@@ -150,7 +150,7 @@ const BreedingPage = () => {
 
       await sleep(6000);
 
-      await Promise.all([fetchGladiatorToken(), fetchUserTokens()]);
+      await Promise.all([fetchGladiatorToken(), fetchUserTokensFromChain()]);
     } catch (error) {
       // Errors are already logged in sendContractTransaction
     } finally {
@@ -173,7 +173,7 @@ const BreedingPage = () => {
 
       await sleep(6000);
 
-      await fetchUserTokens();
+      await fetchUserTokensFromChain();
     } catch (error) {
     } finally {
       setSelectedTokenId(null);
@@ -238,8 +238,10 @@ const BreedingPage = () => {
 
   /**
    * Fetches all tokens owned by the connected user from the Unique Network indexer.
+   * This is the fast way to receive user tokens, but it can lag behind the network
+   * It will be used only for the page initialization
    */
-  const fetchUserTokens = useCallback(async () => {
+  const fetchUserTokensFromScan = useCallback(async () => {
     // Ensure the scan object and selectedAccount are available
     if (!scan || !selectedAccount) return;
 
@@ -258,6 +260,26 @@ const BreedingPage = () => {
       console.error("Error fetching user tokens:", error);
     }
   }, [scan, selectedAccount]);
+
+  /**
+   * Fetches all tokens owned by the connected user from the Unique Network blockchain.
+   * This method is not so fast as fetchUserTokensFromScan, but it is more reliable
+   */
+  const fetchUserTokensFromChain = useCallback(async () => {
+    if (!chain || !selectedAccount) return;
+
+    try {
+      const accountTokens = await chain.collection.accountTokens({
+        address: selectedAccount.address,
+        collectionId: COLLECTION_ID,
+      });
+
+      const tokens = await Promise.all(
+        accountTokens.map((tkn) => fetchToken(tkn.tokenId))
+      );
+      setUserTokens(tokens.filter((tkn) => tkn !== undefined));
+    } catch (error) {}
+  }, [chain, fetchToken, selectedAccount]);
 
   /**
    * Determines if the selected token can be evolved based on its attributes.
@@ -288,8 +310,8 @@ const BreedingPage = () => {
 
   useEffect(() => {
     fetchGladiatorToken();
-    fetchUserTokens();
-  }, [fetchGladiatorToken, fetchUserTokens]);
+    fetchUserTokensFromScan();
+  }, [fetchGladiatorToken, fetchUserTokensFromScan]);
 
   return (
     <Container>
