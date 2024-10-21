@@ -39,9 +39,6 @@ const BreedingPage = () => {
   // State to track the currently selected token ID for actions like entering the arena or evolving
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
 
-  const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
   // Handler to select or deselect a token by its ID
   const handleSelectToken = (tokenId: number) => {
     setSelectedTokenId((prevTokenId) =>
@@ -126,8 +123,6 @@ const BreedingPage = () => {
       // Send the breed transaction with the cross address and a specified gas limit
       await sendContractTransaction("breed", [crossAddress], 1_000_000n);
 
-      await sleep(6000);
-
       await fetchGladiatorToken();
       await fetchUserTokensFromChain();
     } catch (error) {
@@ -147,8 +142,6 @@ const BreedingPage = () => {
     try {
       // Send the enterArena transaction with the selected token ID and a specified gas limit
       await sendContractTransaction("enterArena", [selectedTokenId], 1000_000n);
-
-      await sleep(6000);
 
       await Promise.all([fetchGladiatorToken(), fetchUserTokensFromChain()]);
     } catch (error) {
@@ -170,8 +163,6 @@ const BreedingPage = () => {
     setLoading(true);
     try {
       await sendContractTransaction("evolve", [selectedTokenId], 1000_000n);
-
-      await sleep(6000);
 
       await fetchUserTokensFromChain();
     } catch (error) {
