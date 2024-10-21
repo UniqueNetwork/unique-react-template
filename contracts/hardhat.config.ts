@@ -12,7 +12,7 @@ const config: HardhatUserConfig = {
   networks: {
     opal: {
       url: "https://rpc-opal.unique.network",
-      accounts: [""]
+      accounts: [] // Set your account
     }
   }
 };

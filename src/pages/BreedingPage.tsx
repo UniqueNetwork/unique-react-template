@@ -14,6 +14,7 @@ import { useChainAndScan } from "../hooks/useChainAndScan";
 // The ABI of the BreedingGame contract. Run `yarn compile:contracts` to compile it
 import artifacts from "../static/artifacts/contracts/BreedingGame.sol/BreedingGame.json";
 import { useEthersSigner } from "../hooks/useSigner";
+import { switchNetwork } from "../utils/swithChain";
 
 const BreedingPage = () => {
   // Constants defining the contract address, collection ID, and experience required to evolve
@@ -86,6 +87,7 @@ const BreedingPage = () => {
         return result.extrinsicOutput.hash;
         // If the signer is an Ethereum account:
       } else if (selectedAccount.signerType === SignerTypeEnum.Ethereum) {
+        await switchNetwork();
         // Instantiate the contract with the provider's signer
         const contract = new ethers.Contract(
           CONTRACT_ADDRESS,

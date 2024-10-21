@@ -19,7 +19,7 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
 export function useEthersSigner() {
   const {REACT_APP_CHAIN_ID} = process.env;
   if (!REACT_APP_CHAIN_ID) throw Error("ChainId does not set");
-  const chainId = parseInt(REACT_APP_CHAIN_ID);
+  const chainId = parseInt(process.env.REACT_APP_CHAIN_ID ?? "8880", 10);
   const { data: client } = useConnectorClient<Config>({ chainId })
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client])
 }

@@ -3,7 +3,7 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Chain } from "viem";
+import { uniqueOpal } from "viem/chains";
 
 const queryClient = new QueryClient();
 
@@ -15,24 +15,8 @@ const metadata = {
   icons: [""],
 };
 
-const chains: readonly [Chain, ...Chain[]] = [
-  {
-    id: parseInt(process.env.REACT_APP_CHAIN_ID ?? "8880", 10),
-    name: process.env.REACT_APP_CHAIN_NAME ?? "Unique Mainnet",
-    nativeCurrency: {
-      name: process.env.REACT_APP_CHAIN_NATIVE_CURRENCY_NAME ?? "UNQ",
-      symbol: process.env.REACT_APP_CHAIN_NATIVE_CURRENCY_SYMBOL ?? "UNQ",
-      decimals: parseInt("18", 10),
-    },
-    rpcUrls: {
-      default: {
-        http: [process.env.REACT_APP_CHAIN_RPC_URL ?? "https://rpc.unique.network"],
-      },
-    },
-  },
-] as const;
 export const config = defaultWagmiConfig({
-  chains,
+  chains: [uniqueOpal],
   projectId,
   metadata,
 });
