@@ -217,13 +217,13 @@ export const Header: React.FC = () => {
             to="/account/5CMgqJntEgV87wpXsDKTGii2BdcndDqnsNMVNxDsHmiTybGg"
             onClick={() => setIsDropdownOpen(false)}
           >
-            Test account
+            User account
           </Button>
           <Button to="/collection/4091" onClick={() => setIsDropdownOpen(false)}>
-            Test Collection
+            Museum Collection
           </Button>
           <Button to="/token/4091/3" onClick={() => setIsDropdownOpen(false)}>
-            Test NFT
+            Art NFT
           </Button>
         </ButtonsWrapper>
       </HeaderContainer>
