@@ -15,7 +15,14 @@ import { Address } from "@unique-nft/utils";
 import { ConnectedWalletsName } from "./useWalletCenter";
 import { useWalletCenter } from "./useWalletCenter";
 import { PolkadotWallet } from "./PolkadotWallet";
+import { Magic } from "magic-sdk";
 
+const magicInstance = new Magic('pk_live_E224E308B81F94FB', {
+  network: {
+    rpcUrl: process.env.REACT_APP_CHAIN_RPC_URL || 'https://rpc-opal.unique.network',
+    chainId: Number(process.env.REACT_APP_CHAIN_ID) || 8882,
+  },
+});
 /**
  * React context for managing blockchain accounts, including Polkadot and Ethereum wallets.
  * 
@@ -32,8 +39,10 @@ export const AccountsContext = createContext<AccountsContextValue>({
   updateEthereumWallet: async () => Promise.resolve(),
   reinitializePolkadotAccountsWithBalance: async () => Promise.resolve(),
   clearAccounts: noop,
+  loginWithMagicLink: async () => Promise.resolve(),
+  logoutMagicLink: async () => Promise.resolve(),
+  magic: null,
 });
-
 /**
  * Provider component for the AccountsContext, which manages blockchain accounts and their states.
  * 
@@ -201,6 +210,95 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [address]);
 
+  const loginWithMagicLink = useCallback(async (email: string) => {
+    try {
+      if (!sdk) return;
+
+      const didToken = await magicInstance.auth.loginWithMagicLink({ email });
+      if (didToken) {
+        const userMetadata = await magicInstance.user.getMetadata();
+        const ethereumAddress = 
+        Address.extract.substrateOrMirrorIfEthereumNormalized(
+          userMetadata.publicAddress || ""
+        );
+        const account: Account = {
+          address: userMetadata.publicAddress || '',
+          signerType: SignerTypeEnum.Magiclink,
+          name: email,
+          signer: undefined,
+          normalizedAddress: ethereumAddress,
+          sign: undefined,
+        };
+
+        const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
+        account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
+
+        setAccounts((prevAccounts) => {
+          const newAccounts = new Map(prevAccounts);
+          newAccounts.set(ethereumAddress, account);
+          return newAccounts;
+        });
+      }
+    } catch (error) {
+      console.error("Magic link login failed:", error);
+      throw error;
+    }
+  }, [sdk]);
+
+  const logoutMagicLink = useCallback(async () => {
+    try {
+      await magicInstance.user.logout();
+      setAccounts((prevAccounts) => {
+        const newAccounts = new Map(prevAccounts);
+        for (let [key, account] of newAccounts) {
+          if (account.signerType === SignerTypeEnum.Magiclink) {
+            newAccounts.delete(key);
+          }
+        }
+        return newAccounts;
+      });
+    } catch (error) {
+      console.error("Magic link logout failed:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const restoreMagicSession = async () => {
+      try {
+        const isLoggedIn = await magicInstance.user.isLoggedIn();
+        if (isLoggedIn && sdk) {
+          const userMetadata = await magicInstance.user.getMetadata();
+          const ethereumAddress = 
+          Address.extract.substrateOrMirrorIfEthereumNormalized(
+            userMetadata.publicAddress || ""
+          );
+          const account: Account = {
+            address: userMetadata.publicAddress || '',
+            signerType: SignerTypeEnum.Magiclink,
+            name: userMetadata.email || "",
+            signer: undefined,
+            normalizedAddress: ethereumAddress,
+            sign: undefined,
+          };
+
+          const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
+          account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
+  
+
+          setAccounts((prevAccounts) => {
+            const newAccounts = new Map(prevAccounts);
+            newAccounts.set(ethereumAddress, account);
+            return newAccounts;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to restore Magic link session:", error);
+      }
+    };
+
+    restoreMagicSession();
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       accounts,
@@ -212,6 +310,9 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       updateEthereumWallet,
       reinitializePolkadotAccountsWithBalance,
       clearAccounts,
+      loginWithMagicLink,
+      logoutMagicLink,
+      magic: magicInstance,
     }),
     [
       accounts,
@@ -222,6 +323,8 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       updateEthereumWallet,
       reinitializePolkadotAccountsWithBalance,
       clearAccounts,
+      loginWithMagicLink,
+      logoutMagicLink,
     ]
   );
 

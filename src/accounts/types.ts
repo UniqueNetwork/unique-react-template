@@ -4,10 +4,12 @@ import { IEthereumExtensionResultSafe } from "@unique-nft/utils/extension";
 import { ConnectedWalletsName } from "./useWalletCenter";
 import { Signer as EthSigner } from "ethers";
 import { PolkadotWalletName } from "./PolkadotWallet";
+import { Magic } from "magic-sdk";
 
 export enum SignerTypeEnum {
   Polkadot = "Polkadot",
   Ethereum = "Ethereum",
+  Magiclink = 'Magiclink'
 }
 
 export type Signer = any | EthSigner;
@@ -56,4 +58,7 @@ export interface AccountsContextValue {
   updateEthereumWallet: () => Promise<void>;
   reinitializePolkadotAccountsWithBalance: () => Promise<void>;
   clearAccounts: () => void;
+  loginWithMagicLink: (email: string) => Promise<void>;
+  logoutMagicLink: () => Promise<void>;
+  magic: Magic | null;
 }

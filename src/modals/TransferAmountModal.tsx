@@ -10,6 +10,7 @@ import { AccountsContext } from "../accounts/AccountsContext";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
+import { ethers } from "ethers";
 
 type TransferAmountModalProps = {
   isVisible: boolean;
@@ -22,13 +23,15 @@ export const TransferAmountModal = ({
   sender,
   onClose,
 }: TransferAmountModalProps) => {
-  const { reinitializePolkadotAccountsWithBalance } =
+  const { reinitializePolkadotAccountsWithBalance, magic } =
     useContext(AccountsContext);
   const [receiverAddress, setReceiverAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const signer = useEthersSigner();
+
+
 
   const handleReceiverAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     setReceiverAddress(e.target.value);
@@ -47,11 +50,14 @@ export const TransferAmountModal = ({
     setError("");
     setIsLoading(true);
 
+    console.log(sender, 'SENDER')
     try {
       if (sender.signerType === SignerTypeEnum.Ethereum) {
         await sendEthereumTransaction();
-      } else {
+      } else if (sender.signerType === SignerTypeEnum.Polkadot) {
         await sendPolkadotTransaction();
+      } else if (sender.signerType === SignerTypeEnum.Magiclink) {
+        await sendMagicLinkTransaction();
       }
 
       reinitializePolkadotAccountsWithBalance();
@@ -62,6 +68,7 @@ export const TransferAmountModal = ({
   };
 
   const sendEthereumTransaction = async () => {
+
     if (!signer) return;
     await switchNetwork();
     const from = Address.extract.ethCrossAccountId(sender!.address);
@@ -69,12 +76,43 @@ export const TransferAmountModal = ({
     const uniqueFungible = await UniqueFungibleFactory(0, signer);
     const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
 
-    await (
-      await uniqueFungible.transferFromCross(from, to, amountRaw, {
-        from: sender!.address,
-      })
-    ).wait();
+    try{
+      await (
+        await uniqueFungible.transferFromCross(from, to, amountRaw, {
+          from: sender!.address,
+        })
+      ).wait();
+    } catch (err) {
+      console.log(err, 'ERROR')
+    }
+
     setIsLoading(false);
+  };
+
+
+  const sendMagicLinkTransaction = async () => {
+    const from = Address.extract.ethCrossAccountId(sender!.address);
+    const to = Address.extract.ethCrossAccountId(receiverAddress);
+
+    if (!magic) throw Error('No Magic')
+
+    try {
+      const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
+      const magicSigner = await provider.getSigner();
+
+      const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
+
+      const uniqueFungible = await UniqueFungibleFactory(0, magicSigner);
+
+      const tx = await uniqueFungible.transferFromCross(from, to, amountRaw)
+    
+      await tx.wait();
+    } catch (err) {
+      console.error("Magic link transaction error:", err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sendPolkadotTransaction = async () => {

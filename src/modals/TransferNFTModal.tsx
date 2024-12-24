@@ -10,6 +10,8 @@ import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
+import { ethers } from "ethers";
+import { UniqueNFTFactory } from "@unique-nft/solidity-interfaces";
 
 type TransferNFTModalProps = {
   isVisible: boolean;
@@ -21,7 +23,7 @@ export const TransferNFTModal = ({
   isVisible,
   onClose,
 }: TransferNFTModalProps) => {
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount, magic } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -52,6 +54,25 @@ export const TransferNFTModal = ({
           setErrorMessage("Failed to initialize NFT collection.");
           setIsLoading(false);
           return;
+        }
+
+        const fromCross = Address.extract.ethCrossAccountId(
+          selectedAccount.address
+        );
+        const toCross = Address.extract.ethCrossAccountId(receiver.trim());
+        await (
+          await collection.transferFromCross(fromCross, toCross, +tokenId)
+        ).wait();
+      } else if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
+        if (!magic) throw Error('No Magic')
+
+        const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
+        const magicSigner = await provider.getSigner();
+
+        const collection = await UniqueNFTFactory(+collectionId, magicSigner);
+
+        if (!collection) {
+          throw new Error("Failed to initialize the collection helper.");
         }
 
         const fromCross = Address.extract.ethCrossAccountId(

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect, useRef, ChangeEvent } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { AccountsContext } from "../accounts/AccountsContext";
@@ -6,6 +6,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 import { truncateMiddle } from "../utils/common";
 import { disableElementInShadowDom } from "../utils/disableShadowDomButton";
+import { Modal } from "../components/Modal";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -74,6 +75,7 @@ const AccountDropdown = styled.div`
 const AccountItem = styled.div`
   padding: 8px 12px;
   cursor: pointer;
+
   &:hover {
     background-color: #f0f0f0;
   }
@@ -110,14 +112,99 @@ const ButtonBlockHeader = styled.div`
   padding: 8px 0;
 `;
 
+const StyledModalContent = styled.div`
+  background-color: #1f1f1f;
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+
+  h3 {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+`;
+
+const StyledInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  background-color: #2c2c2c;
+  border: 1px solid #3a3a3a;
+  color: #fff;
+  font-size: 16px;
+  box-sizing: border-box;
+`;
+
+const StyledActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+`;
+
+const StyledButton = styled.button`
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+  }
+`;
+
+const StyledError = styled.p`
+  color: #ff4d4d;
+  font-size: 14px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+`;
+
+const StyledLoading = styled.p`
+  color: #fff;
+  font-size: 14px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+`;
+
+const HeaderWrapper = styled.div`
+  .unique-modal {
+    padding: 0;
+  }
+`;
+
 export const Header: React.FC = () => {
-  const { accounts, setSelectedAccountId, selectedAccountId, selectedAccount } =
-    useContext(AccountsContext);
+  const {
+    accounts,
+    setSelectedAccountId,
+    selectedAccountId,
+    selectedAccount,
+    loginWithMagicLink,
+    magic,
+  } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { open } = useWeb3Modal();
   const [isOpenChoseWalletModal, setIsOpenChoseWalletModal] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handlePolkadotClick = () => {
     setIsDropdownOpen(false);
@@ -128,13 +215,38 @@ export const Header: React.FC = () => {
     setIsDropdownOpen(false);
     open();
     const timeoutId = setTimeout(() => {
-      const modalElement = document.querySelector('w3m-modal');
+      const modalElement = document.querySelector("w3m-modal");
       if (modalElement) {
-        disableElementInShadowDom(modalElement, 'wui-profile-button-v2', 'copy-address');
+        disableElementInShadowDom(modalElement, "wui-profile-button-v2", "copy-address");
       }
     }, 100);
 
     return () => clearTimeout(timeoutId);
+  };
+
+  const handleMagicLinkClick = () => {
+    setIsDropdownOpen(false);
+    setIsEmailModalOpen(true);
+  };
+
+  const handleLogin = async () => {
+    if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      if (!magic) throw Error("Magic instance not found");
+      setIsLoading(true);
+      setErrorMessage(null);
+      await loginWithMagicLink(email);
+      setIsEmailModalOpen(false);
+    } catch (error) {
+      console.error("Login failed:", error);
+      setErrorMessage("Failed to login. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleDropdown = () => {
@@ -144,6 +256,11 @@ export const Header: React.FC = () => {
   const onAccountSelect = (accountId: number) => {
     setSelectedAccountId(accountId);
     setIsDropdownOpen(false);
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    setErrorMessage(null);
   };
 
   useEffect(() => {
@@ -168,11 +285,11 @@ export const Header: React.FC = () => {
   }, [isDropdownOpen]);
 
   return (
-    <>
+    <HeaderWrapper>
       <HeaderContainer>
         <AccountSelectorWrapper>
           <ConnectedAccountsButton onClick={toggleDropdown}>
-            {selectedAccount ? truncateMiddle(selectedAccount.address, 22) : 'Connect Account'}
+            {selectedAccount ? truncateMiddle(selectedAccount.address, 22) : "Connect Account"}
           </ConnectedAccountsButton>
           {isDropdownOpen && (
             <AccountDropdown ref={dropdownRef}>
@@ -181,8 +298,7 @@ export const Header: React.FC = () => {
                   key={account.address}
                   onClick={() => onAccountSelect(index)}
                   style={{
-                    backgroundColor:
-                      index === selectedAccountId ? "#f0f0f0" : "white",
+                    backgroundColor: index === selectedAccountId ? "#f0f0f0" : "white",
                   }}
                 >
                   <span>
@@ -190,14 +306,14 @@ export const Header: React.FC = () => {
                   </span>
                 </AccountItem>
               ))}
-
               <ButtonBlock>
                 <ButtonBlockHeader>Connect new accounts: </ButtonBlockHeader>
-                <ButtonConnect onClick={handlePolkadotClick}>
-                  POLKADOT Wallets
-                </ButtonConnect>
+                <ButtonConnect onClick={handlePolkadotClick}>POLKADOT Wallets</ButtonConnect>
                 <ButtonConnect onClick={handleWalletConnectClick}>
-                  ETHEREUM Wallets
+                  ETHEREUM Wallets Wallet Connect
+                </ButtonConnect>
+                <ButtonConnect onClick={handleMagicLinkClick}>
+                  ETHEREUM Wallets Magic link
                 </ButtonConnect>
               </ButtonBlock>
               <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
@@ -207,10 +323,7 @@ export const Header: React.FC = () => {
           )}
         </AccountSelectorWrapper>
         <ButtonsWrapper>
-          <Button
-            to="/evm-test"
-            onClick={() => setIsDropdownOpen(false)}
-          >
+          <Button to="/evm-test" onClick={() => setIsDropdownOpen(false)}>
             EVM Test
           </Button>
           <Button
@@ -231,6 +344,25 @@ export const Header: React.FC = () => {
         isOpenConnectWalletModal={isOpenChoseWalletModal}
         setIsOpenConnectWalletModal={(e) => setIsOpenChoseWalletModal(e)}
       />
-    </>
+      <Modal isVisible={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} isFlexible={true}>
+        <StyledModalContent>
+          <h3>Sign in with Magic Link</h3>
+          <StyledInput
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={handleEmailChange}
+          />
+          {errorMessage && <StyledError>{errorMessage}</StyledError>}
+          {isLoading && <StyledLoading>Loading...</StyledLoading>}
+          <StyledActions>
+            <StyledButton onClick={handleLogin} disabled={isLoading}>
+              Login
+            </StyledButton>
+            <StyledButton onClick={() => setIsEmailModalOpen(false)}>Cancel</StyledButton>
+          </StyledActions>
+        </StyledModalContent>
+      </Modal>
+    </HeaderWrapper>
   );
 };

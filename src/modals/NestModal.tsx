@@ -10,6 +10,8 @@ import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import styled from "styled-components";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
+import { UniqueNFTFactory } from "@unique-nft/solidity-interfaces";
+import { ethers } from "ethers";
 
 
 type NestTModalProps = {
@@ -25,7 +27,7 @@ export const ContentWrapper = styled.div`
 `;
 
 export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount, magic } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -52,21 +54,20 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
           throw new Error("Failed to initialize the collection helper.");
         }
 
-        const newParentTokenAddress = Address.nesting.idsToAddress(
-          +collectionParentId,
-          +tokenParentId
-        );
-        const fromCross = Address.extract.ethCrossAccountId(
-          selectedAccount.address
-        );
+        await transferToken(collection);
+      } else if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
+        if (!magic) throw Error('No Magic')
 
-        await (
-          await collection.transferFrom(
-            fromCross.eth,
-            newParentTokenAddress,
-            +tokenId
-          )
-        ).wait();
+        const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
+        const magicSigner = await provider.getSigner();
+
+        const collection = await UniqueNFTFactory(+collectionId, magicSigner);
+
+        if (!collection) {
+          throw new Error("Failed to initialize the collection helper.");
+        }
+
+        await transferToken(collection);
       } else {
         const sdk = await connectSdk(baseUrl, selectedAccount);
 
@@ -90,6 +91,22 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
       setErrorMessage("An error occurred");
       setIsLoading(false);
     }
+  };
+
+  const transferToken = async (collection: any) => {
+    if (!selectedAccount || !tokenId) return;
+    const newParentTokenAddress = Address.nesting.idsToAddress(
+      +collectionParentId,
+      +tokenParentId
+    );
+    const fromCross = Address.extract.ethCrossAccountId(selectedAccount.address);
+  
+    const tx = await collection.transferFrom(
+      fromCross.eth,
+      newParentTokenAddress,
+      +tokenId
+    );
+    await tx.wait();
   };
 
   return (
