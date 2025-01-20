@@ -138,7 +138,7 @@ const CollectionPage = () => {
   return (
     <Container>
       <Hint>
-        Change URL manually to see the other Collections
+        Use Search button to see other collections
       </Hint>
       <Title>Collection information</Title>
       <Avatar imageUrl={coverImageUrl} />

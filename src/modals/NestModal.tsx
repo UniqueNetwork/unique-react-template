@@ -10,8 +10,7 @@ import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import styled from "styled-components";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
-import { UniqueNFTFactory } from "@unique-nft/solidity-interfaces";
-import { ethers } from "ethers";
+import { getCollection } from "../utils/getCollection";
 
 
 type NestTModalProps = {
@@ -27,7 +26,7 @@ export const ContentWrapper = styled.div`
 `;
 
 export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
-  const { selectedAccount, magic } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -57,16 +56,11 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
         await transferToken(collection);
       } else if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
         if (!magic) throw Error('No Magic')
-
-        const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
-        const magicSigner = await provider.getSigner();
-
-        const collection = await UniqueNFTFactory(+collectionId, magicSigner);
-
-        if (!collection) {
-          throw new Error("Failed to initialize the collection helper.");
-        }
-
+        const collection = await getCollection(magic.rpcProvider, collectionId)
+        await transferToken(collection);
+      } else if (selectedAccount.signerType === SignerTypeEnum.Web3Auth) {
+        if (!providerWeb3Auth) throw Error('No Web3Auth provider')
+        const collection = await getCollection(providerWeb3Auth, collectionId)
         await transferToken(collection);
       } else {
         const sdk = await connectSdk(baseUrl, selectedAccount);

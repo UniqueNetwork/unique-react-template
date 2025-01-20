@@ -11,7 +11,7 @@ import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
 import { ethers } from "ethers";
-import { UniqueNFTFactory } from "@unique-nft/solidity-interfaces";
+import { getCollection } from "../utils/getCollection";
 
 type TransferNFTModalProps = {
   isVisible: boolean;
@@ -23,7 +23,7 @@ export const TransferNFTModal = ({
   isVisible,
   onClose,
 }: TransferNFTModalProps) => {
-  const { selectedAccount, magic } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -63,25 +63,25 @@ export const TransferNFTModal = ({
         await (
           await collection.transferFromCross(fromCross, toCross, +tokenId)
         ).wait();
-      } else if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
-        if (!magic) throw Error('No Magic')
+      } else if (
+        selectedAccount.signerType === SignerTypeEnum.Magiclink ||
+        selectedAccount.signerType === SignerTypeEnum.Web3Auth
+      ) {
+        const provider = selectedAccount.signerType === SignerTypeEnum.Magiclink
+          ? magic?.rpcProvider
+          : providerWeb3Auth;
 
-        const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
-        const magicSigner = await provider.getSigner();
-
-        const collection = await UniqueNFTFactory(+collectionId, magicSigner);
-
-        if (!collection) {
-          throw new Error("Failed to initialize the collection helper.");
+        if (!provider) {
+          throw new Error(`No provider for ${selectedAccount.signerType}`);
         }
 
-        const fromCross = Address.extract.ethCrossAccountId(
-          selectedAccount.address
+        await transferNFTWithProvider(
+          provider,
+          collectionId,
+          tokenId,
+          selectedAccount.address,
+          receiver.trim()
         );
-        const toCross = Address.extract.ethCrossAccountId(receiver.trim());
-        await (
-          await collection.transferFromCross(fromCross, toCross, +tokenId)
-        ).wait();
       } else {
         const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.transfer({
@@ -99,6 +99,19 @@ export const TransferNFTModal = ({
       setIsLoading(false);
     }
   };
+
+  const transferNFTWithProvider = async(
+    provider: ethers.Eip1193Provider,
+    collectionId: string,
+    tokenId: string,
+    fromAddress: string,
+    toAddress: string
+  ) => {
+    const collection = await getCollection(provider, collectionId);
+    const fromCross = Address.extract.ethCrossAccountId(fromAddress);
+    const toCross = Address.extract.ethCrossAccountId(toAddress.trim());
+    await (await collection.transferFromCross(fromCross, toCross, +tokenId)).wait();
+  }
 
   return (
     <Modal isVisible={isVisible} onClose={onClose} isFlexible={true}>

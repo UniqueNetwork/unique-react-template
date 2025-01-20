@@ -7,6 +7,11 @@ import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWalle
 import { truncateMiddle } from "../utils/common";
 import { disableElementInShadowDom } from "../utils/disableShadowDomButton";
 import { Modal } from "../components/Modal";
+import { SearchForm } from "./SearchForm/SearchForm";
+import { Web3Auth } from "@web3auth/modal";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { CHAIN_NAMESPACES } from "@web3auth/base";
+import Web3AuthConnect from "./Web3Auth";
 
 const Button = styled(NavLink)`
   padding: 10px 20px;
@@ -17,12 +22,14 @@ const Button = styled(NavLink)`
   background-color: #f0ad4e;
   text-decoration: none;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     opacity: 0.8;
   }
 `;
-
 const ConnectedAccountsButton = styled.button`
   padding: 10px 20px;
   border: none;
@@ -39,24 +46,36 @@ const ConnectedAccountsButton = styled.button`
 
 const HeaderContainer = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 30px;
-  width: 90vw;
-  max-width: 1260px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
-`;
 
+  @media (min-width: 940px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+  }
+`;
 const ButtonsWrapper = styled.div`
   display: flex;
   gap: 10px;
+  min-width: 620px;
 `;
 
 const AccountSelectorWrapper = styled.div`
   position: relative;
   display: inline-block;
+  margin: 0 auto 10px 0;
+
+  @media (min-width: 940px) {
+    margin-bottom: 0;
+  }
 `;
 
 const AccountDropdown = styled.div`
@@ -69,7 +88,7 @@ const AccountDropdown = styled.div`
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
   padding: 10px;
-  min-width: 200px;
+  min-width: 400px;
 `;
 
 const AccountItem = styled.div`
@@ -187,6 +206,38 @@ const HeaderWrapper = styled.div`
   }
 `;
 
+const SearchButton = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  background-color: #007bff;
+  font-size: 16px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const SearchFormWrap = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const SearchFormAbsolute = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 0;
+  z-index: 100;
+  background: white;
+  padding: 13px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+`;
+
 export const Header: React.FC = () => {
   const {
     accounts,
@@ -195,6 +246,8 @@ export const Header: React.FC = () => {
     selectedAccount,
     loginWithMagicLink,
     magic,
+    setWeb3Auth,
+    setProviderWeb3Auth,
   } = useContext(AccountsContext);
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -228,6 +281,10 @@ export const Header: React.FC = () => {
     setIsDropdownOpen(false);
     setIsEmailModalOpen(true);
   };
+
+  const handleWeb3Auth = () => {
+    console.log('handleWeb3Auth')
+  }
 
   const handleLogin = async () => {
     if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
@@ -284,6 +341,50 @@ export const Header: React.FC = () => {
     };
   }, [isDropdownOpen]);
 
+  useEffect(() => {
+    const initWeb3Auth = async () => {
+      try {
+        const chainConfig = {
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+          chainId: "0x22B2",
+          rpcTarget: process.env.REACT_APP_CHAIN_RPC_URL || '',
+          displayName: process.env.REACT_APP_CHAIN_NAME || '',
+          ticker: process.env.REACT_APP_CHAIN_NATIVE_CURRENCY_SYMBOL,
+          tickerName: process.env.REACT_APP_CHAIN_NATIVE_CURRENCY_NAME,
+        };
+
+        const privateKeyProvider = new EthereumPrivateKeyProvider({
+          config: { chainConfig }
+        });
+
+        const web3AuthInstance = new Web3Auth({
+          clientId: process.env.REACT_APP_WEB_3_AUTH_CLIENT_ID || '',
+          web3AuthNetwork: "sapphire_devnet",
+          chainConfig,
+          privateKeyProvider,
+        });
+
+        setWeb3Auth(web3AuthInstance);
+        await web3AuthInstance.initModal();
+
+        if (web3AuthInstance.provider) {
+          setProviderWeb3Auth(web3AuthInstance.provider);
+        }
+
+      } catch (error) {
+        console.error("Error initializing Web3Auth:", error);
+      }
+    };
+
+    initWeb3Auth();
+  }, []);
+
+  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
+
+  const toggleSearchFormVisibility = () => {
+    setIsSearchFormVisible((prev) => !prev);
+  };
+
   return (
     <HeaderWrapper>
       <HeaderContainer>
@@ -315,6 +416,7 @@ export const Header: React.FC = () => {
                 <ButtonConnect onClick={handleMagicLinkClick}>
                   ETHEREUM Wallets Magic link
                 </ButtonConnect>
+                <Web3AuthConnect />
               </ButtonBlock>
               <NavLinkWrapper onClick={() => setIsDropdownOpen(false)}>
                 <NavLink to="/">Go to Accounts Page</NavLink>
@@ -338,6 +440,16 @@ export const Header: React.FC = () => {
           <Button to="/token/4091/3" onClick={() => setIsDropdownOpen(false)}>
             Test NFT
           </Button>
+          <SearchFormWrap>
+            <SearchButton onClick={toggleSearchFormVisibility}>
+              Search
+            </SearchButton>
+            {isSearchFormVisible && (
+              <SearchFormAbsolute>
+                <SearchForm />
+              </SearchFormAbsolute>
+            )}
+          </SearchFormWrap>
         </ButtonsWrapper>
       </HeaderContainer>
       <ConnectWallets

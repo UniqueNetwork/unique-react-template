@@ -16,6 +16,8 @@ import { ConnectedWalletsName } from "./useWalletCenter";
 import { useWalletCenter } from "./useWalletCenter";
 import { PolkadotWallet } from "./PolkadotWallet";
 import { Magic } from "magic-sdk";
+import { Eip1193Provider, ethers } from "ethers";
+import { Web3Auth } from "@web3auth/modal";
 
 const magicInstance = new Magic('pk_live_E224E308B81F94FB', {
   network: {
@@ -41,7 +43,13 @@ export const AccountsContext = createContext<AccountsContextValue>({
   clearAccounts: noop,
   loginWithMagicLink: async () => Promise.resolve(),
   logoutMagicLink: async () => Promise.resolve(),
+  loginWithWeb3Auth: async () => Promise.resolve(),
+  logoutWeb3Auth: async () => Promise.resolve(),
   magic: null,
+
+  providerWeb3Auth: null,
+  setWeb3Auth: () => {},
+  setProviderWeb3Auth: () => {},
 });
 /**
  * Provider component for the AccountsContext, which manages blockchain accounts and their states.
@@ -299,6 +307,65 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     restoreMagicSession();
   }, []);
 
+  const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
+  const [providerWeb3Auth, setProviderWeb3Auth] = useState<Eip1193Provider | null>(null);
+
+  const loginWithWeb3Auth = useCallback(async () => {
+    if (!web3Auth || !sdk) return;
+
+    try {
+      const web3AuthProvider = await web3Auth.connect();
+      if (!web3AuthProvider) return;
+
+      const ethersProvider = new ethers.BrowserProvider(web3AuthProvider);
+      const signer = await ethersProvider.getSigner();
+      const userAddress = await signer.getAddress();
+
+      const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(userAddress);
+      const account: Account = {
+        address: userAddress,
+        signerType: SignerTypeEnum.Web3Auth,
+        name: 'Web3Auth Account',
+        signer: signer,
+        normalizedAddress: ethereumAddress,
+        sign: undefined,
+      };
+
+      const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
+      account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
+
+      setAccounts((prevAccounts) => {
+        const newAccounts = new Map(prevAccounts);
+        newAccounts.set(ethereumAddress, account);
+        return newAccounts;
+      });
+
+      setSelectedAccountId(accounts.size);
+    } catch (error) {
+      console.error("Web3Auth login error:", error);
+    }
+  }, [web3Auth, sdk, accounts.size]);
+
+  const logoutWeb3Auth = useCallback(async () => {
+    if (!web3Auth) return;
+
+    try {
+      await web3Auth.logout();
+      setAccounts((prevAccounts) => {
+        const newAccounts = new Map(prevAccounts);
+        for (let [key, account] of newAccounts) {
+          if (account.signerType === SignerTypeEnum.Web3Auth) {
+            newAccounts.delete(key);
+          }
+        }
+        return newAccounts;
+      });
+      setSelectedAccountId(0);
+    } catch (error) {
+      console.error("Web3Auth logout error:", error);
+    }
+  }, [web3Auth]);
+
   const contextValue = useMemo(
     () => ({
       accounts,
@@ -313,6 +380,12 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       loginWithMagicLink,
       logoutMagicLink,
       magic: magicInstance,
+      
+      loginWithWeb3Auth,
+      logoutWeb3Auth,
+      setWeb3Auth,
+      setProviderWeb3Auth,
+      providerWeb3Auth,
     }),
     [
       accounts,
@@ -325,6 +398,12 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       clearAccounts,
       loginWithMagicLink,
       logoutMagicLink,
+
+      loginWithWeb3Auth,
+      logoutWeb3Auth,
+      setWeb3Auth,
+      setProviderWeb3Auth,
+      providerWeb3Auth,
     ]
   );
 

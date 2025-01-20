@@ -74,6 +74,7 @@ export const ConnectWallets = ({
         onClose={() => setIsOpenConnectWalletModal(false)}
         isClosable
       >
+        <WalletListWrap>
         <ModalHeader>Connect wallet</ModalHeader>
         <ModalParagraph>Choose available polkadot extension</ModalParagraph>
         <Wallets>
@@ -97,6 +98,7 @@ export const ConnectWallets = ({
             )
           )}
         </Wallets>
+        </WalletListWrap>
       </Modal>
     </ModalWrapper>
   );
@@ -105,7 +107,7 @@ export const ConnectWallets = ({
 const ModalWrapper = styled.div`
   .unique-modal {
     width: 360px;
-    border-radius: 34px;
+    border-radius: 12px;
     background-color: color-mix(in srgb, #fff 0%, #121313);
   }
 
@@ -126,6 +128,12 @@ const ModalParagraph = styled.p`
   font-size: 16px;
   color: #b0b0b0;
   line-height: 1.6;
+`;
+
+const WalletListWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
 `;
 
 const Wallets = styled.div`

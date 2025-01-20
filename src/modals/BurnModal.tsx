@@ -8,8 +8,7 @@ import { baseUrl } from "../sdk/SdkContext";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
-import { ethers } from "ethers";
-import { UniqueNFTFactory } from "@unique-nft/solidity-interfaces";
+import { getCollection } from "../utils/getCollection";
 
 type BurnModalProps = {
   isVisible: boolean;
@@ -18,7 +17,7 @@ type BurnModalProps = {
 };
 
 export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
-  const { selectedAccount, magic } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -46,17 +45,12 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
         await (await collection.burn(tokenId)).wait();
       } else if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
         if (!magic) throw Error('No Magic')
-
-          const provider = new ethers.BrowserProvider(magic.rpcProvider as any);
-          const magicSigner = await provider.getSigner();
-
-          const collection = await UniqueNFTFactory(+collectionId, magicSigner);
-
-          if (!collection) {
-            throw new Error("Failed to initialize the collection helper.");
-          }
-  
-          await (await collection.burn(tokenId)).wait();
+        const collection = await getCollection(magic.rpcProvider, collectionId);
+        await (await collection.burn(tokenId)).wait();
+      } else if (selectedAccount.signerType === SignerTypeEnum.Web3Auth) {
+        if (!providerWeb3Auth) throw Error('No Web3Auth provider')
+        const collection = await getCollection(providerWeb3Auth, collectionId);
+        await (await collection.burn(tokenId)).wait();
       } else {
         const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.burn({

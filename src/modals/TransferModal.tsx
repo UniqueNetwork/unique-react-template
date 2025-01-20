@@ -10,6 +10,7 @@ import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
+import { getCollection } from "../utils/getCollection";
 
 type TransferModalProps = {
   isVisible: boolean;
@@ -20,7 +21,7 @@ export const TransferModal = ({
   isVisible,
   onClose,
 }: TransferModalProps) => {
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
   const [receiver, setReceiver] = useState<string>("");
   const { collectionId } = useParams<{ collectionId: string }>();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,9 +47,22 @@ export const TransferModal = ({
         if (!collection) {
           throw new Error("Failed to initialize the collection helper.");
         }
-
         const toCross = Address.extract.ethCrossAccountId(receiver.trim());
 
+        await (
+          await collection.changeCollectionOwnerCross(toCross)
+        ).wait();
+      } else  if (selectedAccount.signerType === SignerTypeEnum.Magiclink) {
+        if (!magic) throw Error('No Magic')
+        const collection = await getCollection(magic.rpcProvider, collectionId)
+        const toCross = Address.extract.ethCrossAccountId(receiver.trim());
+        await (
+          await collection.changeCollectionOwnerCross(toCross)
+        ).wait();
+      } else  if (selectedAccount.signerType === SignerTypeEnum.Web3Auth) {
+        if (!providerWeb3Auth) throw Error('No Web3Auth provider');
+        const collection = await getCollection(providerWeb3Auth, collectionId);
+        const toCross = Address.extract.ethCrossAccountId(receiver.trim());
         await (
           await collection.changeCollectionOwnerCross(toCross)
         ).wait();

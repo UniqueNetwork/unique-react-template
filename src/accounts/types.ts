@@ -2,14 +2,15 @@ import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import { BN } from "@polkadot/util";
 import { IEthereumExtensionResultSafe } from "@unique-nft/utils/extension";
 import { ConnectedWalletsName } from "./useWalletCenter";
-import { Signer as EthSigner } from "ethers";
+import { Eip1193Provider, Signer as EthSigner } from "ethers";
 import { PolkadotWalletName } from "./PolkadotWallet";
 import { Magic } from "magic-sdk";
 
 export enum SignerTypeEnum {
   Polkadot = "Polkadot",
   Ethereum = "Ethereum",
-  Magiclink = 'Magiclink'
+  Magiclink = 'Magiclink',
+  Web3Auth = 'Web3Auth',
 }
 
 export type Signer = any | EthSigner;
@@ -60,5 +61,13 @@ export interface AccountsContextValue {
   clearAccounts: () => void;
   loginWithMagicLink: (email: string) => Promise<void>;
   logoutMagicLink: () => Promise<void>;
+  loginWithWeb3Auth: () => Promise<void>,
+  logoutWeb3Auth: () => Promise<void>,
+  providerWeb3Auth: Eip1193Provider | null,
   magic: Magic | null;
+
+
+  setWeb3Auth: any,
+  setProviderWeb3Auth: any,
+
 }

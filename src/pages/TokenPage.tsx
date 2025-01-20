@@ -235,9 +235,9 @@ const TokenPage: React.FC = () => {
   return (
     <Container>
       <Hint>
-        Change URL manually to see the other NFT
+        Use Search button to see the other NFT
       </Hint>
-      <Title>NFT info - Change URL manually to see the other NFT</Title>
+      <Title>NFT info</Title>
       <InfoContainer>
         {sliderItems.length > 1 ? (
           <TokenSlider

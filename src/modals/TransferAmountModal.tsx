@@ -23,15 +23,13 @@ export const TransferAmountModal = ({
   sender,
   onClose,
 }: TransferAmountModalProps) => {
-  const { reinitializePolkadotAccountsWithBalance, magic } =
+  const { reinitializePolkadotAccountsWithBalance, magic, providerWeb3Auth } =
     useContext(AccountsContext);
   const [receiverAddress, setReceiverAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const signer = useEthersSigner();
-
-
 
   const handleReceiverAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     setReceiverAddress(e.target.value);
@@ -58,6 +56,8 @@ export const TransferAmountModal = ({
         await sendPolkadotTransaction();
       } else if (sender.signerType === SignerTypeEnum.Magiclink) {
         await sendMagicLinkTransaction();
+      } else if (sender.signerType === SignerTypeEnum.Web3Auth) {
+        await sendWeb3AuthTx();
       }
 
       reinitializePolkadotAccountsWithBalance();
@@ -114,6 +114,27 @@ export const TransferAmountModal = ({
       setIsLoading(false);
     }
   };
+
+  const sendWeb3AuthTx = async () => {
+    const from = Address.extract.ethCrossAccountId(sender!.address);
+    const to = Address.extract.ethCrossAccountId(receiverAddress);
+    if (!providerWeb3Auth) throw Error('No WEB3AUTH provider');
+
+    try {
+      const provider = new ethers.BrowserProvider(providerWeb3Auth as any);
+      const web3AuthSigner = await provider.getSigner();
+      const amountRaw = BigInt(amount) * BigInt(10) ** BigInt(18);
+      const uniqueFungible = await UniqueFungibleFactory(0, web3AuthSigner);
+      const tx = await uniqueFungible.transferFromCross(from, to, amountRaw);
+      await tx.wait();
+    } catch (err) {
+      console.error("Magic link transaction error:", err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   const sendPolkadotTransaction = async () => {
     const sdk = await connectSdk(baseUrl, sender);
