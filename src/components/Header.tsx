@@ -30,6 +30,7 @@ const Button = styled(NavLink)`
     opacity: 0.8;
   }
 `;
+
 const ConnectedAccountsButton = styled.button`
   padding: 10px 20px;
   border: none;
@@ -38,6 +39,9 @@ const ConnectedAccountsButton = styled.button`
   cursor: pointer;
   background-color: #007bff;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     opacity: 0.8;
@@ -62,6 +66,7 @@ const HeaderContainer = styled.div`
     padding: 30px;
   }
 `;
+
 const ButtonsWrapper = styled.div`
   display: flex;
   gap: 10px;
@@ -112,6 +117,9 @@ const ButtonConnect = styled.button`
   cursor: pointer;
   background-color: #007bff;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     opacity: 0.8;
@@ -214,6 +222,9 @@ const SearchButton = styled.button`
   cursor: pointer;
   background-color: #007bff;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     opacity: 0.8;
@@ -258,6 +269,8 @@ export const Header: React.FC = () => {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
+  const searchFormRef = useRef<HTMLDivElement | null>(null);
 
   const handlePolkadotClick = () => {
     setIsDropdownOpen(false);
@@ -281,10 +294,6 @@ export const Header: React.FC = () => {
     setIsDropdownOpen(false);
     setIsEmailModalOpen(true);
   };
-
-  const handleWeb3Auth = () => {
-    console.log('handleWeb3Auth')
-  }
 
   const handleLogin = async () => {
     if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
@@ -320,26 +329,29 @@ export const Header: React.FC = () => {
     setErrorMessage(null);
   };
 
+  const toggleSearchFormVisibility = () => {
+    setIsSearchFormVisible((prev) => !prev);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (
+        searchFormRef.current &&
+        !searchFormRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest(".search-button")
+      ) {
+        setIsSearchFormVisible(false);
       }
     };
 
-    if (isDropdownOpen) {
-      setTimeout(() => {
-        document.addEventListener("click", handleClickOutside);
-      }, 0);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, []);
 
   useEffect(() => {
     const initWeb3Auth = async () => {
@@ -378,12 +390,6 @@ export const Header: React.FC = () => {
 
     initWeb3Auth();
   }, []);
-
-  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
-
-  const toggleSearchFormVisibility = () => {
-    setIsSearchFormVisible((prev) => !prev);
-  };
 
   return (
     <HeaderWrapper>
@@ -441,11 +447,11 @@ export const Header: React.FC = () => {
             Test NFT
           </Button>
           <SearchFormWrap>
-            <SearchButton onClick={toggleSearchFormVisibility}>
+            <SearchButton className="search-button" onClick={toggleSearchFormVisibility}>
               Search
             </SearchButton>
             {isSearchFormVisible && (
-              <SearchFormAbsolute>
+              <SearchFormAbsolute ref={searchFormRef}>
                 <SearchForm />
               </SearchFormAbsolute>
             )}
