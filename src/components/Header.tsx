@@ -52,18 +52,22 @@ const HeaderContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 20px;
+  gap: 10px;
   padding: 20px;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
+  padding: 30px;
 
   @media (min-width: 940px) {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 30px;
+  }
+
+  @media (min-width: 1400px) {
+    padding: 30px 0;
   }
 `;
 
@@ -76,11 +80,8 @@ const ButtonsWrapper = styled.div`
 const AccountSelectorWrapper = styled.div`
   position: relative;
   display: inline-block;
-  margin: 0 auto 10px 0;
-
-  @media (min-width: 940px) {
-    margin-bottom: 0;
-  }
+  margin: 0;
+  margin-right: auto;
 `;
 
 const AccountDropdown = styled.div`
