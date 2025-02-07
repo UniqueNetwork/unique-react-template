@@ -1,14 +1,13 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { AccountsContext } from "../accounts/AccountsContext";
 import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
-import { baseUrl } from "../sdk/SdkContext";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
 import { getCollection } from "../utils/getCollection";
+import { useAccountsContext } from "../accounts/AccountsContext";
+import { useSdkContext } from "../sdk/SdkContext";
 
 type BurnModalProps = {
   isVisible: boolean;
@@ -17,7 +16,8 @@ type BurnModalProps = {
 };
 
 export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
-  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useAccountsContext();
+  const { sdk } = useSdkContext();
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -28,7 +28,7 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
   const { getUniqueNFTFactory } = useUniqueNFTFactory(collectionId);
 
   const onSign = async () => {
-    if (!selectedAccount || !collectionId || !tokenId) {
+    if (!sdk || !selectedAccount || !collectionId || !tokenId) {
       setErrorMessage("All fields must be filled out.");
       return;
     }
@@ -52,7 +52,6 @@ export const BurnModal = ({ isVisible, onClose }: BurnModalProps) => {
         const collection = await getCollection(providerWeb3Auth, collectionId);
         await (await collection.burn(tokenId)).wait();
       } else {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.burn({
           collectionId,
           tokenId: +tokenId,

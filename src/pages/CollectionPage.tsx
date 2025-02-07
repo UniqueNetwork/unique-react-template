@@ -1,12 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
-import { SdkContext } from "../sdk/SdkContext";
 import { TransferModal } from "../modals/TransferModal";
 import useIsOwner from "../hooks/useIsOwner";
 import { Hint } from "./TokenPage";
 import TokenList from "../components/TokenList/TokenList";
-import { UniqueChainType } from "../sdk/connect";
+import { UniqueChainType, useSdkContext } from "../sdk/SdkContext";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -95,7 +94,7 @@ export type NFTCollection = Awaited<ReturnType<UniqueChainType['collection']['ge
 
 
 const CollectionPage = () => {
-  const { sdk } = useContext(SdkContext);
+  const { sdk } = useSdkContext();
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collectionData, setCollectionData] = useState<NFTCollection | null>(
     null

@@ -1,16 +1,15 @@
-import { ChangeEvent, useContext, useState } from "react";
-import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
-import { useParams } from "react-router-dom";
-import { baseUrl } from "../sdk/SdkContext";
-import { AccountsContext } from "../accounts/AccountsContext";
-import { SignerTypeEnum } from "../accounts/types";
+import { ChangeEvent, useState } from "react";
 import { Address } from "@unique-nft/utils";
+import { Modal } from "../components/Modal";
+import { useParams } from "react-router-dom";
+import { useAccountsContext } from "../accounts/AccountsContext";
+import { SignerTypeEnum } from "../accounts/types";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
 import { getCollection } from "../utils/getCollection";
+import { useSdkContext } from "../sdk/SdkContext";
 
 type TransferModalProps = {
   isVisible: boolean;
@@ -21,7 +20,8 @@ export const TransferModal = ({
   isVisible,
   onClose,
 }: TransferModalProps) => {
-  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useAccountsContext();
+  const {sdk} = useSdkContext();
   const [receiver, setReceiver] = useState<string>("");
   const { collectionId } = useParams<{ collectionId: string }>();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +33,7 @@ export const TransferModal = ({
   };
 
   const onSign = async () => {
-    if (!receiver || !selectedAccount || !collectionId) {
+    if (!sdk || !receiver || !selectedAccount || !collectionId) {
       setErrorMessage("All fields must be filled out.");
       return;
     }
@@ -67,9 +67,7 @@ export const TransferModal = ({
           await collection.changeCollectionOwnerCross(toCross)
         ).wait();
       } else {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
-
-        await sdk?.collection.transferCollection(
+        await sdk.collection.transferCollection(
           {
             to: receiver.trim(),
             collectionId: +collectionId,

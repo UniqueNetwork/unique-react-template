@@ -1,17 +1,18 @@
-import { ChangeEvent, useContext, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { ethers } from "ethers";
+import { Address } from "@unique-nft/utils";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
-import { baseUrl } from "../sdk/SdkContext";
-import { Address } from "@unique-nft/utils";
+
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
-import { ethers } from "ethers";
+
 import { getCollection } from "../utils/getCollection";
+import { useSdkContext } from "../sdk/SdkContext";
 
 type TransferNFTModalProps = {
   isVisible: boolean;
@@ -23,7 +24,8 @@ export const TransferNFTModal = ({
   isVisible,
   onClose,
 }: TransferNFTModalProps) => {
-  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useAccountsContext();
+  const { sdk } = useSdkContext();
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -39,7 +41,7 @@ export const TransferNFTModal = ({
   const { getUniqueNFTFactory } = useUniqueNFTFactory(collectionId);
 
   const onSign = async () => {
-    if (!receiver || !selectedAccount || !collectionId || !tokenId) {
+    if (!sdk || !receiver || !selectedAccount || !collectionId || !tokenId) {
       setErrorMessage("All fields must be filled out.");
       return;
     }
@@ -83,7 +85,6 @@ export const TransferNFTModal = ({
           receiver.trim()
         );
       } else {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
         await sdk.token.transfer({
           to: receiver.trim(),
           collectionId,

@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { NavLink, useParams } from "react-router-dom";
-import { SdkContext } from "../sdk/SdkContext";
 import { TokenSlider } from "../components/Slider/TokenSlider";
 import { Picture } from "../components/Picture";
 import { TransferNFTModal } from "../modals/TransferNFTModal";
@@ -10,7 +9,7 @@ import { NestTModal } from "../modals/NestModal";
 import { UnnestTModal } from "../modals/UnnestModal";
 import useIsOwner from "../hooks/useIsOwner";
 import NestedNftItems from "../components/NestedNFTItems";
-import { UniqueChainType } from "../sdk/connect";
+import { UniqueChainType, useSdkContext } from "../sdk/SdkContext";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -133,7 +132,7 @@ enum TokenModalEnum {
 }
 
 const TokenPage: React.FC = () => {
-  const { sdk } = useContext(SdkContext);
+  const { sdk } = useSdkContext();
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;

@@ -1,16 +1,17 @@
-import { ChangeEvent, useContext, useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { ethers } from "ethers";
+import { Address } from "@unique-nft/utils";
+import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces";
+
 import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
-import { baseUrl } from "../sdk/SdkContext";
-import { Address } from "@unique-nft/utils";
+import { useSdkContext } from "../sdk/SdkContext";
+
 import { useEthersSigner } from "../hooks/useSigner";
-import { UniqueFungibleFactory } from "@unique-nft/solidity-interfaces";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { ContentWrapper } from "./NestModal";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
-import { ethers } from "ethers";
 
 type TransferAmountModalProps = {
   isVisible: boolean;
@@ -24,7 +25,8 @@ export const TransferAmountModal = ({
   onClose,
 }: TransferAmountModalProps) => {
   const { reinitializePolkadotAccountsWithBalance, magic, providerWeb3Auth } =
-    useContext(AccountsContext);
+    useAccountsContext();
+  const {sdk} = useSdkContext();
   const [receiverAddress, setReceiverAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +50,6 @@ export const TransferAmountModal = ({
     setError("");
     setIsLoading(true);
 
-    console.log(sender, 'SENDER')
     try {
       if (sender.signerType === SignerTypeEnum.Ethereum) {
         await sendEthereumTransaction();
@@ -137,8 +138,9 @@ export const TransferAmountModal = ({
 
 
   const sendPolkadotTransaction = async () => {
-    const sdk = await connectSdk(baseUrl, sender);
-    await sdk?.balance.transfer({
+    if (!sdk) return;
+
+    await sdk.balance.transfer({
       to: receiverAddress.trim(),
       amount: `${amount}`,
       isAmountInCoins: true,

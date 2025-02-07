@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { web3Enable } from "@polkadot/extension-dapp";
 import PolkadotJsIcon from "../../static/icons/polkadot-wallet.svg";
@@ -8,7 +8,7 @@ import EnkriptIcon from "../../static/icons/enkrypt.svg";
 import { ConnectedWalletsName } from "../../accounts/useWalletCenter";
 import { Modal } from "../../components/Modal";
 import { Icon } from "../../components/UI/Icon";
-import { AccountsContext } from "../../accounts/AccountsContext";
+import { useAccountsContext } from "../../accounts/AccountsContext";
 
 const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
   "polkadot-js": "https://polkadot.js.org/extension/",
@@ -40,7 +40,7 @@ export const ConnectWallets = ({
 }) => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [availableWallets, setAvailableWallets] = useState<string[]>([]);
-  const { setPolkadotAccountsWithBalance } = useContext(AccountsContext);
+  const { setPolkadotAccountsWithBalance } = useAccountsContext();
 
   const handleConnectToPolkadotExtension =
     (walletName: ConnectedWalletsName) => async () => {

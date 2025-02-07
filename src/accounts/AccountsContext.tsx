@@ -2,12 +2,15 @@ import {
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
+  useContext,
 } from "react";
-import { SdkContext } from "../sdk/SdkContext";
+import { Magic } from "magic-sdk";
+import { Eip1193Provider, ethers } from "ethers";
+import { Web3Auth } from "@web3auth/modal";
+import { UniqueChain } from "@unique-nft/sdk";
 import { noop } from "../utils/common";
 import { Account, AccountsContextValue, SignerTypeEnum } from "./types";
 import { useAccount } from "wagmi";
@@ -15,9 +18,7 @@ import { Address } from "@unique-nft/utils";
 import { ConnectedWalletsName } from "./useWalletCenter";
 import { useWalletCenter } from "./useWalletCenter";
 import { PolkadotWallet } from "./PolkadotWallet";
-import { Magic } from "magic-sdk";
-import { Eip1193Provider, ethers } from "ethers";
-import { Web3Auth } from "@web3auth/modal";
+import { baseUrl } from "../sdk/SdkContext";
 
 const magicInstance = new Magic('pk_live_E224E308B81F94FB', {
   network: {
@@ -25,12 +26,7 @@ const magicInstance = new Magic('pk_live_E224E308B81F94FB', {
     chainId: Number(process.env.REACT_APP_CHAIN_ID) || 8882,
   },
 });
-/**
- * React context for managing blockchain accounts, including Polkadot and Ethereum wallets.
- * 
- * @remarks
- * This context is responsible for initializing, updating, and clearing accounts, as well as managing account balances.
- */
+
 export const AccountsContext = createContext<AccountsContextValue>({
   accounts: new Map(),
   setAccounts: noop,
@@ -51,18 +47,7 @@ export const AccountsContext = createContext<AccountsContextValue>({
   setWeb3Auth: () => {},
   setProviderWeb3Auth: () => {},
 });
-/**
- * Provider component for the AccountsContext, which manages blockchain accounts and their states.
- * 
- * @param {PropsWithChildren} children - The child components that will consume the AccountsContext.
- * 
- * @example
- * ```tsx
- * <AccountsContextProvider>
- *   <App />
- * </AccountsContextProvider>
- * ```
- */
+
 export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
   const { address } = useAccount();
   const [accounts, setAccounts] = useState<Map<string, Account>>(new Map());
@@ -104,17 +89,16 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     [selectedAccountId, accounts]
   );
 
-  const { sdk } = useContext(SdkContext);
-
   useEffect(() => {
     localStorage.setItem("selectedAccountId", String(selectedAccountId));
   }, [selectedAccountId]);
 
   const updateEthereumWallet = useCallback(async () => {
-    if (!sdk || !address) return;
+    if (!address) return;
 
     const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(address);
     const account: Account = { address, signerType: SignerTypeEnum.Ethereum, name: '', signer: undefined, normalizedAddress: '', sign: undefined };
+    const sdk = UniqueChain({ baseUrl });
 
     const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
     account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
@@ -124,15 +108,15 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       newAccounts.set(ethereumAddress, { ...account, balance: account.balance });
       return newAccounts;
     });
-  }, [sdk, address]);
+  }, [address]);
 
   useEffect(() => {
     updateEthereumWallet();
   }, [updateEthereumWallet]);
 
   const reinitializePolkadotAccountsWithBalance = useCallback(async () => {
-    if (!sdk || accounts.size === 0) return;
-  
+    if (accounts.size === 0) return;
+
     const updatedPolkadotAccounts = new Map();
     for (let [address, account] of accounts) {
       if (account.signerType === SignerTypeEnum.Polkadot) {
@@ -142,6 +126,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
           const walletAccount = walletAccounts.get(account.normalizedAddress);
           if (walletAccount) {
             account.signer = walletAccount.signer;
+            const sdk = UniqueChain({ baseUrl });
             const balanceResponse = await sdk.balance.get({ address });
             account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
             updatedPolkadotAccounts.set(address, account);
@@ -157,21 +142,18 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       updatedPolkadotAccounts.forEach((account, address) => {
         newAccounts.set(address, account);
       });
-  
+
       return newAccounts;
     });
-  }, [sdk, accounts]);
-  
+  }, [accounts]);
+
   useEffect(() => {
-    if (!reinitializePolkadotAccountsWithBalance) return;
-    reinitializePolkadotAccountsWithBalance();
-  }, [sdk]);
+      reinitializePolkadotAccountsWithBalance();
+  }, [reinitializePolkadotAccountsWithBalance]);
 
   const { connectWallet } = useWalletCenter();
 
   const setPolkadotAccountsWithBalance = useCallback(async (walletName: ConnectedWalletsName = 'polkadot-js') => {
-    if (!sdk) return;
-
     const polkadotAccounts = await connectWallet(walletName);
     if (polkadotAccounts.size === 0) {
       alert(`No ${walletName} accounts found or access denied for this domain`);
@@ -180,6 +162,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
     for (let [address, account] of polkadotAccounts) {
       account.signerType = SignerTypeEnum.Polkadot;
+      const sdk = UniqueChain({ baseUrl });
       const balanceResponse = await sdk.balance.get({ address });
       account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
       polkadotAccounts.set(address, account);
@@ -189,7 +172,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       const accountsToUpdate = new Map([...prevAccounts, ...polkadotAccounts]);
       return accountsToUpdate;
     });
-  }, [sdk]);
+  }, []);
 
   useEffect(() => {
     if (!address) {
@@ -220,15 +203,15 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
   const loginWithMagicLink = useCallback(async (email: string) => {
     try {
-      if (!sdk) return;
+      const sdk = UniqueChain({ baseUrl });
 
       const didToken = await magicInstance.auth.loginWithMagicLink({ email });
       if (didToken) {
         const userMetadata = await magicInstance.user.getMetadata();
-        const ethereumAddress = 
-        Address.extract.substrateOrMirrorIfEthereumNormalized(
-          userMetadata.publicAddress || ""
-        );
+        const ethereumAddress =
+          Address.extract.substrateOrMirrorIfEthereumNormalized(
+            userMetadata.publicAddress || ""
+          );
         const account: Account = {
           address: userMetadata.publicAddress || '',
           signerType: SignerTypeEnum.Magiclink,
@@ -251,7 +234,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       console.error("Magic link login failed:", error);
       throw error;
     }
-  }, [sdk]);
+  }, []);
 
   const logoutMagicLink = useCallback(async () => {
     try {
@@ -270,48 +253,52 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, []);
 
-  useEffect(() => {
-    const restoreMagicSession = async () => {
-      try {
-        const isLoggedIn = await magicInstance.user.isLoggedIn();
-        if (isLoggedIn && sdk) {
-          const userMetadata = await magicInstance.user.getMetadata();
-          const ethereumAddress = 
-          Address.extract.substrateOrMirrorIfEthereumNormalized(
-            userMetadata.publicAddress || ""
-          );
-          const account: Account = {
-            address: userMetadata.publicAddress || '',
-            signerType: SignerTypeEnum.Magiclink,
-            name: userMetadata.email || "",
-            signer: undefined,
-            normalizedAddress: ethereumAddress,
-            sign: undefined,
-          };
+    const restoreMagicSession = useCallback(async () => {
+        try {
+            const isLoggedIn = await magicInstance.user.isLoggedIn();
+            if (isLoggedIn) {
+                const userMetadata = await magicInstance.user.getMetadata();
+                const ethereumAddress =
+                    Address.extract.substrateOrMirrorIfEthereumNormalized(
+                        userMetadata.publicAddress || ""
+                    );
+                const account: Account = {
+                    address: userMetadata.publicAddress || '',
+                    signerType: SignerTypeEnum.Magiclink,
+                    name: userMetadata.email || "",
+                    signer: undefined,
+                    normalizedAddress: ethereumAddress,
+                    sign: undefined,
+                };
 
-          const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
-          account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
-  
+                const sdk = UniqueChain({ baseUrl });
+                const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
+                account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
 
-          setAccounts((prevAccounts) => {
-            const newAccounts = new Map(prevAccounts);
-            newAccounts.set(ethereumAddress, account);
-            return newAccounts;
-          });
+
+                setAccounts((prevAccounts) => {
+                    const newAccounts = new Map(prevAccounts);
+                    newAccounts.set(ethereumAddress, account);
+                    return newAccounts;
+                });
+            }
+        } catch (error) {
+            console.error("Failed to restore Magic link session:", error);
         }
-      } catch (error) {
-        console.error("Failed to restore Magic link session:", error);
-      }
-    };
+    }, []);
 
+  useEffect(() => {
     restoreMagicSession();
-  }, []);
+  }, [restoreMagicSession]);
 
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
-  const [providerWeb3Auth, setProviderWeb3Auth] = useState<Eip1193Provider | null>(null);
+  const [providerWeb3Auth, setProviderWeb3Auth] = useState<Eip1193Provider | null>(
+    null
+  );
 
-  const loginWithWeb3Auth = useCallback(async () => {
-    if (!web3Auth || !sdk) return;
+    const loginWithWeb3Auth = useCallback(async () => {
+        const sdk = UniqueChain({ baseUrl });
+    if (!web3Auth) return;
 
     try {
       const web3AuthProvider = await web3Auth.connect();
@@ -321,18 +308,20 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       const signer = await ethersProvider.getSigner();
       const userAddress = await signer.getAddress();
 
-      const ethereumAddress = Address.extract.substrateOrMirrorIfEthereumNormalized(userAddress);
+      const ethereumAddress =
+        Address.extract.substrateOrMirrorIfEthereumNormalized(userAddress);
       const account: Account = {
         address: userAddress,
         signerType: SignerTypeEnum.Web3Auth,
-        name: 'Web3Auth Account',
+        name: "Web3Auth Account",
         signer: signer,
         normalizedAddress: ethereumAddress,
         sign: undefined,
       };
 
       const balanceResponse = await sdk.balance.get({ address: ethereumAddress });
-      account.balance = Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
+      account.balance =
+        Number(balanceResponse.available) / Math.pow(10, Number(balanceResponse.decimals));
 
       setAccounts((prevAccounts) => {
         const newAccounts = new Map(prevAccounts);
@@ -344,7 +333,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     } catch (error) {
       console.error("Web3Auth login error:", error);
     }
-  }, [web3Auth, sdk, accounts.size]);
+  }, [web3Auth, accounts.size]);
 
   const logoutWeb3Auth = useCallback(async () => {
     if (!web3Auth) return;
@@ -380,7 +369,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
       loginWithMagicLink,
       logoutMagicLink,
       magic: magicInstance,
-      
+
       loginWithWeb3Auth,
       logoutWeb3Auth,
       setWeb3Auth,
@@ -413,3 +402,5 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
     </AccountsContext.Provider>
   );
 };
+
+export const useAccountsContext = (): AccountsContextValue => useContext(AccountsContext);

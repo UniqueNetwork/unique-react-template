@@ -1,7 +1,7 @@
-import React, { useContext, useState, useEffect, useRef, ChangeEvent } from "react";
+import React, {  useState, useEffect, useRef, ChangeEvent } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 import { truncateMiddle } from "../utils/common";
@@ -260,7 +260,7 @@ export const Header: React.FC = () => {
     magic,
     setWeb3Auth,
     setProviderWeb3Auth,
-  } = useContext(AccountsContext);
+  } = useAccountsContext();
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);

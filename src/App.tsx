@@ -1,15 +1,15 @@
+import styled from "styled-components";
 import { AccountsContextProvider } from "./accounts/AccountsContext";
-import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import "./App.css";
 import { AccountsPage } from "./pages/AccountListPage";
-import { SdkProvider } from "./sdk/SdkContext";
 import CollectionPage from "./pages/CollectionPage";
 import { Header } from "./components/Header";
 import SingleAccountPage from "./pages/SingleAccountPage";
 import TokenPage from "./pages/TokenPage";
-import styled from "styled-components";
 import { WalletConnectProviders } from "./components/WalletConnectProviders";
 import { EvmTest } from "./pages/EvmTest";
+import { SdkProvider } from "./sdk/SdkContext";
 
 const ContentLayout = styled.div`
   width: 90vw;
@@ -22,8 +22,8 @@ function App() {
   return (
     <div className="App">
       <WalletConnectProviders>
-        <SdkProvider>
-          <AccountsContextProvider>
+        <AccountsContextProvider>
+          <SdkProvider>
             <Router>
               <Header />
               <ContentLayout>
@@ -49,8 +49,8 @@ function App() {
                 </Routes>
               </ContentLayout>
             </Router>
-          </AccountsContextProvider>
-        </SdkProvider>
+          </SdkProvider>
+        </AccountsContextProvider>
       </WalletConnectProviders>
     </div>
   );
