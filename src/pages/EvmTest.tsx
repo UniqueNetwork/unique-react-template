@@ -1,13 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { connectSdk } from '../sdk/connect';
-import { baseUrl } from '../sdk/SdkContext';
-import { AccountsContext } from '../accounts/AccountsContext';
 import styled from 'styled-components';
 import { SignerTypeEnum } from '../accounts/types';
 import storageArtifacts from '../data/storage-artifacts.json';
 import { useEthersSigner } from '../hooks/useSigner';
 import { switchNetwork } from '../utils/swithChain';
+import { useSdkContext } from '../sdk/SdkContext';
+import { useAccountsContext } from '../accounts/AccountsContext';
 
 export const EvmTest = () => {
   const [contractAddress, setContractAddress] = useState('');
@@ -18,8 +17,9 @@ export const EvmTest = () => {
   const [storingValue, setStoringValue] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount } = useAccountsContext();
   const signer = useEthersSigner();
+  const { sdk } = useSdkContext();
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContractAddress(e.target.value);
@@ -40,7 +40,6 @@ export const EvmTest = () => {
       setDeploying(true);
 
       if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
         if (!sdk) return;
 
         const result = await sdk.evm.deploy(
@@ -81,11 +80,12 @@ export const EvmTest = () => {
       return;
     }
 
+    if (!sdk) return;
+
     try {
       setStoringValue(true);
 
       if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
         const storeTx = await sdk.evm.send({
           functionName: 'store',
           functionArgs: [BigInt(storeValue)],
@@ -120,12 +120,12 @@ export const EvmTest = () => {
       setErrorMessage('Contract address and ABI are required');
       return;
     }
+    if (!sdk) return;
 
     try {
       setCheckingValue(true);
 
       if (selectedAccount?.signerType !== SignerTypeEnum.Ethereum) {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
         const result = await sdk.evm.call({
           functionName: 'retrieve',
           functionArgs: [],

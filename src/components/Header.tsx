@@ -1,7 +1,7 @@
-import React, { useContext, useState, useEffect, useRef, ChangeEvent } from "react";
+import React, {  useState, useEffect, useRef, ChangeEvent } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWallets } from "../modals/ConnectWalletModalContext/ConnectWallets";
 import { truncateMiddle } from "../utils/common";
@@ -50,25 +50,25 @@ const ConnectedAccountsButton = styled.button`
 
 const HeaderContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
   gap: 10px;
   padding: 20px;
-  width: 100%;
-  max-width: 1200px;
+  // width: 100%;
+  min-width: 1320px;
   margin: 0 auto;
   box-sizing: border-box;
   padding: 30px;
 
-  @media (min-width: 940px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
+  // @media (min-width: 940px) {
+  //   flex-direction: row;
+  //   justify-content: space-between;
+  //   align-items: center;
+  // }
 
-  @media (min-width: 1400px) {
-    padding: 30px 0;
-  }
+  // @media (min-width: 1400px) {
+  //   padding: 30px 0;
+  // }
 `;
 
 const ButtonsWrapper = styled.div`
@@ -260,7 +260,7 @@ export const Header: React.FC = () => {
     magic,
     setWeb3Auth,
     setProviderWeb3Auth,
-  } = useContext(AccountsContext);
+  } = useAccountsContext();
   const accountsArray = Array.from(accounts.values());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);

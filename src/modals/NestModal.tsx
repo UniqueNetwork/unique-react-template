@@ -1,17 +1,15 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { Account, SignerTypeEnum } from "../accounts/types";
 import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
-import { baseUrl } from "../sdk/SdkContext";
+import { useSdkContext } from "../sdk/SdkContext";
 import { Address } from "@unique-nft/utils";
 import { useUniqueNFTFactory } from "../hooks/useUniqueNFTFactory";
 import styled from "styled-components";
 import { Button, ButtonWrapper, Loading } from "./UnnestModal";
 import { switchNetwork } from "../utils/swithChain";
 import { getCollection } from "../utils/getCollection";
-
 
 type NestTModalProps = {
   isVisible: boolean;
@@ -26,7 +24,8 @@ export const ContentWrapper = styled.div`
 `;
 
 export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
-  const { selectedAccount, magic, providerWeb3Auth } = useContext(AccountsContext);
+  const { selectedAccount, magic, providerWeb3Auth } = useAccountsContext();
+  const { sdk } = useSdkContext();
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
     collectionId: string;
@@ -38,7 +37,7 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
   const { getUniqueNFTFactory } = useUniqueNFTFactory(collectionId);
 
   const onSign = async () => {
-    if (!selectedAccount || !collectionId || !tokenId) {
+    if (!sdk || !selectedAccount || !collectionId || !tokenId) {
       setErrorMessage("All fields must be filled out.");
       return;
     }
@@ -63,8 +62,6 @@ export const NestTModal = ({ isVisible, onClose }: NestTModalProps) => {
         const collection = await getCollection(providerWeb3Auth, collectionId)
         await transferToken(collection);
       } else {
-        const sdk = await connectSdk(baseUrl, selectedAccount);
-
         await sdk?.token.nest({
           parent: {
             collectionId: +collectionParentId,

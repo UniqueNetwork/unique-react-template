@@ -1,13 +1,13 @@
-import { useCallback, useContext, useState } from "react";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useCallback, useState } from "react";
 import { Account } from "../accounts/types";
 import { List } from "../components/List";
 import { TransferAmountModal } from "../modals/TransferAmountModal";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
+import { useAccountsContext } from "../accounts/AccountsContext";
 
 export const AccountsPage = () => {
-  const { accounts } = useContext(AccountsContext);
+  const { accounts } = useAccountsContext();
   const accountsArray = Array.from(accounts.values());
   const [currentAccount, setCurrentAccount] = useState<Account>();
   const [transferAmountIsVisible, setTransferAmountIsVisible] = useState(false);

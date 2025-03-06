@@ -1,12 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { AccountsContext } from "../accounts/AccountsContext";
+import styled from "styled-components";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { Account } from "../accounts/types";
 import { Modal } from "../components/Modal";
-import { connectSdk } from "../sdk/connect";
 import { ContentWrapper } from "./NestModal";
-import { baseUrl } from "../sdk/SdkContext";
-import styled from "styled-components";
+import { useSdkContext } from "../sdk/SdkContext";
 
 type UnnestTModalProps = {
   isVisible: boolean;
@@ -15,7 +14,8 @@ type UnnestTModalProps = {
 };
 
 export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount } = useAccountsContext();
+  const { sdk } = useSdkContext();
 
   const { tokenId, collectionId } = useParams<{
     tokenId: string;
@@ -25,13 +25,11 @@ export const UnnestTModal = ({ isVisible, onClose }: UnnestTModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSign = async () => {
-    if (!selectedAccount || !collectionId || !tokenId) return;
+    if (!selectedAccount || !collectionId || !tokenId || !sdk) return;
     setIsLoading(true);
 
     try {
-      const sdk = await connectSdk(baseUrl, selectedAccount);
-
-      await sdk?.token.unnest({
+      await sdk.token.unnest({
         nested: {
           collectionId,
           tokenId: +tokenId,

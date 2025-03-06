@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { AccountsContext } from '../accounts/AccountsContext';
+import { useAccountsContext } from '../accounts/AccountsContext';
 
 const Web3AuthConnect: React.FC = () => {
-  const { loginWithWeb3Auth } = useContext(AccountsContext);
+  const { loginWithWeb3Auth } = useAccountsContext();
 
   return (
     <ButtonConnect onClick={loginWithWeb3Auth}>

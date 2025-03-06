@@ -1,10 +1,10 @@
-import { useContext, useMemo } from "react";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useMemo } from "react";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
 import { compareEncodedAddresses } from "../utils/common";
 
 const useIsOwner = (itemOwner: string | undefined) => {
-  const { selectedAccount } = useContext(AccountsContext);
+  const { selectedAccount } = useAccountsContext();
 
   return useMemo(() => {
     if (!selectedAccount?.address || !itemOwner) return false;
@@ -13,7 +13,9 @@ const useIsOwner = (itemOwner: string | undefined) => {
       ? Address.mirror.ethereumToSubstrate(itemOwner)
       : itemOwner;
 
-    const transformedAccountAddress = Address.is.ethereumAddress(selectedAccount.address)
+    const transformedAccountAddress = Address.is.ethereumAddress(
+      selectedAccount.address
+    )
       ? Address.mirror.ethereumToSubstrate(selectedAccount.address)
       : selectedAccount.address;
 
@@ -22,8 +24,11 @@ const useIsOwner = (itemOwner: string | undefined) => {
       !Address.is.substrateAddress(transformedItemOwner)
     )
       return false;
-      
-    return compareEncodedAddresses(transformedAccountAddress, transformedItemOwner);
+
+    return compareEncodedAddresses(
+      transformedAccountAddress,
+      transformedItemOwner
+    );
   }, [itemOwner, selectedAccount]);
 };
 

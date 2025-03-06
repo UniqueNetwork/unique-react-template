@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
-import { SdkContext } from "../sdk/SdkContext";
-import { AccountsContext } from "../accounts/AccountsContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 import { Address } from "@unique-nft/utils";
 import TokenList from "../components/TokenList/TokenList";
+import { useSdkContext } from "../sdk/SdkContext";
 
 const Container = styled.div`
   display: flex;
@@ -39,10 +39,10 @@ const ErrorMessage = styled.div`
 `;
 
 const SingleAccountPage = () => {
-  const { accounts } = useContext(AccountsContext);
+  const { accounts } = useAccountsContext();
   const accountsArray = Array.from(accounts.values());
 
-  const { sdk } = useContext(SdkContext);
+  const { sdk } = useSdkContext();
   const { accountId } = useParams<{ accountId: string }>();
   const currentAccount = useMemo(
     () => accountsArray.find((acc) => acc.address === accountId),
