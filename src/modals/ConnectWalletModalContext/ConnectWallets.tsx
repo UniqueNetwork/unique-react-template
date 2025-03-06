@@ -9,6 +9,7 @@ import { ConnectedWalletsName } from "../../accounts/useWalletCenter";
 import { Modal } from "../../components/Modal";
 import { Icon } from "../../components/UI/Icon";
 import { useAccountsContext } from "../../accounts/AccountsContext";
+import {getWalletBySource} from "@talismn/connect-wallets";
 
 const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
   "polkadot-js": "https://polkadot.js.org/extension/",
@@ -45,7 +46,11 @@ export const ConnectWallets = ({
   const handleConnectToPolkadotExtension =
     (walletName: ConnectedWalletsName) => async () => {
       try {
-        await setPolkadotAccountsWithBalance(walletName);
+        const wallet = getWalletBySource(walletName);
+        if (wallet) {
+          await wallet.enable('Account React Example');
+          await setPolkadotAccountsWithBalance(walletName);
+        }
       } finally {
         setIsOpenConnectWalletModal(false);
       }
@@ -54,8 +59,12 @@ export const ConnectWallets = ({
   useEffect(() => {
     (async () => {
       setIsFetching(true);
-      const extensions = await web3Enable("Account React Example");
-      setAvailableWallets(extensions.map((ext) => ext.name));
+      const available = walletOptions
+          .map((wallet) => getWalletBySource(wallet.name))
+          .filter(wallet => wallet?.installed)
+          .map((wallet) => wallet!.extensionName);
+
+      setAvailableWallets(available);
       setIsFetching(false);
     })();
   }, []);

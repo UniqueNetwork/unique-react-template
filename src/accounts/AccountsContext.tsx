@@ -149,7 +149,7 @@ export const AccountsContextProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
       reinitializePolkadotAccountsWithBalance();
-  }, [reinitializePolkadotAccountsWithBalance]);
+  }, []);
 
   const { connectWallet } = useWalletCenter();
 

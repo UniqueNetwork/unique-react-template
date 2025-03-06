@@ -50,25 +50,25 @@ const ConnectedAccountsButton = styled.button`
 
 const HeaderContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
   gap: 10px;
   padding: 20px;
-  width: 100%;
-  max-width: 1200px;
+  // width: 100%;
+  min-width: 1320px;
   margin: 0 auto;
   box-sizing: border-box;
   padding: 30px;
 
-  @media (min-width: 940px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
+  // @media (min-width: 940px) {
+  //   flex-direction: row;
+  //   justify-content: space-between;
+  //   align-items: center;
+  // }
 
-  @media (min-width: 1400px) {
-    padding: 30px 0;
-  }
+  // @media (min-width: 1400px) {
+  //   padding: 30px 0;
+  // }
 `;
 
 const ButtonsWrapper = styled.div`
