@@ -90,6 +90,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
     <SliderWrapper>
       {width > BREAKPOINTS.tablet && (
         <PreviewCarouseWrap>
+          {/* @ts-ignore */}
           <Slider
             {...settings2}
             nextArrow={
@@ -121,6 +122,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
       )}
 
       <SliderContainer previewMode={!!previewMode}>
+        {/* @ts-ignore */}
         <Slider ref={horizontalSliderRef} {...settings}>
           {sliderItems.map(({ type, src, thumbnail }, index) => (
             <MainSliderItem
