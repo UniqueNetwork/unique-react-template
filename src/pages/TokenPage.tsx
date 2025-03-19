@@ -9,7 +9,8 @@ import { NestTModal } from "../modals/NestModal";
 import { UnnestTModal } from "../modals/UnnestModal";
 import useIsOwner from "../hooks/useIsOwner";
 import NestedNftItems from "../components/NestedNFTItems";
-import { UniqueChainType, useSdkContext } from "../sdk/SdkContext";
+import { baseUrl, UniqueChainType, useSdkContext } from "../sdk/SdkContext";
+import { useAccountsContext } from "../accounts/AccountsContext";
 
 const Button = styled.button`
   padding: 10px 20px;
@@ -108,7 +109,7 @@ const NestedWrapper = styled.div`
   h3 {
     text-align: left;
   }
-`
+`;
 
 const ActionsContainer = styled.div`
   display: flex;
@@ -122,6 +123,7 @@ export const Hint = styled.div`
   margin-bottom: 10px;
   width: 80%;
 `;
+
 export type TokenData = Awaited<ReturnType<UniqueChainType['token']['get']>>;
 
 enum TokenModalEnum {
@@ -129,6 +131,14 @@ enum TokenModalEnum {
   NEST = "NEST",
   UNNEST = "UNNEST",
   BURN = "BURN",
+}
+
+interface PossibleActions {
+  burn: boolean;
+  nest: boolean;
+  unnest: boolean;
+  transfer: boolean;
+  changeProperties: string[];
 }
 
 const TokenPage: React.FC = () => {
@@ -140,7 +150,9 @@ const TokenPage: React.FC = () => {
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState<TokenModalEnum | null>(null);
+  const [possibleActions, setPossibleActions] = useState<PossibleActions | null>(null);
   const isOwner = useIsOwner(tokenData?.topmostOwner || tokenData?.owner);
+  const { selectedAccount } = useAccountsContext();
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -157,8 +169,41 @@ const TokenPage: React.FC = () => {
       }
     };
 
-      fetchTokenData();
+    fetchTokenData();
   }, [tokenId, sdk, collectionId]);
+
+useEffect(() => {
+  const fetchPossibleActions = async () => {
+    if (!sdk || !tokenId || !collectionId || !selectedAccount) return;
+    // try {
+    //   const actions = await sdk.token.possibleActions({
+    //     sender: selectedAccount.address,
+    //     collectionId: +collectionId,
+    //     tokenId: +tokenId,
+    //   });
+    //   setPossibleActions(actions);
+    //   console.log(actions, 'ACTIONS');
+    // } catch (err) {
+    //   console.log('POSSIBLE_ACTIONS_ERR', err);
+    // }
+    
+    // TODO temp solution
+    try {
+      const url = `${baseUrl}/token/possible-actions?sender=${selectedAccount?.address}&collectionId=${collectionId}&tokenId=${tokenId}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const actions = await response.json();
+      setPossibleActions(actions);
+      console.log(actions, 'ACTIONS via fetch');
+    } catch (err) {
+      console.log('FETCH_POSSIBLE_ACTIONS_ERR', err);
+    }
+  };
+
+  fetchPossibleActions();
+}, [sdk, tokenId, collectionId, selectedAccount]);
 
   const { sliderItems, mediaTypes, attributes, royaltiesString } =
     useMemo(() => {
@@ -278,10 +323,12 @@ const TokenPage: React.FC = () => {
         </TokenInfoWrap>
       </InfoContainer>
 
-      {tokenData.children && <NestedWrapper>
-        <h3>Nested NFTs</h3>
-        <NestedNftItems children={tokenData.children} />
-      </NestedWrapper>}
+      {tokenData.children && (
+        <NestedWrapper>
+          <h3>Nested NFTs</h3>
+          <NestedNftItems children={tokenData.children} />
+        </NestedWrapper>
+      )}
 
       <Title>Attributes</Title>
       <InfoItem>
@@ -321,7 +368,6 @@ const TokenPage: React.FC = () => {
       <InfoItem>
         <span>Royalty:</span> <span>{royaltiesString}</span>
       </InfoItem>
-      
       <InfoItem>
         <span>NFT EVM address:</span>
         <span>{tokenData.collectionAddress}</span>
@@ -346,30 +392,36 @@ const TokenPage: React.FC = () => {
           {`${collectionId}-${tokenId}`}
         </a>
       </InfoItem>
+
       <Title>Actions</Title>
-      {!isOwner && <>You are not NFT's owner</>}
+      {(!possibleActions?.transfer &&
+        !possibleActions?.nest &&
+        !possibleActions?.unnest &&
+        !possibleActions?.burn) && (
+        <>You are not allowed to perform any actions on this NFT</>
+      )}
       <ActionsContainer>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.TRANSFER)}
-          disabled={!isOwner}
+          disabled={!possibleActions?.transfer}
         >
           Transfer
         </Button>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.NEST)}
-          disabled={!(isOwner && !tokenData.parentToken)}
+          disabled={!possibleActions?.nest}
         >
           Nest
         </Button>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.UNNEST)}
-          disabled={!(isOwner && tokenData.parentToken)}
+          disabled={!possibleActions?.unnest}
         >
           Unnest
         </Button>
         <Button
           onClick={() => setOpenModal(TokenModalEnum.BURN)}
-          disabled={!isOwner}
+          disabled={!possibleActions?.burn}
         >
           Burn
         </Button>

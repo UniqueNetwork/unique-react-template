@@ -47,7 +47,6 @@ export const SdkProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     if (selectedAccount) {
-      //@ts-expect-error wait update utils
       const sdkInstance = UniqueChain({ baseUrl, account: selectedAccount });
       setSdk(sdkInstance);
     } else {
