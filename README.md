@@ -2,6 +2,8 @@
 
 This boilerplate aims to simplify working with Unique Network and Unique SDK.
 
+## Quick Start
+
 ```sh
 yarn
 yarn start
@@ -12,6 +14,37 @@ yarn start
 > - For the EVM workshop, use https://github.com/UniqueNetwork/unique-react-template/tree/workshop-evm
 > - For the legacy version of Unique SDK-1.0, use https://github.com/UniqueNetwork/unique-react-template/tree/sdk-1
 
+## Environment Configuration
+
+The application uses environment variables for configuration. A `.env.example` file is provided with default values for connecting to the Opal testnet.
+
+For local development, copy `.env.example` to `.env` and modify as needed:
+
+```sh
+cp .env.example .env
+```
+
+### Docker Support
+
+This template can be built and run using Docker. The Dockerfile accepts build arguments for all environment variables, making it easy to configure for different networks without modifying files.
+
+Example docker-compose configuration:
+
+```yaml
+ui:
+  build:
+    context: https://github.com/UniqueNetwork/unique-react-template.git
+    dockerfile: Dockerfile
+    args:
+      - REACT_APP_REST_URL=http://localhost:3000/v2/
+      - REACT_APP_CHAIN_RPC_URL=ws://localhost:9833
+      - REACT_APP_SCAN_URL=http://localhost:3001/v2
+      # ... other environment variables
+  ports:
+    - 3002:80
+```
+
+This is particularly useful when running the full Unique Network development stack locally. See the [Unique SDK documentation](https://docs.unique.network/build/sdk/v2/environment.html) for complete setup instructions.
 
 ### Connect to Unique SDK
 

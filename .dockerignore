@@ -1,3 +1,6 @@
 node_modules
 build
 .github
+.env
+.env.local
+.env.*.local
